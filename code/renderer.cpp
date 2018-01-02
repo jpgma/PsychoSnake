@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <windows.h>
-#define comprimento 30
+#define comprimento 20
 #define altura 10
 
 static char LOADED_BITMAP[] = 
@@ -21,19 +21,26 @@ int main ()
 {
 
 	char bitmap [altura*comprimento];
-	
-	for(int i=0;i<altura;i++)
+	int alturaP, comprimentoP;
+	for(int i=1;i<=altura;i++)
 	{
-		for(int j=0;j<comprimento;j++)
+		for(int j=1;j<=comprimento;j++)
 		{	
-			bitmap[i*j] = -80;
+			bitmap[i*j] = LOADED_BITMAP[i*j];
 		}
 
 	}
-	
-	for(int i=0;i<altura; i++)
+	printf("Posicao: \n");
+	printf("Altura 1-10: ");
+	scanf("%d", &alturaP);
+	printf("Comprimento 1-20: ");
+	scanf("%d", &comprimentoP);
+	bitmap[alturaP*comprimentoP] = 'x';
+	system("CLS");
+
+	for(int i=1;i<=altura; i++)
 	{
-		for(int j=0; j<comprimento; j++)
+		for(int j=1; j<=comprimento; j++)
 		{
 			printf("%c", bitmap[i*j]);
 		}
