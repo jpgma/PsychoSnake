@@ -30,20 +30,40 @@ int main ()
 		}
 
 	}
-	printf("Posicao: \n");
+	/*printf("Posicao: \n");
 	printf("Altura 1-10: ");
 	scanf("%d", &alturaP);
 	printf("Comprimento 1-20: ");
 	scanf("%d", &comprimentoP);
 	bitmap[alturaP*comprimentoP] = 'x';
-	system("CLS");
 
-	for(int i=1;i<=altura; i++)
+*/
+	int z=1;
+	while(z<=3)
 	{
-		for(int j=1; j<=comprimento; j++)
+		for(int i=1;i<=altura; i++)
 		{
-			printf("%c", bitmap[i*j]);
+			for(int j=1; j<=comprimento; j++)
+			{
+				if(z==1)
+				{
+
+					bitmap[1*1] = 'x';	
+				}
+				else if(z==2)
+				{
+					bitmap[1*2] = 'x';
+				}
+				else if(z==3)
+				{
+					bitmap[1*3] = 'x';
+				}
+				printf("%c", bitmap[i*j]);
+			}
+			printf("\n");
 		}
+		
+		z++;
 		printf("\n");
 	}
 
