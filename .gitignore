@@ -1,1 +1,4 @@
 cmdinit.bat
+build\renderer.pdb
+build\renderer.ilk
+build\renderer.obj

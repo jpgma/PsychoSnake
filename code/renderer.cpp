@@ -1,34 +1,9 @@
 #include <stdio.h>
 #include <windows.h>
+
 #define comprimento 20
 #define altura 10
 
-void LimparTela()
-{
-	char bitmap [altura*comprimento];
-	for(int i=1;i<=altura;i++)
-	{
-		for(int j=1;j<=comprimento;j++)
-		{	
-			bitmap[i*j] = -80;
-		}
-	}
-}
-
-
-void PrintarBitMap()
-{
-	char bitmap [altura*comprimento];
-	for(int i=1;i<=altura; i++)
-	{
-		for(int j=1; j<=comprimento; j++)
-		{
-			printf("%c", bitmap[i*j]);
-		}
-		printf("\n");
-	}
-}
-		
 static char LOADED_BITMAP[] = 
 {
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
@@ -42,6 +17,33 @@ static char LOADED_BITMAP[] =
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'
 };
+
+void LimparTela()
+{
+	char bitmap [altura*comprimento];
+	for(int y = 1; y <= altura; y++)
+	{
+		for(int x = 1; x <= comprimento; x++)
+		{	
+			bitmap[x+(y*altura)] = -80;
+		}
+	}
+}
+
+
+void PrintarBitMap()
+{
+	char bitmap [altura*comprimento];
+	for(int y = 1; y <= altura; y++)
+	{
+		for(int x = 1; x <= comprimento; x++)
+		{
+			printf("%c", bitmap[x+(y*altura)]);
+		}
+		printf("\n");
+	}
+}
+		
 
 int main ()
 {
