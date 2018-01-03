@@ -26,12 +26,8 @@ void LimparTela(CHAR_INFO *buffer)
 		for(int x = 0; x <= SCREEN_WIDTH; x++)
 		{
 			char clear_char = CLEAR_CHARMAP[x+(y*SCREEN_HEIGHT)];
-
-			CHAR_INFO ci = {};
-			ci.Char.UnicodeChar = clear_char;
-			ci.Char.AsciiChar = clear_char;
-			ci.Attributes = BACKGROUND_RED|BACKGROUND_GREEN|BACKGROUND_BLUE|BACKGROUND_INTENSITY;
-			buffer[x+(y*SCREEN_HEIGHT)] = ci;
+			buffer[x+(y*SCREEN_HEIGHT)].Char.UnicodeChar = clear_char;
+			buffer[x+(y*SCREEN_HEIGHT)].Attributes = BACKGROUND_RED|BACKGROUND_GREEN|BACKGROUND_BLUE|BACKGROUND_INTENSITY;
 		}
 	}
 }
