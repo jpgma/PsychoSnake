@@ -1,6 +1,7 @@
-#include <stdio.h>
-#include <windows.h>
 #define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <stdio.h>
+
 #define SCREEN_WIDTH 20
 #define SCREEN_HEIGHT 10
 
@@ -18,56 +19,50 @@ static char LOADED_BITMAP[] =
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'
 };
 
-void LimparTela()
+void LimparTela(CHAR_INFO *buffer)
 {
-	char bitmap [SCREEN_HEIGHT*SCREEN_WIDTH];
-	for(int y = 1; y <= SCREEN_HEIGHT; y++)
+	for(int y = 0; y <= SCREEN_HEIGHT; y++)
 	{
-		for(int x = 1; x <= SCREEN_WIDTH; x++)
+		for(int x = 0; x <= SCREEN_WIDTH; x++)
 		{	
-
-			bitmap[x+(y*SCREEN_HEIGHT)] = -80;
+			CHAR_INFO ci = {};
+			ci.Char.UnicodeChar = -80;
+			ci.Char.AsciiChar = -80;
+			ci.Attributes = BACKGROUND_RED|BACKGROUND_GREEN|BACKGROUND_BLUE|BACKGROUND_INTENSITY;
+			buffer[x+(y*SCREEN_HEIGHT)] = ci;
 		}
 	}
 }
 
 
-void PrintarBitMap()
+void PrintarBitMap(HANDLE screen_buffer_handle, CHAR_INFO *buffer, 
+				   COORD buffer_size, COORD buffer_coord, SMALL_RECT rcRegion)
 {
-	char bitmap [SCREEN_HEIGHT*SCREEN_WIDTH];
-	for(int y = 1; y <= SCREEN_HEIGHT; y++)
-	{
-		for(int x = 1; x <= SCREEN_WIDTH; x++)
-		{
-			HANDLE hOutput = (HANDLE)GetStdHandle( STD_OUTPUT_HANDLE );
-
-			COORD dwBufferSize = { SCREEN_WIDTH,SCREEN_HEIGHT };
-			COORD dwBufferCoord = { 0, 0 };
-			SMALL_RECT rcRegion = { 0, 0, SCREEN_WIDTH-1, SCREEN_HEIGHT-1 };
-
-			CHAR_INFO buffer[SCREEN_HEIGHT][SCREEN_WIDTH];
-
-			ReadConsoleOutput( hOutput, (CHAR_INFO *)buffer, dwBufferSize,
-			dwBufferCoord, &rcRegion );
-
-			buffer[y][x].Attributes = 0x0E;
-
-			WriteConsoleOutput( hOutput, (CHAR_INFO *)buffer, dwBufferSize,
-			dwBufferCoord, &rcRegion );
-			printf("%c", bitmap[x+(y*SCREEN_HEIGHT)]);
-		}
-		printf("\n");
-	}
+	WriteConsoleOutput(screen_buffer_handle, buffer, buffer_size, buffer_coord, &rcRegion);
 }
 		
 
 int main ()
 {
+	SMALL_RECT rcRegion = { 0, 0, SCREEN_WIDTH-1, SCREEN_HEIGHT-1 };
+	COORD buffer_size = {SCREEN_WIDTH, SCREEN_HEIGHT};
+	COORD buffer_coord = {0,0};
+	HANDLE screen_buffer_handle = CreateConsoleScreenBuffer( GENERIC_READ | GENERIC_WRITE,  
+					   										 FILE_SHARE_READ | FILE_SHARE_WRITE,
+					   										 NULL,
+					   										 CONSOLE_TEXTMODE_BUFFER, 
+       														 NULL);
+	SetConsoleWindowInfo(screen_buffer_handle, TRUE, &rcRegion);
+	SetConsoleScreenBufferSize(screen_buffer_handle, buffer_size);
+	SetConsoleActiveScreenBuffer(screen_buffer_handle);
 
-	
-	LimparTela();
-	PrintarBitMap();
+	CHAR_INFO buffer[SCREEN_WIDTH*SCREEN_HEIGHT];
 
+	LimparTela(buffer);
+	PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, rcRegion);
+
+	int x;
+	scanf("%d",&x);
 
 	return 0;
 }
