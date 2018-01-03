@@ -40,6 +40,8 @@ void PrintarBitMap(HANDLE screen_buffer_handle, CHAR_INFO *buffer,
 }
 		
 
+#define WIN32_KEY_DOWN 0b1000000000000000
+
 int main ()
 {
 	SMALL_RECT rcRegion = { 0, 0, SCREEN_WIDTH-1, SCREEN_HEIGHT-1 };
@@ -56,11 +58,16 @@ int main ()
 
 	CHAR_INFO buffer[SCREEN_WIDTH*SCREEN_HEIGHT];
 
-	LimparTela(buffer);
-	PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, rcRegion);
+	bool esc_down = false;
+	while(!esc_down)
+	{
+		LimparTela(buffer);
 
-	int x;
-	scanf("%d",&x);
+		esc_down = ((GetAsyncKeyState(VK_ESCAPE) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN);
+
+		PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, rcRegion);
+	}
+
 
 	return 0;
 }
