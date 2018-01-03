@@ -5,7 +5,7 @@
 #define SCREEN_WIDTH 20
 #define SCREEN_HEIGHT 10
 
-static char LOADED_BITMAP[] = 
+static char CLEAR_CHARMAP[] = 
 {
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
@@ -24,10 +24,12 @@ void LimparTela(CHAR_INFO *buffer)
 	for(int y = 0; y <= SCREEN_HEIGHT; y++)
 	{
 		for(int x = 0; x <= SCREEN_WIDTH; x++)
-		{	
+		{
+			char clear_char = CLEAR_CHARMAP[x+(y*SCREEN_HEIGHT)];
+
 			CHAR_INFO ci = {};
-			ci.Char.UnicodeChar = -80;
-			ci.Char.AsciiChar = -80;
+			ci.Char.UnicodeChar = clear_char;
+			ci.Char.AsciiChar = clear_char;
 			ci.Attributes = BACKGROUND_RED|BACKGROUND_GREEN|BACKGROUND_BLUE|BACKGROUND_INTENSITY;
 			buffer[x+(y*SCREEN_HEIGHT)] = ci;
 		}
