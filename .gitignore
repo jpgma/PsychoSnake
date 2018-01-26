@@ -4,3 +4,5 @@ build\renderer.ilk
 build\renderer.obj
 renderer.sublime-workspace
 renderer.sublime-project
+build/.vs/renderer/v15/Browse.VC.opendb
+build/.vs/renderer/v15/Browse.VC.db
