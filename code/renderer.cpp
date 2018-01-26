@@ -7,7 +7,7 @@
 
 static char CLEAR_CHARMAP[] = 
 {
-	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
+	'1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
@@ -38,9 +38,10 @@ void PrintarBitMap(HANDLE screen_buffer_handle, CHAR_INFO *buffer,
 {
 	WriteConsoleOutput(screen_buffer_handle, buffer, buffer_size, buffer_coord, &rcRegion);
 }
-		
+
 
 #define WIN32_KEY_DOWN 0b1000000000000000
+#define IS_KEY_DOWN(key) ((GetAsyncKeyState(key) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN)
 
 int main ()
 {
@@ -52,6 +53,7 @@ int main ()
 					   										 NULL,
 					   										 CONSOLE_TEXTMODE_BUFFER, 
        														 NULL);
+
 	SetConsoleWindowInfo(screen_buffer_handle, TRUE, &rcRegion);
 	SetConsoleScreenBufferSize(screen_buffer_handle, buffer_size);
 	SetConsoleActiveScreenBuffer(screen_buffer_handle);
@@ -63,11 +65,22 @@ int main ()
 	{
 		LimparTela(buffer);
 
-		esc_down = ((GetAsyncKeyState(VK_ESCAPE) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN);
+		esc_down = IS_KEY_DOWN(VK_ESCAPE);
+
+		bool up = IS_KEY_DOWN(VK_UP);
+		if(up)
+		{
+			buffer[0].Char.UnicodeChar = -80;
+			buffer[0].Attributes = BACKGROUND_RED|BACKGROUND_INTENSITY;
+		} 
 
 		PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, rcRegion);
 	}
 
+	// if((GetAsyncKeyState(tecla) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN)
+	// {
+
+	// }
 
 	return 0;
 }

@@ -2,3 +2,5 @@ cmdinit.bat
 build\renderer.pdb
 build\renderer.ilk
 build\renderer.obj
+renderer.sublime-workspace
+renderer.sublime-project
