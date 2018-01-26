@@ -25,6 +25,9 @@ typedef u32 b32;
 #define CHAR_SIZE 16
 #define DEBUG_LINE_COUNT 1
 
+#define TARGET_FPS 60
+#define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
+
 void LimparTela(CHAR_INFO *buffer, int clear_char, short clear_color)
 {
 	CHAR_INFO clear_char_info = {};
@@ -154,10 +157,10 @@ void main ()
 		{
 			// escrevendo fps na linha de debug
 			char str[10];
-			wsprintf(str, "%d fps", frame_count, 255);
+			wsprintf(str, "%d fps", frame_count);
 			for (int i = 0; i < 10; ++i)
 			{
-				buffer[(SCREEN_WIDTH*SCREEN_HEIGHT)+i-1].Char.UnicodeChar = str[i];
+				buffer[(SCREEN_WIDTH*SCREEN_HEIGHT)+i].Char.UnicodeChar = str[i];
 			}
 
 			ms_since_last_s = 0.0;
