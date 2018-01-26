@@ -8,7 +8,7 @@
 static char CLEAR_CHARMAP[] = 
 {
 	'1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
-	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
+	'1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
 	'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0',
@@ -60,7 +60,10 @@ int main ()
 
 	CHAR_INFO buffer[SCREEN_WIDTH*SCREEN_HEIGHT];
 
-	bool esc_down = false;
+	bool esc_down = false;		
+	int estadoLocal_y = 0;
+	int estadoLocal_x = 0;
+	int x =0, y = 0;
 	while(!esc_down)
 	{
 		LimparTela(buffer);
@@ -68,11 +71,39 @@ int main ()
 		esc_down = IS_KEY_DOWN(VK_ESCAPE);
 
 		bool up = IS_KEY_DOWN(VK_UP);
+		bool down = IS_KEY_DOWN(VK_DOWN);
+		bool left = IS_KEY_DOWN(VK_LEFT);
+		bool right = IS_KEY_DOWN(VK_RIGHT);
+
 		if(up)
 		{
-			buffer[0].Char.UnicodeChar = -80;
-			buffer[0].Attributes = BACKGROUND_RED|BACKGROUND_INTENSITY;
+			
+			buffer[x+(y*SCREEN_HEIGHT)].Char.UnicodeChar = -86;
+			buffer[x+(y*SCREEN_HEIGHT)].Attributes = BACKGROUND_RED|BACKGROUND_INTENSITY;
 		} 
+		else if(down)
+		{
+			buffer[x+(y*SCREEN_HEIGHT)].Char.UnicodeChar = -80;
+			buffer[x+(y*SCREEN_HEIGHT)].Attributes = BACKGROUND_GREEN|BACKGROUND_INTENSITY;
+
+			estadoLocal_y = estadoLocal_y + 1;
+			y = estadoLocal_y;
+
+		}
+		/*else if(left)
+		{
+			
+			buffer[x+(y*SCREEN_HEIGHT)].Char.UnicodeChar = -80;
+			buffer[x+(y*SCREEN_HEIGHT)].Attributes = BACKGROUND_GREEN|BACKGROUND_RED|BACKGROUND_INTENSITY;
+
+		}
+		else if(right)
+		{
+
+			buffer[(x+1)+(y*SCREEN_HEIGHT)].Char.UnicodeChar = -80;
+			buffer[(x+1)+(y*SCREEN_HEIGHT)].Attributes = BACKGROUND_GREEN|BACKGROUND_BLUE|BACKGROUND_INTENSITY;
+
+		}*/
 
 		PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, rcRegion);
 	}
