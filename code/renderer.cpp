@@ -15,8 +15,6 @@ typedef int8_t i8;
 typedef float r32;
 typedef double r64;
 typedef u32 b32;
-#define true 1
-#define false 0
 #define internal static;
 #define global static;
 
@@ -25,24 +23,55 @@ typedef u32 b32;
 #define CHAR_SIZE 16
 #define DEBUG_LINE_COUNT 1
 
-#define TARGET_FPS 60
+#define TARGET_FPS 120
 #define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
 
-void LimparTela(CHAR_INFO *buffer, int clear_char, short clear_color)
+#define WIN32_KEY_DOWN 0x8000
+#define IS_KEY_DOWN(key) ((GetAsyncKeyState(key) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN)
+
+
+global u32 bitfield_image[] = 
+{
+	0b00000000000000000000000000000000,
+	0b00000000000000000000000000000000,
+	0b00000000000000000000000000000000,
+	0b00000000000000000000000000000000,
+	0b00111111000000000000000000000000,
+	0b00001000000000000000000000000000,
+	0b00001001111110000000000000000000,
+	0b00111001001100000000000000000000,
+	0b00000001110000000000000000000000,
+	0b00000001000000000000000000000000,
+	0b00000001000000000000000000000000,
+	0b00000000000000000000000000000000,
+	0b00000000000000000000000000000000,
+	0b00000000000000000000000000000000,
+	0b00000000000000000000000000000000,
+	0b00000000000000000000000000000000,
+};
+
+inline u16
+RGBColor(b32 r, b32 g, b32 b, b32 i, b32 f)
+{
+	return(u16)(f ? ((r?FOREGROUND_RED:0)|(g?FOREGROUND_GREEN:0)|(b?FOREGROUND_BLUE:0)|(i?FOREGROUND_INTENSITY:0)) : ((r?BACKGROUND_RED:0)|(g?BACKGROUND_GREEN:0)|(b?BACKGROUND_BLUE:0)|(i?BACKGROUND_INTENSITY:0)) );
+}
+
+internal void 
+LimparTela(CHAR_INFO *buffer, u32 clear_char, u16 clear_color)
 {
 	CHAR_INFO clear_char_info = {};
 	clear_char_info.Char.UnicodeChar = clear_char;
 	clear_char_info.Attributes = clear_color;
 	
-	for(int i = 0; i < (SCREEN_WIDTH*SCREEN_HEIGHT); i++)
+	for(u32 i = 0; i < (SCREEN_WIDTH*SCREEN_HEIGHT); i++)
 	{
 		buffer[i] = clear_char_info;
 	}
 }
 
-
-void PrintarBitMap(HANDLE screen_buffer_handle, CHAR_INFO *buffer, 
-				   COORD buffer_size, COORD buffer_coord, SMALL_RECT write_rect)
+internal void 
+PrintarBitMap(HANDLE screen_buffer_handle, CHAR_INFO *buffer, 
+			  COORD buffer_size, COORD buffer_coord, SMALL_RECT write_rect)
 {
 	WriteConsoleOutput(screen_buffer_handle, buffer, buffer_size, buffer_coord, &write_rect);
 }
@@ -63,9 +92,6 @@ GetTimeElapsed (i64 a, i64 b, i64 perf_frequency)
 			  (r64) perf_frequency;
 	return res;
 }
-
-#define WIN32_KEY_DOWN 0b1000000000000000
-#define IS_KEY_DOWN(key) ((GetAsyncKeyState(key) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN)
 
 void main ()
 {
@@ -106,17 +132,21 @@ void main ()
 	// buffer p/ uso do renderizador
 	CHAR_INFO *buffer = (CHAR_INFO *)calloc((SCREEN_WIDTH*(SCREEN_HEIGHT+DEBUG_LINE_COUNT)), sizeof(CHAR_INFO));
 	// limpando debug line
-	for (int i = (SCREEN_WIDTH*SCREEN_HEIGHT)-1; i < (SCREEN_WIDTH*SCREEN_HEIGHT)-1+SCREEN_WIDTH; ++i)
+	for (u32 i = (SCREEN_WIDTH*SCREEN_HEIGHT)-1; i < (SCREEN_WIDTH*SCREEN_HEIGHT)-1+SCREEN_WIDTH; ++i)
 	{
 		buffer[i].Char.UnicodeChar = ' ';
-		buffer[i].Attributes = (FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE|FOREGROUND_INTENSITY);
+		buffer[i].Attributes = RGBColor(1,1,1,1,1);//(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE|FOREGROUND_INTENSITY);
 	}
 
-	bool esc_down = false;		
+	CHAR_INFO player_char = {};
+	player_char.Char.UnicodeChar = 3;
+	player_char.Attributes = RGBColor(1,0,0,1,1);//(FOREGROUND_RED|FOREGROUND_INTENSITY);
+
 	int estadoLocal_y = 0;
 	int estadoLocal_x = 0;
-	int x = 0, y = 0;
+	u32 x = 0, y = 0;
 
+	// iniciando o contador de tempo do windows
 	timeBeginPeriod(1);
     LARGE_INTEGER perf_frequency_i;
 	QueryPerformanceFrequency(&perf_frequency_i);
@@ -125,49 +155,55 @@ void main ()
 	u32 frame_count = 0;
 	i64 frame_start = GetTime();
 
-	while(!esc_down)
+	while(!IS_KEY_DOWN(VK_ESCAPE))
 	{
-		LimparTela(buffer, -80, (FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE/*|FOREGROUND_INTENSITY*/));
+		LimparTela(buffer, ' ', RGBColor(1,1,1,0,1)/*(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE)*/);
 
 		bool up = IS_KEY_DOWN(VK_UP);
 		bool down = IS_KEY_DOWN(VK_DOWN);
 		bool left = IS_KEY_DOWN(VK_LEFT);
 		bool right = IS_KEY_DOWN(VK_RIGHT);
 
-		if(up)
+		for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
 		{
-			y++;
-		} 
-		else if(down)
-		{
-			y--;
+			u32 row = bitfield_image[y];
+			for (u32 x = 0; x < SCREEN_WIDTH; ++x)
+			{
+				u32 mask = (0b10000000000000000000000000000000 >> x);
+				if((row & mask) == mask)
+				{
+					buffer[x+(y*SCREEN_WIDTH)] = player_char;
+				}
+			}
 		}
+
 
 		COORD buffer_coord = {0,0};
 		PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, write_rect);
-		
-		esc_down = IS_KEY_DOWN(VK_ESCAPE);
 
+		// contando frames, ms_for_frame = final do frame - inicio do frame
 		++frame_count;
 		i64 frame_end = GetTime();
 		r64 ms_for_frame = GetTimeElapsed(frame_start,frame_end, perf_frequency);
 
+		// contando os milissegundos desde o ultimo segundo, 
+		// se 1s ou mais se passou, mostrar qtd de frames e zerar contagem
 		ms_since_last_s += ms_for_frame;
 		if(ms_since_last_s >= 1000.0)
 		{
 			// escrevendo fps na linha de debug
 			char str[10];
+			// escrever frame_count em str
 			wsprintf(str, "%d fps", frame_count);
-			for (int i = 0; i < 10; ++i)
-			{
+			// copiar str p/ linha de debug no buffer
+			for (u32 i = 0; i < 10; ++i)
 				buffer[(SCREEN_WIDTH*SCREEN_HEIGHT)+i].Char.UnicodeChar = str[i];
-			}
 
 			ms_since_last_s = 0.0;
 			frame_count = 0;
 		}
 
-		frame_start = frame_end;
+		frame_start = GetTime();
 	}
 
 	free(buffer);
