@@ -23,17 +23,14 @@ typedef u32 b32;
 #define CHAR_SIZE 16
 #define DEBUG_LINE_COUNT 1
 
-#define TARGET_FPS 120
-#define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
-
 #define WIN32_KEY_DOWN 0x8000
 #define IS_KEY_DOWN(key) ((GetAsyncKeyState(key) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN)
 
 
 
 //Limitando o FPS
-#define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
 #define TARGET_FPS 60
+#define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
 
 
 
@@ -58,9 +55,10 @@ global u32 bitfield_image[] =
 };
 
 inline u16
-RGBColor(b32 r, b32 g, b32 b, b32 i, b32 f)
+RGBColor(b32 r, b32 g, b32 b, b32 i, b32 rb, b32 gb, b32 bb, b32 ib)
 {
-	return(u16)(f ? ((r?FOREGROUND_RED:0)|(g?FOREGROUND_GREEN:0)|(b?FOREGROUND_BLUE:0)|(i?FOREGROUND_INTENSITY:0)) : ((r?BACKGROUND_RED:0)|(g?BACKGROUND_GREEN:0)|(b?BACKGROUND_BLUE:0)|(i?BACKGROUND_INTENSITY:0)) );
+	return(u16)((r?FOREGROUND_RED:0)|(g?FOREGROUND_GREEN:0)|(b?FOREGROUND_BLUE:0)|(i?FOREGROUND_INTENSITY:0))|
+			   ((rb?BACKGROUND_RED:0)|(gb?BACKGROUND_GREEN:0)|(bb?BACKGROUND_BLUE:0)|(ib?BACKGROUND_INTENSITY:0));
 }
 
 internal void 
@@ -142,12 +140,12 @@ void main ()
 	for (u32 i = (SCREEN_WIDTH*SCREEN_HEIGHT)-1; i < (SCREEN_WIDTH*SCREEN_HEIGHT)-1+SCREEN_WIDTH; ++i)
 	{
 		buffer[i].Char.UnicodeChar = ' ';
-		buffer[i].Attributes = RGBColor(1,1,1,1,1);//(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE|FOREGROUND_INTENSITY);
+		buffer[i].Attributes = RGBColor(1,1,1,1, 0,0,0,0);//(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE|FOREGROUND_INTENSITY);
 	}
 
 	CHAR_INFO player_char = {};
 	player_char.Char.UnicodeChar = 3;
-	player_char.Attributes = RGBColor(1,0,0,1,1);//(FOREGROUND_RED|FOREGROUND_INTENSITY);
+	player_char.Attributes = RGBColor(1,0,0,1, 0,0,0,0);//(FOREGROUND_RED|FOREGROUND_INTENSITY);
 
 	int estadoLocal_y = 0;
 	int estadoLocal_x = 0;
@@ -164,7 +162,7 @@ void main ()
 
 	while(!IS_KEY_DOWN(VK_ESCAPE))
 	{
-		LimparTela(buffer, ' ', RGBColor(1,1,1,0,1)/*(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE)*/);
+		LimparTela(buffer, ' ', RGBColor(1,1,1,0, 0,0,0,0)/*(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE)*/);
 
 		bool up = IS_KEY_DOWN(VK_UP);
 		bool down = IS_KEY_DOWN(VK_DOWN);
