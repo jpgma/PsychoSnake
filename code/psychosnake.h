@@ -1,0 +1,12 @@
+#define WALL_CENTER             0
+#define WALL_UP_LEFT            1
+#define WALL_UP_DOWN            2
+#define WALL_UP_RIGHT           3
+#define WALL_UP_DOWN_LEFT       4
+#define WALL_UP_LEFT_RIGHT      5
+#define WALL_UP_DOWN_RIGHT      6
+#define WALL_UP_DOWN_LEFT_RIGHT 7
+#define WALL_DOWN_LEFT          8
+#define WALL_DOWN_RIGHT         9
+#define WALL_DOWN_LEFT_RIGHT    10
+#define WALL_LEFT_RIGHT         11

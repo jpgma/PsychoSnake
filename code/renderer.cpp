@@ -26,13 +26,77 @@ typedef u32 b32;
 #define WIN32_KEY_DOWN 0x8000
 #define IS_KEY_DOWN(key) ((GetAsyncKeyState(key) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN)
 
-
-
 //Limitando o FPS
 #define TARGET_FPS 60
 #define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
 
+/* Caracteres p/ construçao de obstaculos:
 
+	176 ░
+	177 ▒
+	178 ▓
+	219 █
+	220 ▄
+	223 ▀
+	254 ■
+
+	250 ·
+	217 ┘
+	179 │
+	192 └
+	180 ┤
+	193 ┴
+	195 ├
+	197 ┼
+	191 ┐
+	218 ┌
+	194 ┬
+	196 ─
+
+	250 ·
+	188 ╝
+	186 ║
+	200 ╚
+	185 ╣
+	202 ╩
+	204 ╠
+	206 ╬
+	187 ╗
+	201 ╔
+	203 ╦
+	205 ═
+
+	exemplos:
+	╔═════╦
+	║
+	╠═══╗  
+	╚═══╝ 
+*/
+
+#define WALL_CENTER             0
+#define WALL_UP_LEFT            1
+#define WALL_UP_DOWN            2
+#define WALL_UP_RIGHT           3
+#define WALL_UP_DOWN_LEFT       4
+#define WALL_UP_LEFT_RIGHT      5
+#define WALL_UP_DOWN_RIGHT      6
+#define WALL_UP_DOWN_LEFT_RIGHT 7
+#define WALL_DOWN_LEFT          8
+#define WALL_DOWN_RIGHT         9
+#define WALL_DOWN_LEFT_RIGHT    10
+#define WALL_LEFT_RIGHT         11
+
+global u8 thin_walls[] = 
+{
+	250, 217, 179, 192, 180, 193, 
+	195, 197, 191, 218, 194, 196
+};
+
+global u8 thick_walls[] = 
+{
+	254, 188, 186, 200, 185, 202, 
+	204, 206, 187, 201, 203, 205,
+};
 
 global u32 bitfield_image[] = 
 {
@@ -41,14 +105,14 @@ global u32 bitfield_image[] =
 	0b10000000000000000000000000000001,
 	0b10000000000000000000000000000001,
 	0b10000000000000000000000000000001,
-	0b10000000000000000000000000000001,
-	0b10000000000000000000000000000001,
-	0b10000000000000000000000000000001,
-	0b10000000000000000000000000000001,
-	0b10000000000000000000000000000001,
-	0b10000000000000000000000000000001,
-	0b10000000000000000000000000000001,
-	0b10000000000000000000000000000001,
+	0b10000000111111111000000000000001,
+	0b10000000000001000000000000000001,
+	0b10000000000001001111110000000001,
+	0b10000000111111001000010000000001,
+	0b10000000000000001111110000000001,
+	0b10000000000000001000000000000001,
+	0b10000000000000001000000000000001,
+	0b10000000000000001000000000000001,
 	0b10000000000000000000000000000001,
 	0b10000000000000000000000000000001,
 	0b11111111111111111111111111111111,
@@ -98,6 +162,87 @@ GetTimeElapsed (i64 a, i64 b, i64 perf_frequency)
 	return res;
 }
 
+internal b32
+IsOccupied (u32 *map, u32 x, u32 y)
+{
+	b32 res = false;
+
+	if((x < SCREEN_WIDTH) && (y < SCREEN_HEIGHT))
+	{
+		u32 row = map[y];
+		u32 mask = (0b10000000000000000000000000000000 >> x);
+		if((row & mask) == mask) res = true;
+	}
+
+	return res;
+}
+
+internal void
+SetMapBlock (u32 *map, u32 x, u32 y, b32 value)
+{
+	if((x < SCREEN_WIDTH) && (y < SCREEN_HEIGHT))
+	{
+		u32 row = map[y];
+		u32 mask = (0b10000000000000000000000000000000 >> x);
+		if((row & mask) == mask)
+		{
+			if(!value) map[y] = map[y] & ~mask;
+		}
+		else if(value)
+		{
+			map[y] = map[y] | mask;
+		}
+	}
+}
+
+internal u8
+GetWall (u32 *map, u8 *wall_set, u32 x, u32 y)
+{
+	u8 res = wall_set[WALL_CENTER];
+
+	if((x < SCREEN_WIDTH) && (y < SCREEN_HEIGHT))
+	{
+		b32 up    = IsOccupied(map, x,y-1);
+		b32 down  = IsOccupied(map, x,y+1);
+		b32 left  = IsOccupied(map, x-1,y);
+		b32 right = IsOccupied(map, x+1,y);
+
+		if(up)
+		{
+			if(down)
+			{
+				if(left)
+				{
+					if(right) res = wall_set[WALL_UP_DOWN_LEFT_RIGHT];
+					else res = wall_set[WALL_UP_DOWN_LEFT];
+				}
+				else if(right) res = wall_set[WALL_UP_DOWN_RIGHT];
+				else res = wall_set[WALL_UP_DOWN];
+			}
+			else if(left)
+			{
+				if(right) res = wall_set[WALL_UP_LEFT_RIGHT];
+				else res = wall_set[WALL_UP_LEFT];
+			}
+			else if(right) res = wall_set[WALL_UP_RIGHT];
+			else res = wall_set[WALL_UP_DOWN];
+		}
+		else if(down)
+		{
+			if(left)
+			{
+				if(right) res = wall_set[WALL_DOWN_LEFT_RIGHT];
+				else res = wall_set[WALL_DOWN_LEFT];
+			}
+			else if(right) res = wall_set[WALL_DOWN_RIGHT];
+			else res = wall_set[WALL_UP_DOWN];
+		}
+		else if(left || right) res = wall_set[WALL_LEFT_RIGHT];
+	}
+
+	return res;
+}
+
 void main ()
 {
 	// criando buffer interno do console
@@ -144,12 +289,14 @@ void main ()
 	}
 
 	CHAR_INFO player_char = {};
-	player_char.Char.UnicodeChar = 3;
+	player_char.Char.UnicodeChar = 207;
 	player_char.Attributes = RGBColor(1,0,0,1, 0,0,0,0);//(FOREGROUND_RED|FOREGROUND_INTENSITY);
 
 	int estadoLocal_y = 0;
 	int estadoLocal_x = 0;
+	u32 t = 0;
 	u32 x = 0, y = 0;
+	b32 wasnt_down = true;
 
 	// iniciando o contador de tempo do windows
 	timeBeginPeriod(1);
@@ -169,19 +316,40 @@ void main ()
 		bool left = IS_KEY_DOWN(VK_LEFT);
 		bool right = IS_KEY_DOWN(VK_RIGHT);
 
+		// t++;
+		// r32 period = 0.5f;
+		// if((t%(u32)(TARGET_FPS * period)) == 0)
+		// {
+		// 	t = 0;
+		// 	if(player_char.Attributes == RGBColor(1,0,0,1, 0,0,0,0))
+		// 		player_char.Attributes = RGBColor(0,0,0,0, 1,0,0,1);//player_char.Char.UnicodeChar = 176;
+		// 	else
+		// 		player_char.Attributes = RGBColor(1,0,0,1, 0,0,0,0);
+		// }
+
+		if(IS_KEY_DOWN(VK_LBUTTON) && wasnt_down)
+		{
+			CONSOLE_SCREEN_BUFFER_INFO sbinfo;
+			GetConsoleScreenBufferInfo(screen_buffer_handle, &sbinfo);
+
+			u32 x = sbinfo.dwCursorPosition.X;
+			u32 y = sbinfo.dwCursorPosition.Y;
+			SetMapBlock(bitfield_image,x,y, !IsOccupied(bitfield_image,x,y));
+			wasnt_down = false;
+		}
+		if(!IS_KEY_DOWN(VK_LBUTTON)) wasnt_down = true;
+
 		for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
 		{
-			u32 row = bitfield_image[y];
 			for (u32 x = 0; x < SCREEN_WIDTH; ++x)
 			{
-				u32 mask = (0b10000000000000000000000000000000 >> x);
-				if((row & mask) == mask)
+				if(IsOccupied(bitfield_image, x,y))
 				{
+					player_char.Char.UnicodeChar = GetWall(bitfield_image, thick_walls, x,y);
 					buffer[x+(y*SCREEN_WIDTH)] = player_char;
 				}
 			}
 		}
-
 
 		COORD buffer_coord = {0,0};
 		PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, write_rect);
@@ -191,8 +359,7 @@ void main ()
 		i64 frame_end = GetTime();
 		r64 ms_for_frame = GetTimeElapsed(frame_start,frame_end, perf_frequency);
 
-		// contando os milissegundos desde o ultimo segundo, 
-		// se 1s ou mais se passou, mostrar qtd de frames e zerar contagem
+
 		if(ms_for_frame < TARGET_MS_PER_FRAME)
 		{
 			Sleep(TARGET_MS_PER_FRAME - ms_for_frame);
@@ -200,10 +367,9 @@ void main ()
 			ms_for_frame = GetTimeElapsed(frame_start,frame_end, perf_frequency);
 		}
 
-
-
+		// contando os milissegundos desde o ultimo segundo, 
+		// se 1s ou mais se passou, mostrar qtd de frames e zerar contagem
 		ms_since_last_s += ms_for_frame;
-
 		if(ms_since_last_s >= 1000.0)
 		{
 			// escrevendo fps na linha de debug
