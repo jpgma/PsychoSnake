@@ -298,6 +298,8 @@ void main ()
 	u32 x = 0, y = 0;
 	b32 wasnt_down = true;
 
+	char position_player = '0';
+
 	// iniciando o contador de tempo do windows
 	timeBeginPeriod(1);
     LARGE_INTEGER perf_frequency_i;
@@ -307,6 +309,10 @@ void main ()
 	u32 frame_count = 0;
 	i64 frame_start = GetTime();
 
+	unsigned int posicao_x = 0;
+	unsigned int posicao_y = 0;
+	int counting_time=0;
+
 	while(!IS_KEY_DOWN(VK_ESCAPE))
 	{
 		LimparTela(buffer, ' ', RGBColor(1,1,1,0, 0,0,0,0)/*(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE)*/);
@@ -315,7 +321,7 @@ void main ()
 		bool down = IS_KEY_DOWN(VK_DOWN);
 		bool left = IS_KEY_DOWN(VK_LEFT);
 		bool right = IS_KEY_DOWN(VK_RIGHT);
-
+		bool space = IS_KEY_DOWN(VK_SPACE);
 		// t++;
 		// r32 period = 0.5f;
 		// if((t%(u32)(TARGET_FPS * period)) == 0)
@@ -337,19 +343,34 @@ void main ()
 			SetMapBlock(bitfield_image,x,y, !IsOccupied(bitfield_image,x,y));
 			wasnt_down = false;
 		}
-		if(!IS_KEY_DOWN(VK_LBUTTON)) wasnt_down = true;
 
-		for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
-		{
-			for (u32 x = 0; x < SCREEN_WIDTH; ++x)
+
+			buffer[posicao_x+(posicao_y*SCREEN_WIDTH)].Char.UnicodeChar = position_player;
+			buffer[posicao_x+(posicao_y*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;
+
+
+			if(IS_KEY_DOWN(VK_RIGHT))
+			{	
+				posicao_x++;
+				posicao_x = posicao_x%SCREEN_WIDTH;
+			}	
+			if(IS_KEY_DOWN(VK_DOWN))
 			{
-				if(IsOccupied(bitfield_image, x,y))
-				{
-					player_char.Char.UnicodeChar = GetWall(bitfield_image, thick_walls, x,y);
-					buffer[x+(y*SCREEN_WIDTH)] = player_char;
-				}
+				posicao_y++;
+				posicao_y = posicao_y%(SCREEN_HEIGHT);
 			}
-		}
+			if(IS_KEY_DOWN(VK_LEFT))
+			{
+				posicao_x--;
+				posicao_x = posicao_x%SCREEN_WIDTH;
+
+			}
+			if(IS_KEY_DOWN(VK_UP))
+			{
+				posicao_y--;
+				posicao_y = posicao_y%(SCREEN_HEIGHT);
+			}
+
 
 		COORD buffer_coord = {0,0};
 		PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, write_rect);
