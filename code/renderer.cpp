@@ -27,7 +27,7 @@ typedef u32 b32;
 #define IS_KEY_DOWN(key) ((GetAsyncKeyState(key) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN)
 
 //Limitando o FPS
-#define TARGET_FPS 60
+#define TARGET_FPS 30
 #define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
 
 /* Caracteres p/ construçao de obstaculos:
@@ -98,24 +98,24 @@ global u8 thick_walls[] =
 	204, 206, 187, 201, 203, 205,
 };
 
-global u32 bitfield_image[] = 
+global u32 wall_map[] = 
 {
-	0b11111111111111111111111111111111,
+	0b11111111111111101111111111111111,
 	0b10000000000000000000000000000001,
 	0b10000000000000000000000000000001,
 	0b10000000000000000000000000000001,
 	0b10000000000000000000000000000001,
-	0b10000000111111111000000000000001,
-	0b10000000000001000000000000000001,
-	0b10000000000001001111110000000001,
-	0b10000000111111001000010000000001,
-	0b10000000000000001111110000000001,
-	0b10000000000000001000000000000001,
-	0b10000000000000001000000000000001,
-	0b10000000000000001000000000000001,
 	0b10000000000000000000000000000001,
 	0b10000000000000000000000000000001,
-	0b11111111111111111111111111111111,
+	0b00000000000000000000000000000000,
+	0b10000000000000000000000000000001,
+	0b10000000000000000000000000000001,
+	0b10000000000000000000000000000001,
+	0b10000000000000000000000000000001,
+	0b10000000000000000000000000000001,
+	0b10000000000000000000000000000001,
+	0b10000000000000000000000000000001,
+	0b11111111111111101111111111111111,
 };
 
 inline u16
@@ -317,38 +317,26 @@ void main ()
 	{
 		LimparTela(buffer, ' ', RGBColor(1,1,1,0, 0,0,0,0)/*(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE)*/);
 
+		// desenhando mapa
+		for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
+		{
+			for (u32 x = 0; x < SCREEN_WIDTH; ++x)
+			{
+				if(IsOccupied(wall_map,x,y))
+				{
+					buffer[x+(y*SCREEN_WIDTH)].Char.UnicodeChar = GetWall(wall_map, thin_walls, x,y);
+					buffer[x+(y*SCREEN_WIDTH)].Attributes = RGBColor(1,1,1,1, 0,0,0,0);
+				}
+			}
+		}
+
 		bool up = IS_KEY_DOWN(VK_UP);
 		bool down = IS_KEY_DOWN(VK_DOWN);
 		bool left = IS_KEY_DOWN(VK_LEFT);
 		bool right = IS_KEY_DOWN(VK_RIGHT);
 		bool space = IS_KEY_DOWN(VK_SPACE);
-		// t++;
-		// r32 period = 0.5f;
-		// if((t%(u32)(TARGET_FPS * period)) == 0)
-		// {
-		// 	t = 0;
-		// 	if(player_char.Attributes == RGBColor(1,0,0,1, 0,0,0,0))
-		// 		player_char.Attributes = RGBColor(0,0,0,0, 1,0,0,1);//player_char.Char.UnicodeChar = 176;
-		// 	else
-		// 		player_char.Attributes = RGBColor(1,0,0,1, 0,0,0,0);
-		// }
 
-		if(IS_KEY_DOWN(VK_LBUTTON) && wasnt_down)
-		{
-			CONSOLE_SCREEN_BUFFER_INFO sbinfo;
-			GetConsoleScreenBufferInfo(screen_buffer_handle, &sbinfo);
-
-			u32 x = sbinfo.dwCursorPosition.X;
-			u32 y = sbinfo.dwCursorPosition.Y;
-			SetMapBlock(bitfield_image,x,y, !IsOccupied(bitfield_image,x,y));
-			wasnt_down = false;
-		}
-
-
-			buffer[posicao_x+(posicao_y*SCREEN_WIDTH)].Char.UnicodeChar = position_player;
-			buffer[posicao_x+(posicao_y*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;
-
-
+		{ // movimentando player
 			if(IS_KEY_DOWN(VK_RIGHT))
 			{	
 				posicao_x++;
@@ -370,7 +358,9 @@ void main ()
 				posicao_y--;
 				posicao_y = posicao_y%(SCREEN_HEIGHT);
 			}
-
+			buffer[posicao_x+(posicao_y*SCREEN_WIDTH)].Char.UnicodeChar = position_player;
+			buffer[posicao_x+(posicao_y*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;
+		}
 
 		COORD buffer_coord = {0,0};
 		PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, write_rect);
