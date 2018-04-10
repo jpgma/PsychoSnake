@@ -308,11 +308,20 @@ void main ()
 	r64 ms_since_last_s = 0.0;
 	u32 frame_count = 0;
 	i64 frame_start = GetTime();
+	r32 dt;
 
-	unsigned int posicao_x = 0;
-	unsigned int posicao_y = 0;
-	int counting_time=0;
 
+	 r32 posicao_x = 0;
+	 r32 posicao_y = 0;
+
+	 u32 px;
+	 u32 py;
+
+	r32 player_speed = 5.0;
+		posicao_x = posicao_x+((SCREEN_WIDTH)/2);
+		posicao_y = posicao_y+((SCREEN_HEIGHT)/2);
+
+ 	
 	while(!IS_KEY_DOWN(VK_ESCAPE))
 	{
 		LimparTela(buffer, ' ', RGBColor(1,1,1,0, 0,0,0,0)/*(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE)*/);
@@ -336,31 +345,100 @@ void main ()
 		bool right = IS_KEY_DOWN(VK_RIGHT);
 		bool space = IS_KEY_DOWN(VK_SPACE);
 
+
 		{ // movimentando player
-			if(IS_KEY_DOWN(VK_RIGHT))
-			{	
-				posicao_x++;
-				posicao_x = posicao_x%SCREEN_WIDTH;
-			}	
+			
+				if(IS_KEY_DOWN(VK_RIGHT))
+				{	
+
+					posicao_x = posicao_x + (dt*player_speed);
+
+					if(posicao_x > 0 && posicao_x < SCREEN_WIDTH)
+					{
+						if(IsOccupied(wall_map,posicao_x,posicao_y))
+						{
+							posicao_x = (posicao_x-1);
+						}
+					}
+					else
+					{
+						posicao_x = (u32)posicao_x%(SCREEN_WIDTH);
+					}
+
+				
+					
+				}
+			
 			if(IS_KEY_DOWN(VK_DOWN))
 			{
-				posicao_y++;
-				posicao_y = posicao_y%(SCREEN_HEIGHT);
-			}
-			if(IS_KEY_DOWN(VK_LEFT))
-			{
-				posicao_x--;
-				posicao_x = posicao_x%SCREEN_WIDTH;
+				
+				posicao_y = posicao_y + (dt*player_speed);
+				if(posicao_y > 0 && posicao_y < SCREEN_HEIGHT)
+				{
+					if(IsOccupied(wall_map,posicao_x,posicao_y))
+					{
+						posicao_y = (posicao_y-1);
+					}
+
+				}
+				else
+				{
+					posicao_y = (u32)posicao_y%(SCREEN_HEIGHT);
+				}		
+
 
 			}
+			if(IS_KEY_DOWN(VK_LEFT))
+				{	
+
+					posicao_x = posicao_x - (dt*player_speed);
+
+					if(posicao_x > 0 && posicao_x < SCREEN_WIDTH)
+					{
+						if(IsOccupied(wall_map,posicao_x,posicao_y))
+						{
+							posicao_x = (posicao_x+1);
+						}
+						
+					}
+					else
+					{
+						posicao_x = (u32)posicao_x%(SCREEN_WIDTH);
+					}
+
+				
+					
+				}
 			if(IS_KEY_DOWN(VK_UP))
 			{
-				posicao_y--;
-				posicao_y = posicao_y%(SCREEN_HEIGHT);
+				
+				posicao_y = posicao_y - (dt*player_speed);
+
+				if(posicao_y > 0 && posicao_y < SCREEN_HEIGHT)
+				{
+					if(IsOccupied(wall_map,posicao_x,posicao_y))
+					{
+						posicao_y = (posicao_y+1);
+					}
+
+				}
+
+				else
+				{
+					posicao_y = (u32)posicao_y%(SCREEN_HEIGHT);
+				}
+				
 			}
-			buffer[posicao_x+(posicao_y*SCREEN_WIDTH)].Char.UnicodeChar = position_player;
-			buffer[posicao_x+(posicao_y*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;
+
+			buffer[(u32)posicao_x+((u32)posicao_y*SCREEN_WIDTH)].Char.UnicodeChar = position_player;
+			buffer[(u32)posicao_x+((u32)posicao_y*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;					
+				
+			
+
 		}
+
+
+
 
 		COORD buffer_coord = {0,0};
 		PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, write_rect);
@@ -377,6 +455,12 @@ void main ()
 			frame_end = GetTime();
 			ms_for_frame = GetTimeElapsed(frame_start,frame_end, perf_frequency);
 		}
+
+
+		dt = ms_for_frame/1000.0f;
+
+
+
 
 		// contando os milissegundos desde o ultimo segundo, 
 		// se 1s ou mais se passou, mostrar qtd de frames e zerar contagem
@@ -395,7 +479,7 @@ void main ()
 			frame_count = 0;
 		}
 
-		frame_start = GetTime();
+		frame_start = frame_end;
 	}
 
 	free(buffer);
