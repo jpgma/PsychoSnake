@@ -317,7 +317,7 @@ void main ()
 	 u32 px;
 	 u32 py;
 
-	r32 player_speed = 5.0;
+	r32 player_speed = 10.0;
 		posicao_x = posicao_x+((SCREEN_WIDTH)/2);
 		posicao_y = posicao_y+((SCREEN_HEIGHT)/2);
 
@@ -348,87 +348,56 @@ void main ()
 
 		{ // movimentando player
 			
-				if(IS_KEY_DOWN(VK_RIGHT))
-				{	
+			if(IS_KEY_DOWN(VK_RIGHT))
+			{	
+				posicao_x += dt*player_speed;
 
-					posicao_x = posicao_x + (dt*player_speed);
+			}
 
-					if(posicao_x > 0 && posicao_x < SCREEN_WIDTH)
-					{
-						if(IsOccupied(wall_map,posicao_x,posicao_y))
-						{
-							posicao_x = (posicao_x-1);
-						}
-					}
-					else
-					{
-						posicao_x = (u32)posicao_x%(SCREEN_WIDTH);
-					}
-
-				
-					
-				}
-			
 			if(IS_KEY_DOWN(VK_DOWN))
 			{
-				
-				posicao_y = posicao_y + (dt*player_speed);
-				if(posicao_y > 0 && posicao_y < SCREEN_HEIGHT)
-				{
-					if(IsOccupied(wall_map,posicao_x,posicao_y))
-					{
-						posicao_y = (posicao_y-1);
-					}
-
-				}
-				else
-				{
-					posicao_y = (u32)posicao_y%(SCREEN_HEIGHT);
-				}		
-
+				posicao_y += dt*player_speed;
 
 			}
+
+
+
 			if(IS_KEY_DOWN(VK_LEFT))
-				{	
+			{	
+				posicao_x -= dt*player_speed;
+			}
 
-					posicao_x = posicao_x - (dt*player_speed);
 
-					if(posicao_x > 0 && posicao_x < SCREEN_WIDTH)
-					{
-						if(IsOccupied(wall_map,posicao_x,posicao_y))
-						{
-							posicao_x = (posicao_x+1);
-						}
-						
-					}
-					else
-					{
-						posicao_x = (u32)posicao_x%(SCREEN_WIDTH);
-					}
 
-				
-					
-				}
 			if(IS_KEY_DOWN(VK_UP))
 			{
-				
-				posicao_y = posicao_y - (dt*player_speed);
-
-				if(posicao_y > 0 && posicao_y < SCREEN_HEIGHT)
-				{
-					if(IsOccupied(wall_map,posicao_x,posicao_y))
-					{
-						posicao_y = (posicao_y+1);
-					}
-
-				}
-
-				else
-				{
-					posicao_y = (u32)posicao_y%(SCREEN_HEIGHT);
-				}
-				
+				posicao_y -= dt*player_speed;
 			}
+
+
+			if(posicao_x < 0.0f)
+			{
+				posicao_x += SCREEN_WIDTH;
+
+			}
+			else if(posicao_x > SCREEN_WIDTH)
+			{
+				posicao_x -= SCREEN_WIDTH;
+
+			}
+			else if(posicao_y < 0)
+			{
+				posicao_y += SCREEN_HEIGHT;
+
+			}
+			else if(posicao_y > SCREEN_HEIGHT)
+			{
+				posicao_y -= SCREEN_HEIGHT;
+
+			}
+
+
+
 
 			buffer[(u32)posicao_x+((u32)posicao_y*SCREEN_WIDTH)].Char.UnicodeChar = position_player;
 			buffer[(u32)posicao_x+((u32)posicao_y*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;					
