@@ -321,9 +321,15 @@ void main ()
 		posicao_x = posicao_x+((SCREEN_WIDTH)/2);
 		posicao_y = posicao_y+((SCREEN_HEIGHT)/2);
 
+	int dead_count = 0;
  	
 	while(!IS_KEY_DOWN(VK_ESCAPE))
 	{
+
+
+		r32 npx = posicao_x;
+		r32 npy = posicao_y;
+
 		LimparTela(buffer, ' ', RGBColor(1,1,1,0, 0,0,0,0)/*(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE)*/);
 
 		// desenhando mapa
@@ -350,13 +356,13 @@ void main ()
 			
 			if(IS_KEY_DOWN(VK_RIGHT))
 			{	
-				posicao_x += dt*player_speed;
+				npx += dt*player_speed;
 
 			}
 
 			if(IS_KEY_DOWN(VK_DOWN))
 			{
-				posicao_y += dt*player_speed;
+				npy += dt*player_speed;
 
 			}
 
@@ -364,38 +370,53 @@ void main ()
 
 			if(IS_KEY_DOWN(VK_LEFT))
 			{	
-				posicao_x -= dt*player_speed;
+				npx -= dt*player_speed;
 			}
 
 
 
 			if(IS_KEY_DOWN(VK_UP))
 			{
-				posicao_y -= dt*player_speed;
+				npy -= dt*player_speed;
 			}
+			
 
 
-			if(posicao_x < 0.0f)
+
+
+			if(npx < 0.0f)
 			{
-				posicao_x += SCREEN_WIDTH;
+				npx += SCREEN_WIDTH;
+
 
 			}
-			else if(posicao_x > SCREEN_WIDTH)
+			else if(npx > SCREEN_WIDTH)
 			{
-				posicao_x -= SCREEN_WIDTH;
+				npx -= SCREEN_WIDTH;
 
 			}
-			else if(posicao_y < 0)
+			else if(npy < 0)
 			{
-				posicao_y += SCREEN_HEIGHT;
+				npy += SCREEN_HEIGHT;
 
 			}
-			else if(posicao_y > SCREEN_HEIGHT)
+			else if(npy > SCREEN_HEIGHT)
 			{
-				posicao_y -= SCREEN_HEIGHT;
+				npy -= SCREEN_HEIGHT;
 
 			}
 
+			if(!IsOccupied(wall_map,(u32)npx,(u32)npy))
+			{
+				posicao_x = npx;
+				posicao_y = npy;
+			}
+			else
+			{
+				posicao_x = ((SCREEN_WIDTH)/2);
+				posicao_y = ((SCREEN_HEIGHT)/2);
+				dead_count++;
+			}
 
 
 
@@ -437,12 +458,13 @@ void main ()
 		if(ms_since_last_s >= 1000.0)
 		{
 			// escrevendo fps na linha de debug
-			char str[10];
+			char str[20];
 			// escrever frame_count em str
-			wsprintf(str, "%d fps", frame_count);
+			wsprintf(str, "%d FPS %d:MORTES", frame_count,dead_count);
 			// copiar str p/ linha de debug no buffer
-			for (u32 i = 0; i < 10; ++i)
+			for (u32 i = 0; i < 20; ++i)
 				buffer[(SCREEN_WIDTH*SCREEN_HEIGHT)+i].Char.UnicodeChar = str[i];
+
 
 			ms_since_last_s = 0.0;
 			frame_count = 0;
