@@ -81,8 +81,21 @@ GetWall (u32 *map, u8 *wall_set, u32 x, u32 y)
 }
 
 internal void 
-GameUpdateAndRender (CHAR_INFO *buffer, int *dead_count, r32 *posicao_x, r32 *posicao_y, r32 dt)
+GameUpdateAndRender (b32 *initialized, CHAR_INFO *buffer, int *dead_count, r32 *posicao_x, r32 *posicao_y, r32 dt)
 {
+	if(!*initialized)
+	{
+		for (i32 i = 0; i < 3; ++i)
+		{
+			posicao_x[i] = SCREEN_WIDTH/2.0f;
+			posicao_y[i] = SCREEN_HEIGHT/2.0f;
+		}
+
+		*dead_count = 0;
+
+		*initialized = true;
+	}
+
 	r32 npx = *posicao_x;
 	r32 npy = *posicao_y;
 
@@ -135,19 +148,16 @@ GameUpdateAndRender (CHAR_INFO *buffer, int *dead_count, r32 *posicao_x, r32 *po
 
 			if(((u32)posicao_x[0]!=(u32)npx)||((u32)posicao_y[0]!=(u32)npy))
 			{
-				for(int i=2; i>0; i--)
+				for(i32 i=2; i>0; i--)
 				{
 					posicao_x[i] = posicao_x[i-1];
 					posicao_y[i] = posicao_y[i-1];
-
 				}
 			}
 
 			*posicao_x = npx;
 			*posicao_y = npy;
 		}
-
-
 		else
 		{
 			for(int i=0; i<3; ++i)
@@ -170,7 +180,7 @@ GameUpdateAndRender (CHAR_INFO *buffer, int *dead_count, r32 *posicao_x, r32 *po
 
 		char position_player = '0';
 
-		for(int i=0; i<3; ++i)
+		for(i32 i=2; i>=0; --i)
 		{
 			buffer[(u32)posicao_x[i]+((u32)posicao_y[i]*SCREEN_WIDTH)].Char.UnicodeChar = position_player;
 			buffer[(u32)posicao_x[i]+((u32)posicao_y[i]*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;	

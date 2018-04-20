@@ -125,12 +125,6 @@ void main ()
     player_char.Char.UnicodeChar = 207;
     player_char.Attributes = RGBColor(1,0,0,1, 0,0,0,0);//(FOREGROUND_RED|FOREGROUND_INTENSITY);
 
-    int estadoLocal_y = 0;
-    int estadoLocal_x = 0;
-    u32 t = 0;
-    u32 x = 0, y = 0;
-    b32 wasnt_down = true;
-
     // iniciando o contador de tempo do windows
     timeBeginPeriod(1);
     LARGE_INTEGER perf_frequency_i;
@@ -143,23 +137,13 @@ void main ()
 
     r32 posicao_x[3];
  	r32 posicao_y[3];
-
-
-    posicao_x[0]= ((SCREEN_WIDTH)/2);
-  	posicao_y[0]= ((SCREEN_HEIGHT)/2);
-
-  	posicao_x[1] = posicao_x[0]+1;
-	posicao_x[2] = posicao_x[1]+1;
-
-	posicao_y[1] = posicao_y[0];
-	posicao_y[2] = posicao_y[1];
-
-    int dead_count = 0;
+    int dead_count;
+    b32 initialized = false;
     
     while(!IS_KEY_DOWN(VK_ESCAPE))
     {
 
-        GameUpdateAndRender(buffer, &dead_count,posicao_x,posicao_y,dt);
+        GameUpdateAndRender(&initialized, buffer, &dead_count,posicao_x,posicao_y,dt);
 
 
         COORD buffer_coord = {0,0};

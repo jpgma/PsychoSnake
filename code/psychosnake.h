@@ -86,4 +86,4 @@ global u32 wall_map[] =
     0b11111111111111101111111111111111,
 };
 
-internal void GameUpdateAndRender (CHAR_INFO *buffer, int *dead_count, r32 *posicao_x, r32 *posicao_y, r32 dt);
+internal void GameUpdateAndRender (b32 *initialized, CHAR_INFO *buffer, int *dead_count, r32 *posicao_x, r32 *posicao_y, r32 dt);
