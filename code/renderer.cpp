@@ -141,15 +141,25 @@ void main ()
     i64 frame_start = GetTime();
     r32 dt = 0.0f;
 
-    r32 posicao_x = ((SCREEN_WIDTH)/2);
-    r32 posicao_y = ((SCREEN_HEIGHT)/2);
+    r32 posicao_x[3];
+ 	r32 posicao_y[3];
+
+
+    posicao_x[0]= ((SCREEN_WIDTH)/2);
+  	posicao_y[0]= ((SCREEN_HEIGHT)/2);
+
+  	posicao_x[1] = posicao_x[0]+1;
+	posicao_x[2] = posicao_x[1]+1;
+
+	posicao_y[1] = posicao_y[0];
+	posicao_y[2] = posicao_y[1];
 
     int dead_count = 0;
     
     while(!IS_KEY_DOWN(VK_ESCAPE))
     {
 
-        GameUpdateAndRender(buffer, &dead_count,&posicao_x,&posicao_y,dt);
+        GameUpdateAndRender(buffer, &dead_count,posicao_x,posicao_y,dt);
 
 
         COORD buffer_coord = {0,0};

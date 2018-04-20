@@ -128,22 +128,55 @@ GameUpdateAndRender (CHAR_INFO *buffer, int *dead_count, r32 *posicao_x, r32 *po
 		else if(npy > SCREEN_HEIGHT)
 			npy -= SCREEN_HEIGHT;
 
+
+
 		if(!IsOccupied(wall_map,(u32)npx,(u32)npy))
 		{
+
+			if(((u32)posicao_x[0]!=(u32)npx)||((u32)posicao_y[0]!=(u32)npy))
+			{
+				for(int i=2; i>0; i--)
+				{
+					posicao_x[i] = posicao_x[i-1];
+					posicao_y[i] = posicao_y[i-1];
+
+				}
+			}
+
 			*posicao_x = npx;
 			*posicao_y = npy;
 		}
+
+
 		else
 		{
-			*posicao_x = ((SCREEN_WIDTH)/2);
-			*posicao_y = ((SCREEN_HEIGHT)/2);
+			for(int i=0; i<3; ++i)
+			{
+				posicao_x[i] = ((SCREEN_WIDTH)/2);
+				posicao_y[i] = ((SCREEN_HEIGHT)/2);
+			}
+
 			*dead_count += 1;
 		}
 
+
+		/*for(int i=2; i>0; i--)
+		{
+			posicao_x[i] = posicao_x[i-1];
+			posicao_y[i] = posicao_y[i-1];
+
+		}*/
+
+
 		char position_player = '0';
 
-		buffer[(u32)*posicao_x+((u32)*posicao_y*SCREEN_WIDTH)].Char.UnicodeChar = position_player;
-		buffer[(u32)*posicao_x+((u32)*posicao_y*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;					
+		for(int i=0; i<3; ++i)
+		{
+			buffer[(u32)posicao_x[i]+((u32)posicao_y[i]*SCREEN_WIDTH)].Char.UnicodeChar = position_player;
+			buffer[(u32)posicao_x[i]+((u32)posicao_y[i]*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;	
+
+		}
+				
 	}
 
 }
