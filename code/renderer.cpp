@@ -135,16 +135,12 @@ void main ()
     i64 frame_start = GetTime();
     r32 dt = 0.0f;
 
-    r32 posicao_x[3];
- 	r32 posicao_y[3];
-    int dead_count;
-    b32 initialized = false;
+    GameState game_state = {};
     
     while(!IS_KEY_DOWN(VK_ESCAPE))
     {
 
-        GameUpdateAndRender(&initialized, buffer, &dead_count,posicao_x,posicao_y,dt);
-
+        GameUpdateAndRender(&game_state, buffer,dt);
 
         COORD buffer_coord = {0,0};
         PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, write_rect);
@@ -176,7 +172,7 @@ void main ()
             // escrevendo fps na linha de debug
             char str[20];
             // escrever frame_count em str
-            wsprintf(str, "%d FPS %d:MORTES", frame_count,dead_count);
+            wsprintf(str, "%d FPS %d:MORTES", frame_count, game_state.dead_count);
             // copiar str p/ linha de debug no buffer
             for (u32 i = 0; i < 20; ++i)
                 buffer[(SCREEN_WIDTH*SCREEN_HEIGHT)+i].Char.UnicodeChar = str[i];

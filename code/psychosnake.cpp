@@ -81,23 +81,23 @@ GetWall (u32 *map, u8 *wall_set, u32 x, u32 y)
 }
 
 internal void 
-GameUpdateAndRender (b32 *initialized, CHAR_INFO *buffer, int *dead_count, r32 *posicao_x, r32 *posicao_y, r32 dt)
+GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 {
-	if(!*initialized)
+	if(!game_state->initialized)
 	{
 		for (i32 i = 0; i < 3; ++i)
 		{
-			posicao_x[i] = SCREEN_WIDTH/2.0f;
-			posicao_y[i] = SCREEN_HEIGHT/2.0f;
+			game_state->posicao_x[i] = SCREEN_WIDTH/2.0f;
+			game_state->posicao_y[i] = SCREEN_HEIGHT/2.0f;
 		}
 
-		*dead_count = 0;
+		game_state->dead_count = 0;
 
-		*initialized = true;
+		game_state->initialized = true;
 	}
 
-	r32 npx = *posicao_x;
-	r32 npy = *posicao_y;
+	r32 npx = game_state->posicao_x[0];
+	r32 npy = game_state->posicao_y[0];
 
 	LimparTela(buffer, ' ', RGBColor(1,1,1,0, 0,0,0,0)/*(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE)*/);
 
@@ -121,7 +121,7 @@ GameUpdateAndRender (b32 *initialized, CHAR_INFO *buffer, int *dead_count, r32 *
 		bool right = IS_KEY_DOWN(VK_RIGHT);
 		bool space = IS_KEY_DOWN(VK_SPACE);
 
-    	r32 player_speed = 10.0;
+    	r32 player_speed = 10.0f;
 
 		if(right)
 			npx += dt*player_speed;
@@ -141,52 +141,38 @@ GameUpdateAndRender (b32 *initialized, CHAR_INFO *buffer, int *dead_count, r32 *
 		else if(npy > SCREEN_HEIGHT)
 			npy -= SCREEN_HEIGHT;
 
-
-
 		if(!IsOccupied(wall_map,(u32)npx,(u32)npy))
 		{
 
-			if(((u32)posicao_x[0]!=(u32)npx)||((u32)posicao_y[0]!=(u32)npy))
+			if(((u32)game_state->posicao_x[0]!=(u32)npx)||((u32)game_state->posicao_y[0]!=(u32)npy))
 			{
 				for(i32 i=2; i>0; i--)
 				{
-					posicao_x[i] = posicao_x[i-1];
-					posicao_y[i] = posicao_y[i-1];
+					game_state->posicao_x[i] = game_state->posicao_x[i-1];
+					game_state->posicao_y[i] = game_state->posicao_y[i-1];
 				}
 			}
 
-			*posicao_x = npx;
-			*posicao_y = npy;
+			game_state->posicao_x[0] = npx;
+			game_state->posicao_y[0] = npy;
 		}
 		else
 		{
 			for(int i=0; i<3; ++i)
 			{
-				posicao_x[i] = ((SCREEN_WIDTH)/2);
-				posicao_y[i] = ((SCREEN_HEIGHT)/2);
+				game_state->posicao_x[i] = ((SCREEN_WIDTH)/2);
+				game_state->posicao_y[i] = ((SCREEN_HEIGHT)/2);
 			}
 
-			*dead_count += 1;
+			game_state->dead_count += 1;
 		}
 
-
-		/*for(int i=2; i>0; i--)
-		{
-			posicao_x[i] = posicao_x[i-1];
-			posicao_y[i] = posicao_y[i-1];
-
-		}*/
-
-
-		char position_player = '0';
-
+		char player_char = '0';
 		for(i32 i=2; i>=0; --i)
 		{
-			buffer[(u32)posicao_x[i]+((u32)posicao_y[i]*SCREEN_WIDTH)].Char.UnicodeChar = position_player;
-			buffer[(u32)posicao_x[i]+((u32)posicao_y[i]*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;	
-
-		}
-				
+			buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Char.UnicodeChar = player_char;
+			buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;	
+		}	
 	}
 
 }
