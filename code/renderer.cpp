@@ -78,42 +78,69 @@ GetTimeElapsed (i64 a, i64 b, i64 perf_frequency)
 
 void main ()
 {
+    const u32 buffer_size_ = (SCREEN_WIDTH*(SCREEN_HEIGHT+DEBUG_LINE_COUNT)) * sizeof(CHAR_INFO);
+    const u32 mem_size = sizeof(HANDLE) + sizeof(CONSOLE_FONT_INFOEX) + 
+                         sizeof(COORD) + sizeof(SMALL_RECT) + sizeof(CONSOLE_CURSOR_INFO) + buffer_size_ + 
+                         sizeof(GameState);
+    u8 memoria[mem_size] = {}; // memoria para tudo no programa;
+    u32 offset = 0;
+
+    HANDLE *screen_buffer_handle = (HANDLE *)(memoria + offset);
+    offset += sizeof(HANDLE);
+    
     // criando buffer interno do console
-    HANDLE screen_buffer_handle = CreateConsoleScreenBuffer( GENERIC_READ | GENERIC_WRITE,  
-                                                             FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                                             NULL,
-                                                             CONSOLE_TEXTMODE_BUFFER, 
-                                                             NULL);
+    *screen_buffer_handle = CreateConsoleScreenBuffer( GENERIC_READ | GENERIC_WRITE,  
+                                                       FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                                       NULL,
+                                                       CONSOLE_TEXTMODE_BUFFER, 
+                                                       NULL);
+    
+    CONSOLE_FONT_INFOEX *cfi = (CONSOLE_FONT_INFOEX *)(memoria + offset);
+    offset += sizeof(CONSOLE_FONT_INFOEX);
+    
     // fonte monospaced e quadrada
-    CONSOLE_FONT_INFOEX cfi;
-    cfi.cbSize = sizeof(cfi);
-    cfi.nFont = 0;
-    cfi.dwFontSize.X = CHAR_SIZE;
-    cfi.dwFontSize.Y = CHAR_SIZE;
-    cfi.FontFamily = 0x30;
-    cfi.FontWeight = 0;
-    wcscpy(cfi.FaceName, L"Terminal");
-    SetCurrentConsoleFontEx(screen_buffer_handle, FALSE, &cfi);
+    cfi->cbSize = sizeof(CONSOLE_FONT_INFOEX);
+    cfi->nFont = 0;
+    cfi->dwFontSize.X = CHAR_SIZE;
+    cfi->dwFontSize.Y = CHAR_SIZE;
+    cfi->FontFamily = 0x30;
+    cfi->FontWeight = 0;
+    wcscpy(cfi->FaceName, L"Terminal");
+    SetCurrentConsoleFontEx(*screen_buffer_handle, FALSE, cfi);
+
+    COORD *buffer_size = (COORD*)(memoria + offset);
+    offset += sizeof(COORD);
 
     // informando tamanho do buffer interno
-    COORD buffer_size = {SCREEN_WIDTH, SCREEN_HEIGHT+DEBUG_LINE_COUNT};
-    SetConsoleScreenBufferSize(screen_buffer_handle, buffer_size);
+    buffer_size->X = SCREEN_WIDTH;
+    buffer_size->Y = SCREEN_HEIGHT+DEBUG_LINE_COUNT;
+    SetConsoleScreenBufferSize(*screen_buffer_handle, *buffer_size);
     
+    SMALL_RECT *write_rect = (SMALL_RECT*)(memoria + offset);
+    offset += sizeof(SMALL_RECT);
+
     // dimensoes da janela em caracteres
-    SMALL_RECT write_rect = { 0, 0, SCREEN_WIDTH-1, SCREEN_HEIGHT+DEBUG_LINE_COUNT-1 };
-    SetConsoleWindowInfo(screen_buffer_handle, TRUE, &write_rect);
+    write_rect->Left = 0;
+    write_rect->Top = 0;
+    write_rect->Right = SCREEN_WIDTH-1;
+    write_rect->Bottom = SCREEN_HEIGHT+DEBUG_LINE_COUNT-1;
+    SetConsoleWindowInfo(*screen_buffer_handle, TRUE, write_rect);
     
+    CONSOLE_CURSOR_INFO *cursor_info = (CONSOLE_CURSOR_INFO *)(memoria + offset);
+    offset += sizeof(CONSOLE_CURSOR_INFO);
+
     // ocultando cursor
-    CONSOLE_CURSOR_INFO cursor_info;
-    GetConsoleCursorInfo(screen_buffer_handle, &cursor_info);
-    cursor_info.bVisible = 0;
-    SetConsoleCursorInfo(screen_buffer_handle, &cursor_info);
+    GetConsoleCursorInfo(*screen_buffer_handle, cursor_info);
+    cursor_info->bVisible = 0;
+    SetConsoleCursorInfo(*screen_buffer_handle, cursor_info);
     
     // setando buffer criado como ativo no console
-    SetConsoleActiveScreenBuffer(screen_buffer_handle);
+    SetConsoleActiveScreenBuffer(*screen_buffer_handle);
 
     // buffer p/ uso do renderizador
-    CHAR_INFO *buffer = (CHAR_INFO *)calloc((SCREEN_WIDTH*(SCREEN_HEIGHT+DEBUG_LINE_COUNT)), sizeof(CHAR_INFO));
+    CHAR_INFO *buffer = (CHAR_INFO *)(memoria + offset);
+    offset += buffer_size_;
+
     // limpando debug line
     for (u32 i = (SCREEN_WIDTH*SCREEN_HEIGHT)-1; i < (SCREEN_WIDTH*SCREEN_HEIGHT)-1+SCREEN_WIDTH; ++i)
     {
@@ -135,15 +162,16 @@ void main ()
     i64 frame_start = GetTime();
     r32 dt = 0.0f;
 
-    GameState game_state = {};
+    GameState *game_state = (GameState*)(memoria + offset);
+    offset += sizeof(GameState);
     
     while(!IS_KEY_DOWN(VK_ESCAPE))
     {
 
-        GameUpdateAndRender(&game_state, buffer,dt);
+        GameUpdateAndRender(game_state, buffer,dt);
 
         COORD buffer_coord = {0,0};
-        PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, write_rect);
+        PrintarBitMap(*screen_buffer_handle, buffer, *buffer_size, buffer_coord, *write_rect);
 
         // contando frames, ms_for_frame = final do frame - inicio do frame
         ++frame_count;
@@ -172,7 +200,7 @@ void main ()
             // escrevendo fps na linha de debug
             char str[20];
             // escrever frame_count em str
-            wsprintf(str, "%d FPS %d:MORTES", frame_count, game_state.dead_count);
+            wsprintf(str, "%d FPS %d:MORTES", frame_count, game_state->dead_count);
             // copiar str p/ linha de debug no buffer
             for (u32 i = 0; i < 20; ++i)
                 buffer[(SCREEN_WIDTH*SCREEN_HEIGHT)+i].Char.UnicodeChar = str[i];
@@ -184,8 +212,6 @@ void main ()
 
         frame_start = frame_end;
     }
-
-    free(buffer);
 }
 
 #include "psychosnake.cpp"
