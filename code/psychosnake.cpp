@@ -121,7 +121,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 		bool right = IS_KEY_DOWN(VK_RIGHT);
 		bool space = IS_KEY_DOWN(VK_SPACE);
 
-    	r32 player_speed = 10.0f;
+    	r32 player_speed = 1.0f;
 
 		if(right)
 			npx += dt*player_speed;
