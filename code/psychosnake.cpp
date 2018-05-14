@@ -80,9 +80,16 @@ GetWall (u32 *map, u8 *wall_set, u32 x, u32 y)
 	return res;
 }
 
+
+
+
+
 internal void 
 GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 {
+	r32 nvx = game_state->velocidade_x;
+	r32 nvy = game_state->velocidade_y;
+
 	if(!game_state->initialized)
 	{
 		for (i32 i = 0; i < 3; ++i)
@@ -96,8 +103,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 		game_state->initialized = true;
 	}
 
-	r32 npx = game_state->posicao_x[0];
-	r32 npy = game_state->posicao_y[0];
+
 
 	LimparTela(buffer, ' ', RGBColor(1,1,1,0, 0,0,0,0)/*(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE)*/);
 
@@ -122,15 +128,34 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 		bool space = IS_KEY_DOWN(VK_SPACE);
 
     	r32 player_speed = 10.0f;
+    	r32 npx = game_state->posicao_x[0];
+		r32 npy = game_state->posicao_y[0];
+
 
 		if(right)
-			npx += dt*player_speed;
-		if(down)
-			npy += dt*player_speed;
+		{
+			nvx = 1.0;
+			nvy = 0.0;
+		}
 		if(left)
-			npx -= dt*player_speed;
+		{
+			nvx = -1.0;
+			nvy = 0.0;
+		}
 		if(up)
-			npy -= dt*player_speed;
+		{
+			nvx = 0.0;
+			nvy = -1.0;
+		}
+		if(down)
+		{
+			nvx = 0.0;
+			nvy = 1.0;
+		}
+
+		
+		npx += dt*nvx*player_speed;
+		npy += dt*nvy*player_speed; 
 
 		if(npx < 0.0f)
 			npx += SCREEN_WIDTH;

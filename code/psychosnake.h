@@ -93,6 +93,8 @@ struct GameState
     r32 posicao_x[3];
     r32 posicao_y[3];
     i32 dead_count;
+    r32 velocidade_x;
+    r32 velocidade_y;
 };
 
 internal void GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt);
