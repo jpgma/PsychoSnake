@@ -153,9 +153,13 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 			nvy = 1.0;
 		}
 
-		
-		npx += dt*nvx*player_speed;
-		npy += dt*nvy*player_speed; 
+		if((nvx!=0.0f)||(nvy!=0.0f))
+		{
+			game_state->velocidade_x = nvx;
+			game_state->velocidade_y = nvy;
+		}
+		npx += dt*game_state->velocidade_x*player_speed;
+		npy += dt*game_state->velocidade_y*player_speed; 
 
 		if(npx < 0.0f)
 			npx += SCREEN_WIDTH;
