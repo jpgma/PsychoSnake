@@ -117,4 +117,4 @@ struct GameState
     r32 velocidade_y;
 };
 
-internal void GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt, i32 SHUFFLE_X, i32 SHUFFLE_Y);
+internal void GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt);

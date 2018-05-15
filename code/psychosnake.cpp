@@ -86,9 +86,10 @@ GetWall (u32 *map, u8 *wall_set, u32 x, u32 y)
 
 
 internal void 
-GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt, i32 SHUFFLE_X, i32 SHUFFLE_Y)
+GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 {
-	
+	i32 var_Local_X = 0;
+	i32 var_Local_Y = 0;
 	r32 nvx = game_state->velocidade_x;
 	r32 nvy = game_state->velocidade_y;
 
@@ -213,43 +214,28 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt, i32 SHUFF
 			buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;	
 		}	
 
+		i32 SHUFFLE_X, SHUFFLE_Y;
 
 		if(IsOccupied(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0]))
 		{
 			SetMapBlock(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0],0);
-			for(i32 i = 0; i<SCREEN_WIDTH; i++)
-			{
-				if(!IsOccupied(wall_map, SHUFFLE_X, SHUFFLE_Y))
-				{
-					SetMapBlock(food_map, SHUFFLE_X, SHUFFLE_Y, 1);
-					break;
-				}
-				else if(!IsOccupied(wall_map,SHUFFLE_X+i,SHUFFLE_Y))
-				{
-					SetMapBlock(food_map, SHUFFLE_X+i,SHUFFLE_Y,1);
-					break;
-				}
-				else if(!IsOccupied(wall_map,SHUFFLE_X,SHUFFLE_Y+i))
-				{
-					SetMapBlock(food_map, SHUFFLE_X,SHUFFLE_Y+i,1);
-					break;
-				}
-				else if(!IsOccupied(wall_map,SHUFFLE_X-i,SHUFFLE_Y))
-				{
-					SetMapBlock(food_map, SHUFFLE_X-i,SHUFFLE_Y,1);
-					break;
-				}
-				else if(!IsOccupied(wall_map,SHUFFLE_X,SHUFFLE_Y-i))
-				{
-					SetMapBlock(food_map, SHUFFLE_X,SHUFFLE_Y-i,1);
-					break;
-				}
 
-			}
+		do
+		{
+			SHUFFLE_X = rand()%SCREEN_WIDTH;
+			SHUFFLE_Y = rand()%(SCREEN_HEIGHT-1);
+
+
+		}while(IsOccupied(wall_map, SHUFFLE_X, SHUFFLE_Y));
+
+		SetMapBlock(food_map, SHUFFLE_X,SHUFFLE_Y,1);
+
 		}
 
 
 	}
+
+
 	//desenhando food_map
 	for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
 	{

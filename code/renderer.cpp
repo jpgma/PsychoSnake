@@ -144,10 +144,8 @@ void main ()
 
     while(!IS_KEY_DOWN(VK_ESCAPE))
     {
-        i32 SHUFFLE_X = rand()%(SCREEN_WIDTH);
-        i32 SHUFFLE_Y = rand()%(SCREEN_HEIGHT-1);
 
-        GameUpdateAndRender(&game_state, buffer,dt, SHUFFLE_X, SHUFFLE_Y);
+        GameUpdateAndRender(&game_state, buffer,dt);
 
         COORD buffer_coord = {0,0};
         PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, write_rect);
