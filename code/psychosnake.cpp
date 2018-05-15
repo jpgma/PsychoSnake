@@ -88,18 +88,12 @@ GetWall (u32 *map, u8 *wall_set, u32 x, u32 y)
 internal void 
 GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 {
-	i32 var_Local_X = 0;
-	i32 var_Local_Y = 0;
-	r32 nvx = game_state->velocidade_x;
-	r32 nvy = game_state->velocidade_y;
+
 
 	if(!game_state->initialized)
 	{
-		for (i32 i = 0; i < 3; ++i)
-		{
-			game_state->posicao_x[i] = SCREEN_WIDTH/2.0f;
-			game_state->posicao_y[i] = SCREEN_HEIGHT/2.0f;
-		}
+		game_state->posicao_x[game_state->gomos] = SCREEN_WIDTH/2.0f;
+		game_state->posicao_y[game_state->gomos] = SCREEN_HEIGHT/2.0f;
 
 		game_state->dead_count = 0;
 
@@ -133,7 +127,11 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
     	r32 player_speed = 10.0f;
     	r32 npx = game_state->posicao_x[0];
 		r32 npy = game_state->posicao_y[0];
-
+		i32 var_Local_X = 0;
+		i32 var_Local_Y = 0;
+		r32 nvx = game_state->velocidade_x;
+		r32 nvy = game_state->velocidade_y;
+	
 
 		if(right)
 		{
@@ -182,7 +180,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 
 			if(((u32)game_state->posicao_x[0]!=(u32)npx)||((u32)game_state->posicao_y[0]!=(u32)npy))
 			{
-				for(i32 i=2; i>0; i--)
+				for(i32 i=game_state->gomos; i>0; i--)
 				{
 					game_state->posicao_x[i] = game_state->posicao_x[i-1];
 					game_state->posicao_y[i] = game_state->posicao_y[i-1];
@@ -195,20 +193,18 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 		}
 		else
 		{
-			for(int i=0; i<3; ++i)
-			{
-				game_state->posicao_x[i] = ((SCREEN_WIDTH)/2);
-				game_state->posicao_y[i] = ((SCREEN_HEIGHT)/2);
-				game_state->velocidade_x = 0.0;
-				game_state->velocidade_y = 0.0;
-			}
+			game_state->velocidade_x = 0.0;
+			game_state->velocidade_y = 0.0;
+			game_state->gomos=0;
+			game_state->posicao_x[game_state->gomos] = ((SCREEN_WIDTH)/2);
+			game_state->posicao_y[game_state->gomos] = ((SCREEN_HEIGHT)/2);
 
 			game_state->dead_count += 1;
 		}
 
 
 		char player_char = '0';
-		for(i32 i=2; i>=0; --i)
+		for(i32 i=game_state->gomos; i>=0; --i)
 		{
 			buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Char.UnicodeChar = player_char;
 			buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Attributes = FOREGROUND_RED;	
@@ -219,6 +215,8 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 		if(IsOccupied(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0]))
 		{
 			SetMapBlock(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0],0);
+
+			game_state->gomos++;
 
 		do
 		{

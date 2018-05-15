@@ -105,16 +105,17 @@ global u32 food_map[] =
     0b00000000000000000000000000000000,
     0b00000000000000000000000000000000,
 };
-
+#define MAX_SNAKE_LENGTH 100
 struct GameState
 {
     b32 initialized;
 
-    r32 posicao_x[3];
-    r32 posicao_y[3];
+    r32 posicao_x[MAX_SNAKE_LENGTH];
+    r32 posicao_y[MAX_SNAKE_LENGTH];
     i32 dead_count;
     r32 velocidade_x;
     r32 velocidade_y;
+    i32 gomos=0;
 };
 
 internal void GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt);

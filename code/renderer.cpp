@@ -191,6 +191,7 @@ void main ()
     }
 
     free(buffer);
+
 }
 
 #include "psychosnake.cpp"
