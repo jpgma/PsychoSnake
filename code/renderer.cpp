@@ -3,6 +3,7 @@
 #include <malloc.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 
 typedef uint64_t u64;
 typedef uint32_t u32;
@@ -78,6 +79,10 @@ GetTimeElapsed (i64 a, i64 b, i64 perf_frequency)
 
 void main ()
 {
+    srand(time(NULL));
+
+    
+
     // criando buffer interno do console
     HANDLE screen_buffer_handle = CreateConsoleScreenBuffer( GENERIC_READ | GENERIC_WRITE,  
                                                              FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -136,11 +141,13 @@ void main ()
     r32 dt = 0.0f;
 
     GameState game_state = {};
-    
+
     while(!IS_KEY_DOWN(VK_ESCAPE))
     {
+        i32 SHUFFLE_X = rand()%(SCREEN_WIDTH);
+        i32 SHUFFLE_Y = rand()%(SCREEN_HEIGHT-1);
 
-        GameUpdateAndRender(&game_state, buffer,dt);
+        GameUpdateAndRender(&game_state, buffer,dt, SHUFFLE_X, SHUFFLE_Y);
 
         COORD buffer_coord = {0,0};
         PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, write_rect);
