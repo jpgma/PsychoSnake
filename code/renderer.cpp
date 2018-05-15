@@ -82,6 +82,7 @@ void main ()
     srand(time(NULL));
 
     
+    
 
     // criando buffer interno do console
     HANDLE screen_buffer_handle = CreateConsoleScreenBuffer( GENERIC_READ | GENERIC_WRITE,  
@@ -177,7 +178,7 @@ void main ()
             // escrevendo fps na linha de debug
             char str[20];
             // escrever frame_count em str
-            wsprintf(str, "%d FPS %d:MORTES", frame_count, game_state.dead_count);
+            wsprintf(str, "%d FPS %d:MORTES %d:", frame_count, game_state.dead_count,game_state.gomos);
             // copiar str p/ linha de debug no buffer
             for (u32 i = 0; i < 20; ++i)
                 buffer[(SCREEN_WIDTH*SCREEN_HEIGHT)+i].Char.UnicodeChar = str[i];
