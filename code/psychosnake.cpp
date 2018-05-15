@@ -217,12 +217,37 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt, i32 SHUFF
 		if(IsOccupied(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0]))
 		{
 			SetMapBlock(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0],0);
-			
-			if(!IsOccupied(wall_map, SHUFFLE_X, SHUFFLE_Y))
+			for(i32 i = 0; i<SCREEN_WIDTH; i++)
 			{
-				SetMapBlock(food_map, SHUFFLE_X, SHUFFLE_Y, 1);
+				if(!IsOccupied(wall_map, SHUFFLE_X, SHUFFLE_Y))
+				{
+					SetMapBlock(food_map, SHUFFLE_X, SHUFFLE_Y, 1);
+					break;
+				}
+				else if(!IsOccupied(wall_map,SHUFFLE_X+i,SHUFFLE_Y))
+				{
+					SetMapBlock(food_map, SHUFFLE_X+i,SHUFFLE_Y,1);
+					break;
+				}
+				else if(!IsOccupied(wall_map,SHUFFLE_X,SHUFFLE_Y+i))
+				{
+					SetMapBlock(food_map, SHUFFLE_X,SHUFFLE_Y+i,1);
+					break;
+				}
+				else if(!IsOccupied(wall_map,SHUFFLE_X-i,SHUFFLE_Y))
+				{
+					SetMapBlock(food_map, SHUFFLE_X-i,SHUFFLE_Y,1);
+					break;
+				}
+				else if(!IsOccupied(wall_map,SHUFFLE_X,SHUFFLE_Y-i))
+				{
+					SetMapBlock(food_map, SHUFFLE_X,SHUFFLE_Y-i,1);
+					break;
+				}
+
 			}
 		}
+
 
 	}
 	//desenhando food_map
