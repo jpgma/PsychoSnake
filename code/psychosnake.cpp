@@ -111,7 +111,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         {
             if(IsOccupied(wall_map,x,y))
             {
-                buffer[x+(y*SCREEN_WIDTH)].Char.UnicodeChar = GetWall(wall_map, thin_walls, x,y);
+                buffer[x+(y*SCREEN_WIDTH)].Char.UnicodeChar = GetWall(wall_map, weird_walls, x,y);
                 buffer[x+(y*SCREEN_WIDTH)].Attributes = RGBColor(1,1,1,1, 0,0,0,0);
             }
         }
@@ -133,7 +133,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         r32 npy = game_state->posicao_y[0];
         i32 var_Local_X = 0;
         i32 var_Local_Y = 0;
-        r32 nvx = game_state->velocidade_x;
+         r32 nvx = game_state->velocidade_x;
         r32 nvy = game_state->velocidade_y;
     
 
@@ -199,7 +199,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         {
 
             FILE *scores;
-            scores = fopen("C:\\Users\\Guilherme\\Desktop\\Rendererr\\build\\scores.txt", "a");
+            scores = fopen("scores.txt", "a");
             fprintf(scores, "Score:%d\n", game_state->gomos);
             fclose(scores); 
             game_state->velocidade_x = 0.0;
@@ -212,12 +212,13 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         }
 
         
-        char player_char = 254;
+        const char player_char[] = {(char)219,(char)178,(char)177,(char)176};
         for(i32 i=game_state->gomos; i>=0; --i)
         {
-            buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Char.UnicodeChar = player_char;
-            buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Attributes = FOREGROUND_RED; 
-            buffer[(u32)game_state->posicao_x[0]+((u32)game_state->posicao_y[0]*SCREEN_WIDTH)].Attributes = FOREGROUND_GREEN; 
+            u32 dist_index = (u32)((r32)i * (4.0f/game_state->gomos));
+            buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Char.UnicodeChar = player_char[dist_index];
+            buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Attributes = FOREGROUND_GREEN; 
+            buffer[(u32)game_state->posicao_x[0]+((u32)game_state->posicao_y[0]*SCREEN_WIDTH)].Attributes = FOREGROUND_GREEN|FOREGROUND_INTENSITY; 
         }   
 
         i32 SHUFFLE_X, SHUFFLE_Y;

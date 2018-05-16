@@ -66,6 +66,12 @@ global u8 thick_walls[] =
     204, 206, 187, 201, 203, 205,
 };
 
+global u8 weird_walls[] = 
+{
+    'a', 'b', 'c', 'd', 'e', 'f', 
+    'l', 'k', 'j', 'i', 'h', 'g',
+};
+
 global u32 wall_map[] = 
 {
     0b11111111111111101111111111111111,
