@@ -123,6 +123,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         bool left = IS_KEY_DOWN(VK_LEFT);
         bool right = IS_KEY_DOWN(VK_RIGHT);
         bool space = IS_KEY_DOWN(VK_SPACE);
+        bool pause = IS_KEY_DOWN(0x50);
 
         r32 player_speed = 10.0f;
         if(game_state->gomos >= 10)
@@ -133,9 +134,8 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         r32 npy = game_state->posicao_y[0];
         i32 var_Local_X = 0;
         i32 var_Local_Y = 0;
-         r32 nvx = game_state->velocidade_x;
+        r32 nvx = game_state->velocidade_x;
         r32 nvy = game_state->velocidade_y;
-    
 
         if(right)
         {
@@ -179,6 +179,8 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         else if(npy > SCREEN_HEIGHT)
             npy -= SCREEN_HEIGHT;
 
+
+        //MOVIMENTO DA SNAKE(GOMO BY GOMO)
         if(!IsOccupied(wall_map,(u32)npx,(u32)npy))
         {
 
@@ -202,6 +204,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
             scores = fopen("scores.txt", "a");
             fprintf(scores, "Score:%d\n", game_state->gomos);
             fclose(scores); 
+
             game_state->velocidade_x = 0.0;
             game_state->velocidade_y = 0.0;
             game_state->gomos=0;
@@ -211,18 +214,47 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
             game_state->dead_count += 1;
         }
 
-        
+        //COLISÃO ENTRE O COPOR DA SNAKE
+        for(u32 i =1; i< game_state->gomos; i++)
+        {
+            if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
+                (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[i])))
+            {
+                game_state->velocidade_x = 0.0;
+                game_state->velocidade_y = 0.0;
+                game_state->gomos=0;
+                game_state->posicao_x[game_state->gomos] = ((SCREEN_WIDTH)/2);
+                game_state->posicao_y[game_state->gomos] = ((SCREEN_HEIGHT)/2);
+
+            }
+        }
+  
         const char player_char[] = {(char)219,(char)178,(char)177,(char)176};
         for(i32 i=game_state->gomos; i>=0; --i)
         {
             u32 dist_index = (u32)((r32)i * (4.0f/(game_state->gomos+1)));
             buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Char.UnicodeChar = player_char[dist_index];
-            buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Attributes = FOREGROUND_GREEN; 
-            buffer[(u32)game_state->posicao_x[0]+((u32)game_state->posicao_y[0]*SCREEN_WIDTH)].Attributes = FOREGROUND_GREEN|FOREGROUND_INTENSITY; 
+            
+            u16 color = RGBColor(0,1,0,0, 0,0,0,0);
+            if(i==0)
+            {
+                for(u32 j = 1; j<game_state->gomos; j++)
+                {
+                    if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[j]))&&
+                    (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[j])))
+                    {
+                        color = RGBColor(1,0,0,0, 0,0,0,0);
+                    }
+                }
+            }
+
+            buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Attributes = color;
+        
         }   
 
         i32 SHUFFLE_X, SHUFFLE_Y;
 
+        //SETANDO COMINDA RANDOM 
         if(IsOccupied(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0]))
         {
             SetMapBlock(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0],0);
@@ -230,17 +262,24 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
             game_state->gomos++;
             game_state->posicao_x[game_state->gomos] = game_state->posicao_x[game_state->gomos-1];
             game_state->posicao_y[game_state->gomos] = game_state->posicao_y[game_state->gomos-1];
-
             do
             {
                 SHUFFLE_X = rand()%SCREEN_WIDTH;
                 SHUFFLE_Y = rand()%(SCREEN_HEIGHT-1);
+                //COLISÃO COMIDA / CORPO SNAKE
+                for(u32 j=1; j<game_state->gomos; j++)
+                {
+                    if((SHUFFLE_X==game_state->posicao_x[j])&&(SHUFFLE_Y)==game_state->posicao_y[j])
+                    {
+                        SHUFFLE_X = rand()%SCREEN_WIDTH;
+                        SHUFFLE_Y = rand()%(SCREEN_HEIGHT-1);
+                    }    
+                }
+                
             }while(IsOccupied(wall_map, SHUFFLE_X, SHUFFLE_Y));
 
             SetMapBlock(food_map, SHUFFLE_X,SHUFFLE_Y,1);
         }
-
-
     }
 
 

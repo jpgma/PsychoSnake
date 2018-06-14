@@ -181,7 +181,11 @@ void main ()
             wsprintf(str, "%d FPS %d:MORTES %d:", frame_count, game_state.dead_count,game_state.gomos);
             // copiar str p/ linha de debug no buffer
             for (u32 i = 0; i < 20; ++i)
+            {
                 buffer[(SCREEN_WIDTH*SCREEN_HEIGHT)+i].Char.UnicodeChar = str[i];
+                buffer[(SCREEN_WIDTH*SCREEN_HEIGHT)+i].Attributes = FOREGROUND_BLUE|FOREGROUND_INTENSITY;
+            }
+
 
 
             ms_since_last_s = 0.0;
