@@ -219,8 +219,7 @@ void main ()
     }
 
     // Iniciando DirectSound
-    // buffer interno do DirectSound
-    LPDIRECTSOUNDBUFFER directsound_buffer = {};
+    LPDIRECTSOUNDBUFFER directsound_buffer = {}; // buffer interno do DirectSound
     u32 nchannels = 2; // dois channels de audio, esquerda e direita
     u32 samples_per_sec = 48000; // samples de audio por segundo
     u32 buffer_size_bytes = samples_per_sec*nchannels*sizeof(i16); // tamanho em bytes do buffer de audio 
