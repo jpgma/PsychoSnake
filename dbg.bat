@@ -1,3 +1,3 @@
 @echo off
 
-devenv "build\renderer.exe"
+devenv "build\psychosnake.exe"

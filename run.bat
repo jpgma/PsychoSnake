@@ -1,5 +1,5 @@
 @echo off
 
 REM cd data
-call build\renderer.exe
+call build\psychosnake.exe
 REM cd ..\
