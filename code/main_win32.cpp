@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <dsound.h>
+#include <math.h>
 
 ///////////////////////
 // Definicoes basicas
@@ -23,6 +24,8 @@ typedef u32 b32;
 #define internal static;
 #define global static;
 #define assert(x) {if(!(x)) *((int*)0) = 0;}
+
+#define PI (3.1415927)
 
 ///////////////////////
 // CMD Renderer
@@ -76,17 +79,18 @@ typedef HRESULT WINAPI DIRECTSOUNDCREATE(LPGUID,LPDIRECTSOUND*,LPUNKNOWN);
 DIRECTSOUNDCREATE *DirectSoundCreate_;
 
 internal b32
-InitDirectSound (LPDIRECTSOUNDBUFFER *directsound_buffer, HWND window, u32 nchannels, u32 samples_per_sec, u32 buffer_size_bytes)
+InitDirectSound (LPDIRECTSOUNDBUFFER *ds_buffer, HWND window, u32 nchannels, u32 samples_per_sec, u32 buffer_size_bytes)
 {
     b32 res = false;
 
-    // Carregando dll 
+    // carregando dll 
     HMODULE dsound_library = LoadLibraryA("dsound.dll");
     if(dsound_library)
     {
-        // Obtendo a funcao do dll
+        // obtendo a funcao do dll
         DirectSoundCreate_ = (DIRECTSOUNDCREATE*) GetProcAddress(dsound_library, "DirectSoundCreate");
 
+        // obtendo objeto do DirectSound
         LPDIRECTSOUND DirectSound;
         if(DirectSoundCreate_ && SUCCEEDED(DirectSoundCreate_(0, &DirectSound, 0)))
         {
@@ -111,7 +115,7 @@ InitDirectSound (LPDIRECTSOUNDBUFFER *directsound_buffer, HWND window, u32 nchan
                         bufferdesc.dwFlags = 0;
                         bufferdesc.lpwfxFormat = &waveformatex;
                         bufferdesc.dwBufferBytes = buffer_size_bytes;
-                        if(SUCCEEDED(DirectSound->CreateSoundBuffer(&bufferdesc, directsound_buffer, 0)))
+                        if(SUCCEEDED(DirectSound->CreateSoundBuffer(&bufferdesc, ds_buffer, 0)))
                         {
                             res = true;
                         }
@@ -147,6 +151,60 @@ InitDirectSound (LPDIRECTSOUNDBUFFER *directsound_buffer, HWND window, u32 nchan
     }
 
     return res;
+}
+
+internal void
+DirectSoundWriteToBuffer (LPDIRECTSOUNDBUFFER ds_buffer, u32 ds_buffer_size, u32 *ds_current_sample, i16 *internal_buffer, u32 samples_to_write, u32 samples_per_sec)
+{
+    // TODO: passar infos do buffer
+    u32 ds_sample_index = *ds_current_sample;
+    u32 ds_buffer_bytes_per_sample = 2*sizeof(i16);
+    DWORD byte_to_lock = (ds_sample_index*ds_buffer_bytes_per_sample)%ds_buffer_size;
+    DWORD bytes_to_write = samples_to_write*ds_buffer_bytes_per_sample;
+
+    VOID *region_1 = 0;
+    DWORD region_1_size = 0;
+    VOID *region_2 = 0;
+    DWORD region_2_size = 0;
+    if(SUCCEEDED(ds_buffer->Lock(byte_to_lock, bytes_to_write,
+                                 &region_1, &region_1_size,
+                                 &region_2, &region_2_size,
+                                 0)))
+    {
+        // i16 *src_sample = sound_state->samples;
+
+        r32 hz = 261.83f;
+        i16 volume = 10000;
+
+        i16 *dest_sample = (i16*)region_1;
+        u32 region_1_count = (region_1_size/ds_buffer_bytes_per_sample);
+        for (i32 sample_index = 0; 
+             sample_index < region_1_count; 
+             ++sample_index)
+        {
+            r32 t = (2.0f*PI*(r32)ds_sample_index++) / (r32)(samples_per_sec/hz);
+            i16 sample_value = (i16) (sinf(t)*volume);
+
+            *(dest_sample++) = sample_value;//*(src_sample++);
+            *(dest_sample++) = sample_value;//*(src_sample++);
+        }
+        dest_sample = (i16*)region_2;
+        u32 region_2_count = (region_2_size/ds_buffer_bytes_per_sample);
+        for (i32 sample_index = 0; 
+             sample_index < region_2_count; 
+             ++sample_index)
+        {
+            r32 t = (2.0f*PI*(r32)ds_sample_index++) / (r32)(samples_per_sec/hz);
+            i16 sample_value = (i16) (sinf(t)*volume);
+
+            *(dest_sample++) = sample_value;//*(src_sample++);
+            *(dest_sample++) = sample_value;//*(src_sample++);
+        }
+        
+        *ds_current_sample += region_1_count + region_2_count;
+
+        ds_buffer->Unlock(region_1,region_1_size, region_2,region_2_size);
+    }
 }
 
 ///////////////////////
@@ -219,13 +277,16 @@ void main ()
     }
 
     // Iniciando DirectSound
-    LPDIRECTSOUNDBUFFER directsound_buffer = {}; // buffer interno do DirectSound
     u32 nchannels = 2; // dois channels de audio, esquerda e direita
     u32 samples_per_sec = 48000; // samples de audio por segundo
     u32 buffer_size_bytes = samples_per_sec*nchannels*sizeof(i16); // tamanho em bytes do buffer de audio 
-    if(InitDirectSound(&directsound_buffer, window, nchannels, samples_per_sec, buffer_size_bytes))
-    {
-        // direct sound inicializado!
+    u32 ds_current_sample = 0; // sample atual no buffer do DS
+    LPDIRECTSOUNDBUFFER ds_buffer; // buffer interno do DS
+    if(InitDirectSound(&ds_buffer, window, nchannels, samples_per_sec, buffer_size_bytes))
+    { // DS inicializado!
+        DirectSoundWriteToBuffer(ds_buffer, buffer_size_bytes, &ds_current_sample, 
+                                 0, samples_per_sec, samples_per_sec);
+        ds_buffer->Play(0, 0, DSBPLAY_LOOPING);
     }
 
     CHAR_INFO player_char = {};
@@ -251,6 +312,10 @@ void main ()
 
         COORD buffer_coord = {0,0};
         PrintarBitMap(screen_buffer_handle, buffer, buffer_size, buffer_coord, write_rect);
+
+        // output do som
+        DirectSoundWriteToBuffer(ds_buffer, buffer_size_bytes, &ds_current_sample, 
+                                 0, (samples_per_sec*dt), samples_per_sec);
 
         // contando frames, ms_for_frame = final do frame - inicio do frame
         ++frame_count;

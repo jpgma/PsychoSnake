@@ -13,3 +13,7 @@ build/renderer.pdb
 build/renderer.obj
 build/renderer.ilk
 build/.vs/renderer/v15/.suo
+build/psychosnake.pdb
+build/psychosnake.obj
+build/psychosnake.ilk
+build/psychosnake.exe
