@@ -173,7 +173,7 @@ DirectSoundWriteToBuffer (LPDIRECTSOUNDBUFFER ds_buffer, u32 ds_buffer_size, u32
     {
         // i16 *src_sample = sound_state->samples;
 
-        r32 hz = 261.83f;
+        r32 hz = 73.42f;
         i16 volume = 10000;
 
         i16 *dest_sample = (i16*)region_1;

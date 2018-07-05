@@ -17,3 +17,11 @@ build/psychosnake.pdb
 build/psychosnake.obj
 build/psychosnake.ilk
 build/psychosnake.exe
+tools/vc140.pdb
+tools/log.txt
+tools/genbmpfont.pdb
+tools/genbmpfont.obj
+tools/genbmpfont.ilk
+tools/genbmpfont.exe
+tools/.vs/genbmpfont/v15/Browse.VC.opendb
+tools/.vs/genbmpfont/v15/Browse.VC.db
