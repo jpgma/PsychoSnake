@@ -108,7 +108,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         {
             if(IsOccupied(wall_map,x,y))
             {
-                SetChar(&renderer->buffer, x, y, 219, WALL_COLOR, BACKGROUND_COLOR);
+                SetChar(&renderer->buffer, x, y, GetWall(wall_map, thick_walls, x,y), WALL_COLOR, BACKGROUND_COLOR);
             }
         }
     }
@@ -121,7 +121,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         bool space = IS_KEY_DOWN(VK_SPACE);
         bool pause = IS_KEY_DOWN(0x50);
 
-        r32 player_speed = 13.0f;
+        r32 player_speed = 10.0f;
         // if(game_state->gomos >= 10)
         // {
         //     player_speed = 15.0f;
@@ -224,9 +224,10 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         // }
   
         const u32 player_char[] = {0x2588,0x2593,0x2592,0x2591};
+        const r32 player_char_count = (r32)(sizeof(player_char)/sizeof(u32));
         for(s32 i=game_state->gomos; i>=0; --i)
         {
-            u32 dist_index = (u32)((r32)i * (4.0f/(game_state->gomos+1)));
+            u32 dist_index = (u32)((r32)i * (player_char_count/(game_state->gomos+1)));
             u32 gomo_index = (u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH);
             u32 codepoint = player_char[dist_index];
             
@@ -272,14 +273,19 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
     }
 
 
-    //desenhando food_map
+    //desenhando food_map com animacao
+    const u32 food_char[] = {0x25AA, 0x25FE, 0x25A0, 0x25A0, 0x25A0, 0x25A0,
+                             0x1F793, 0x1F792, 0x1F791, 0x1F790, 0x1F791, 0x1F792, 0x1F793, 0x25A0, 0x25FE};
+    const u32 food_char_count = sizeof(food_char)/sizeof(u32);
+    game_state->food_char_index =  game_state->food_char_index+((food_char_count)*dt);
+    if(game_state->food_char_index > food_char_count) game_state->food_char_index = 0.0f;
     for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
     {
         for (u32 x = 0; x < SCREEN_WIDTH; ++x)
         {
             if(IsOccupied(food_map,x,y))
             {
-                SetChar(&renderer->buffer, x, y, 0x1F78D, FOOD_COLOR, BACKGROUND_COLOR);
+                SetChar(&renderer->buffer, x, y, food_char[(u32)game_state->food_char_index], FOOD_COLOR, BACKGROUND_COLOR);
             }
         }
     }

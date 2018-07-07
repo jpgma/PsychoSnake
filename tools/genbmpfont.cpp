@@ -120,6 +120,16 @@ int main(int argc, char *argv[])
         u32 w = header->glyph_count_x * header->glyph_width;
         u32 h = header->glyph_count_y * header->glyph_height;
         u8 *pixel_data = PIXEL_DATA(header);
+
+        u32 codepoint = 'J';
+        u32 glyph_offset = GetGlyphOffset(header, codepoint);
+        for (s32 j=0; j < header->glyph_height; ++j) 
+        {
+          for (s32 i=0; i < header->glyph_width; ++i)
+             putchar(" .:ioVM@"[pixel_data[glyph_offset + j*w+i]>>5]);
+          putchar('\n');
+        }
+
         for (s32 j=0; j < h; ++j) 
         {
           for (s32 i=0; i < w; ++i)

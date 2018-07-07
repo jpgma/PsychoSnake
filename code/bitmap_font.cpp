@@ -112,6 +112,32 @@ struct BitmapFontHeader
 
 #pragma pack(pop)
 
+internal u32 
+GetGlyphOffset (BitmapFontHeader *font, u32 codepoint)
+{
+    u32 res = 0;
+    if(font)
+    {
+        u32 index = 0;
+        u32 *cp_segment_ends = CP_SEGMENT_ENDS(font);
+        u32 *cp_segment_starts = CP_SEGMENT_STARTS(font);
+        s32 *cp_segment_deltas = CP_SEGMENT_DELTAS(font);
+        for (u32 i = 0; i < font->cp_segment_count; ++i)
+        {
+            if((cp_segment_ends[i] >= codepoint) &&
+                (cp_segment_starts[i] <= codepoint))
+            {
+                index = codepoint + cp_segment_deltas[i];
+                break;
+            }
+        }
+        u32 x = (index%font->glyph_count_x);
+        u32 y = (index/font->glyph_count_x);
+        res = (x*font->glyph_width) + (y*font->glyph_count_x*font->glyph_width*font->glyph_height);
+    }
+    return res;
+}
+
 internal BitmapFontHeader *
 GenerateBitmapFont (const char *filename, 
                     UnicodeBlock *unicode_blocks,
@@ -146,7 +172,7 @@ GenerateBitmapFont (const char *filename,
     u32 glyph_count = 1; // p/ caractere indefinido
     for (u32 i = 0; i < block_count; ++i)
     {
-        glyph_count += (unicode_blocks[i].last - unicode_blocks[i].first);
+        glyph_count += (unicode_blocks[i].last - unicode_blocks[i].first) + 1;
     }
     u32 undefined_codepoints = 0;
     u32 *chars = (u32*)calloc(glyph_count,sizeof(u32));
@@ -275,11 +301,10 @@ GenerateBitmapFont (const char *filename,
             
             r32 scale = stbtt_ScaleForPixelHeight(&font, glyph_height);
             // stbtt_ScaleForMappingEmToPixels(&font, glyph_height);
-            s32 advance, lsb, x0,y0,x1,y1;
+            // s32 advance, lsb, x0,y0,x1,y1;
             s32 gi = stbtt_FindGlyphIndex(&font, chars[g]);
             // stbtt_GetGlyphHMetrics(&font, gi, &advance, &lsb);
             // stbtt_GetGlyphBitmapBox(&font, gi, scale,scale, &x0,&y0,&x1,&y1);
-            
 
             if(chars[g]==0) gi = 0;
             
@@ -287,17 +312,19 @@ GenerateBitmapFont (const char *filename,
             // if(src_pixels) STBTT_free(0,src_pixels);
             // if(chars[g] == 'A')
             //     printf("w:%d h:%d bb:[%d,%d][%d,%d] a:%d lsb:%d\n", w,h, x0,y0,x1,y1, advance,lsb);
-            
+            // src_pixels = stbtt_GetGlyphBitmap(&font, scale,((r32)w/(r32)h)*scale, gi, &w, &h, 0,0);
+            // stbtt_MakeCodepointBitmap(const stbtt_fontinfo *info, unsigned char *output, int out_w, int out_h, int out_stride, float scale_x, float scale_y, int codepoint);
             for (s32 yy = 0; yy < h; ++yy)
             {   
                 for (s32 xx = 0; xx < w; ++xx)
                 {
-                    (pixels)[((x*glyph_width)+xx) + (((y*glyph_height)+yy)*(glyph_width*dim))] = (src_pixels)[xx+(yy*w)];
+                    // movendo glyph pro centro do bitmap
+                    u16 x_off = ((glyph_width-w)*0.5f);
+                    u16 y_off = ((glyph_height-h)*0.5f);
+                    (pixels)[((x*glyph_width)+(xx+x_off)) + (((y*glyph_height)+(yy+y_off))*(glyph_width*dim))] = (src_pixels)[xx+(yy*w)];
                 }
             }
 
-            // src_pixels = stbtt_GetGlyphBitmap(&font, s,((r32)w/(r32)h)*s, gi, &w, &h, 0,0);
-            //stbtt_MakeCodepointBitmap(const stbtt_fontinfo *info, unsigned char *output, int out_w, int out_h, int out_stride, float scale_x, float scale_y, int codepoint);
             // printf("c:%u(%.4x) gi:0x%.4x w:%d h:%d\n", chars[g],chars[g],gi,w,h);
             // for (s32 j=0; j < h; ++j) 
             // {

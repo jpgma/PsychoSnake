@@ -28,7 +28,7 @@ COLOR(u8 r, u8 g, u8 b, u8 a)
 }
 
 #define COLOR_WHITE COLOR(0xffffffff)
-#define COLOR_BLACK COLOR(0x000000ff)
+#define COLOR_BLACK COLOR(0xff000000)
 
 struct Char
 {

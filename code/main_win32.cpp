@@ -34,19 +34,25 @@ U32Swap(u32 n)
     return (n << 16) | (n >> 16);
 }
 
-///////////////////////
-// GDI Renderer
-
 #define SCREEN_WIDTH 32
 #define SCREEN_HEIGHT 16
 #define CHAR_SIZE 32
 #define DEBUG_LINE_COUNT 1
+
+///////////////////////
+// GDI Renderer
+
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 #include "bitmap_font.cpp"
 
 #include "renderer.h"
+
+#define RENDER_MODE_SOLID       1
+#define RENDER_MODE_CODEPOINTS  2
+#define RENDER_MODE_FONT_GLYPHS 3
+global u32 GLOBAL_RENDER_MODE = 2;
 
 internal RenderBuffer 
 AllocRenderBuffer (u16 width, u16 height, u16 debug_lines)
@@ -77,6 +83,7 @@ FreeRenderBuffer (RenderBuffer *buffer)
 }
 
 // TODO: colocar no renderer->api
+global HDC        GLOBAL_WINDOW_HDC;
 global BITMAPINFO GLOBAL_BITMAP_INFO;
 global HWND       GLOBAL_WINDOW_HANDLE;
 global u8 *       GLOBAL_BITMAP_MEMORY;
@@ -86,53 +93,95 @@ global u32        GLOBAL_BITMAP_HEIGHT;
 internal void 
 RenderBufferToScreen (Renderer *renderer)
 {
-    // preenchendo bitmap com charmap
-    u32 dst_pixels_width = renderer->font->glyph_count_x * renderer->font->glyph_width;
-    u32 dst_pixels_height = renderer->font->glyph_count_y * renderer->font->glyph_height;
+    u32 src_pixels_width = renderer->font->glyph_count_x * renderer->font->glyph_width;
+    u32 src_pixels_height = renderer->font->glyph_count_y * renderer->font->glyph_height;
     u8 *src_pixels = PIXEL_DATA(renderer->font);
     u32 *dst_pixels = (u32*)GLOBAL_BITMAP_MEMORY;
     
-    // for (u32 y = 0; y < GLOBAL_BITMAP_HEIGHT; ++y)
-    // {
-    //     for (u32 x = 0; x < GLOBAL_BITMAP_WIDTH; ++x)
-    //     {
-    //         u8 src_value = 0;
-    //         if((x < dst_pixels_width) &&
-    //             (y < dst_pixels_height))
-    //         {
-    //             src_value = src_pixels[x+(y*dst_pixels_width)];
-    //         }
-    //         Color color = COLOR(src_value,src_value,src_value,255);
-    //         dst_pixels[x+(y*GLOBAL_BITMAP_WIDTH)] = color.value;
-    //     }
-    // }
-
-    // for (u32 i = 0; i < (GLOBAL_BITMAP_WIDTH*GLOBAL_BITMAP_HEIGHT); ++i)
-    // {
-    //     u8 src_value = 0;
-    //     if(i < (renderer->font->glyph_count_x*renderer->font->glyph_width) * 
-    //            (renderer->font->glyph_count_y*renderer->font->glyph_height))
-    //     {
-    //         src_value = src_pixels[i];
-    //     }
-    //     Color color = COLOR(src_value,src_value,src_value,255);
-    //     dst_pixels[i] = color.value;
-    // }
-
-    for (u16 y = 0; y < (renderer->buffer.height + renderer->buffer.debug_lines); ++y)
+    // preenchendo bitmap com charmap
+    switch(GLOBAL_RENDER_MODE)
     {
-        for (u16 x = 0; x < renderer->buffer.width; ++x)
+        case RENDER_MODE_SOLID:
         {
-            Color color = renderer->buffer.foreground_colors[x+(y*renderer->buffer.width)];
-            for (s32 yy = 0; yy < renderer->char_size; ++yy)
-            {   
-                for (s32 xx = 0; xx < renderer->char_size; ++xx)
+            for (u16 y = 0; y < (renderer->buffer.height + renderer->buffer.debug_lines); ++y)
+            {
+                for (u16 x = 0; x < renderer->buffer.width; ++x)
                 {
-                    u32 index = ((x*renderer->char_size)+xx) + (((y*renderer->char_size)+yy)*(renderer->char_size*renderer->buffer.width));
-                    dst_pixels[index] = (color.value);
+                    Color color = renderer->buffer.foreground_colors[x+(y*renderer->buffer.width)];
+                    for (s32 yy = 0; yy < renderer->char_size; ++yy)
+                    {   
+                        for (s32 xx = 0; xx < renderer->char_size; ++xx)
+                        {
+                            u32 index = ((x*renderer->char_size)+xx) + (((y*renderer->char_size)+yy)*(renderer->char_size*renderer->buffer.width));
+                            dst_pixels[index] = (color.value);
+                        }
+                    }
                 }
             }
-        }
+        } break;
+
+
+        case RENDER_MODE_CODEPOINTS:
+        {
+            for (u16 y = 0; y < (renderer->buffer.height + renderer->buffer.debug_lines); ++y)
+            {
+                for (u16 x = 0; x < renderer->buffer.width; ++x)
+                {
+                    u32 codepoint = renderer->buffer.codepoints[x+(y*renderer->buffer.width)];
+                    u32 glyph_offset = GetGlyphOffset(renderer->font, codepoint);
+                    Color foreground = renderer->buffer.foreground_colors[x+(y*renderer->buffer.width)];
+                    Color background = renderer->buffer.background_colors[x+(y*renderer->buffer.width)];
+                    for (s32 yy = 0; yy < renderer->char_size; ++yy)
+                    {   
+                        for (s32 xx = 0; xx < renderer->char_size; ++xx)
+                        {
+                            u8 src_value = 0;
+                            u32 src_index = glyph_offset + (xx + (yy*(renderer->font->glyph_width*renderer->font->glyph_count_x)));
+                            u32 dst_index = ((x*renderer->char_size)+xx) + 
+                                             (((y*renderer->char_size)+yy)*(renderer->char_size*renderer->buffer.width));
+                            if(src_index < (src_pixels_width*src_pixels_height))
+                            {
+                                r32 src_value = src_pixels[src_index]/255.0f;
+                                dst_pixels[dst_index] = COLOR((src_value*foreground.r) + ((1.0f-src_value)*background.r),
+                                                              (src_value*foreground.g) + ((1.0f-src_value)*background.g),
+                                                              (src_value*foreground.b) + ((1.0f-src_value)*background.b), 255).value;
+                                // if(src_value > 0)
+                                // {
+                                //     dst_pixels[dst_index] = COLOR(src_value*foreground.r,
+                                //                                   src_value*foreground.g,
+                                //                                   src_value*foreground.b, 255).value;
+                                // }
+                                // else
+                                // {
+                                //     dst_pixels[dst_index] = COLOR(src_value*background.r,
+                                //                                   src_value*background.g,
+                                //                                   src_value*background.b, 255).value;
+                                // }
+                            }
+                        }
+                    }
+                }
+            }
+        } break;
+
+
+        case RENDER_MODE_FONT_GLYPHS:
+        {
+            for (u32 y = 0; y < GLOBAL_BITMAP_HEIGHT; ++y)
+            {
+                for (u32 x = 0; x < GLOBAL_BITMAP_WIDTH; ++x)
+                {
+                    u8 src_value = 0;
+                    if((x < src_pixels_width) &&
+                        (y < src_pixels_height))
+                    {
+                        src_value = src_pixels[x+(y*src_pixels_width)];
+                    }
+                    Color color = COLOR(src_value,src_value,src_value,255);
+                    dst_pixels[x+(y*GLOBAL_BITMAP_WIDTH)] = color.value;
+                }
+            }
+        } break;
     }
 
     // colocando bitmap na tela
@@ -140,24 +189,21 @@ RenderBufferToScreen (Renderer *renderer)
     GetClientRect(GLOBAL_WINDOW_HANDLE,&rect);
     s32 window_width = rect.right - rect.left;
     s32 window_height = rect.bottom - rect.top;
-    HDC hdc = GetDC(GLOBAL_WINDOW_HANDLE);
-    StretchDIBits(hdc,
+    StretchDIBits(GLOBAL_WINDOW_HDC,
                     0,0,window_width,window_height,
                     0,0,GLOBAL_BITMAP_WIDTH,GLOBAL_BITMAP_HEIGHT,
                     (void*)GLOBAL_BITMAP_MEMORY,
                     &GLOBAL_BITMAP_INFO,
                     DIB_RGB_COLORS, SRCCOPY);
-
-    SwapBuffers(hdc);
-    UpdateWindow(GLOBAL_WINDOW_HANDLE);
-    ReleaseDC(GLOBAL_WINDOW_HANDLE,hdc);
+    // SwapBuffers(GLOBAL_WINDOW_HDC);
+    // UpdateWindow(GLOBAL_WINDOW_HANDLE);
 }
 
 #define WIN32_KEY_DOWN 0x8000
 #define IS_KEY_DOWN(key) ((GetAsyncKeyState(key) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN)
 
 //Limitando o FPS
-#define TARGET_FPS 30
+#define TARGET_FPS 60
 #define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
 
 ///////////////////////
@@ -328,7 +374,7 @@ WindowProcedure(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
         {
             switch (wparam) 
             { 
-                case VK_F1:
+                case VK_F2:
                     if(WINDOW_BORDERLESS)
                     {
                         ShowWindow(window, SW_HIDE);
@@ -344,6 +390,13 @@ WindowProcedure(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
                         WINDOW_BORDERLESS = true;
                     }
                 break;
+
+                case '1':
+                case VK_NUMPAD1: GLOBAL_RENDER_MODE = RENDER_MODE_SOLID; break;
+                case '2':
+                case VK_NUMPAD2: GLOBAL_RENDER_MODE = RENDER_MODE_CODEPOINTS; break;
+                case '3':
+                case VK_NUMPAD3: GLOBAL_RENDER_MODE = RENDER_MODE_FONT_GLYPHS; break;
             }
         } 
 
@@ -414,6 +467,7 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
             // SetWindowLong(window, GWL_STYLE, 0); //remove all window styles   
             ShowWindow(window, cmd_show);
             GLOBAL_WINDOW_HANDLE = window;
+            GLOBAL_WINDOW_HDC = GetDC(window);
         }
         else
         {
@@ -461,20 +515,33 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
             // UNICODE_BLOCK_NUMBER_FORMS,
             // UNICODE_BLOCK_ARROWS,
             // UNICODE_BLOCK_MATHEMATICAL_OPERATORS,
-            // UNICODE_BLOCK_BOX_DRAWING,
-            // UNICODE_BLOCK_BLOCK_ELEMENTS,
-            // UNICODE_BLOCK_GEOMETRIC_SHAPES,
-            // UNICODE_BLOCK_GEOMETRIC_SHAPES_EXTENDED,
+            UNICODE_BLOCK_BOX_DRAWING,
+            UNICODE_BLOCK_BLOCK_ELEMENTS,
+            UNICODE_BLOCK_GEOMETRIC_SHAPES,
+            UNICODE_BLOCK_GEOMETRIC_SHAPES_EXTENDED,
             // UNICODE_BLOCK_BRAILLE_PATTERNS,
             // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_A,
             // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_B,
             // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_C,
         };
+        //seguisym.ttf
+        //unifont-11.0.01.ttf
+        //proggy.ttf
+        //dejavu.ttf
+        //blockway.ttf
+        //andale_mono.ttf
+        //SourceCodePro-Black.otf
+        //SourceCodePro-Light.otf
+        //SourceCodePro-Regular.otf
         u32 block_count = sizeof(unicode_blocks)/sizeof(UnicodeBlock*);
         renderer->font = GenerateBitmapFont("data\\seguisym.ttf", 
                                               unicode_blocks, block_count, 
                                               BFNT_PIXEL_FORMAT_ALPHA8, 
                                               renderer->char_size, false);
+        if(!renderer->font)
+        {
+            MessageBoxA(NULL, "Erro no carregamento da fonte!", "Error!", MB_ICONERROR|MB_OK);
+        }
     }
 
     // Iniciando DirectSound
@@ -549,6 +616,7 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
                 wsprintf(str, "[%d FPS] [%d MORTES] [%d GOMOS]", frame_count, game_state->dead_count,game_state->gomos);
                 // copiar str p/ linha de debug no buffer
                 WriteDebugText(renderer, (const char *)str, DBG_TEXT_COLOR,COLOR_BLACK);
+                SetWindowText(window, str);
 
                 ms_since_last_s = 0.0;
                 frame_count = 0;
