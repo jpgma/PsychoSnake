@@ -8,10 +8,10 @@
     223 ▀
     254 ■
 
-    250 ·
-    217 ┘
-    179 │
-    192 └
+    0x1F78D 🞍
+    0x251B  ┛
+    0x2503  ┃
+    0x2517  ┗
     180 ┤
     193 ┴
     195 ├
@@ -54,19 +54,13 @@
 #define WALL_DOWN_LEFT_RIGHT    10
 #define WALL_LEFT_RIGHT         11
 
-global u8 thin_walls[] = 
+global u32 thin_walls[] = 
 {
-    250, 217, 179, 192, 180, 193, 
+    250, 0x2518, 179, 192, 180, 193, 
     195, 197, 191, 218, 194, 196
 };
 
-global u8 thick_walls[] = 
-{
-    254, 188, 186, 200, 185, 202, 
-    204, 206, 187, 201, 203, 205,
-};
-
-global u8 weird_walls[] = 
+global u32 weird_walls[] = 
 {
     'a', 'b', 'c', 'd', 'e', 'f', 
     'l', 'k', 'j', 'i', 'h', 'g',
@@ -111,6 +105,7 @@ global u32 food_map[] =
     0b00000000000000000000000000000000,
     0b00000000000000000000000000000000,
 };
+
 #define MAX_SNAKE_LENGTH 100
 struct GameState
 {
@@ -118,10 +113,10 @@ struct GameState
 
     r32 posicao_x[MAX_SNAKE_LENGTH];
     r32 posicao_y[MAX_SNAKE_LENGTH];
-    i32 dead_count;
+    s32 dead_count;
     r32 velocidade_x;
     r32 velocidade_y;
-    i32 gomos=0;
+    s32 gomos=0;
 };
 
-internal void GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt);
+internal void GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt);

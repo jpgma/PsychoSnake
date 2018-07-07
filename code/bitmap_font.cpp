@@ -46,11 +46,40 @@
 #define BFNT_ENCODING_UNICODE_BMP  1
 #define BFNT_ENCODING_UNICODE_FULL 2
 
-enum UNICODE_BLOCKS
+struct UnicodeBlock
 {
-    UNICODE_BLOCK_BASIC_LATIN = 0, // ASCII
-    UNICODE_BLOCK_LATIN1_SUPPLEMENT,// extended ASCII
+    u32 first, last;
 };
+
+// Basic Multilingual Plane (BMP)
+#define UNICODE_BLOCK_BASIC_LATIN                         {0x0020,0x007F}
+#define UNICODE_BLOCK_LATIN_1_SUPPLEMENT                  {0x00A0,0x00FF}
+#define UNICODE_BLOCK_GENERAL_PUNCTUATION                 {0x2000,0x206F}
+#define UNICODE_BLOCK_SUPERSCRIPS_SUBSCRIPTS              {0x2070,0x209F}
+#define UNICODE_BLOCK_NUMBER_FORMS                        {0x2150,0x218F}
+#define UNICODE_BLOCK_ARROWS                              {0x2190,0x21FF}
+#define UNICODE_BLOCK_MATHEMATICAL_OPERATORS              {0x2200,0x22FF}
+#define UNICODE_BLOCK_MISC_TECHNICAL                      {0x2300,0x23FF}
+#define UNICODE_BLOCK_OPTICAL_CHAR_RECOGNITION            {0x2440,0x244A}
+#define UNICODE_BLOCK_ENCLOSED_ALPHANUMERICS              {0x2460,0x24FF}
+#define UNICODE_BLOCK_BOX_DRAWING                         {0x2500,0x257F}
+#define UNICODE_BLOCK_BLOCK_ELEMENTS                      {0x2580,0x259F}
+#define UNICODE_BLOCK_GEOMETRIC_SHAPES                    {0x25A0,0x25FF}
+#define UNICODE_BLOCK_MISC_SYMBOLS                        {0x2600,0x26FF}
+#define UNICODE_BLOCK_DINGBATS                            {0x2700,0x27BF}
+#define UNICODE_BLOCK_MISC_MATHEMATICAL_SYMBOLS_A         {0x27C0,0x27EF}
+#define UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_A               {0x27F0,0x27FF}
+#define UNICODE_BLOCK_BRAILLE_PATTERNS                    {0x2800,0x28FF}
+#define UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_B               {0x2900,0x297F}
+#define UNICODE_BLOCK_MISC_MATHEMATICAL_SYMBOLS_B         {0x2980,0x29FF}
+#define UNICODE_BLOCK_SUPPLEMENTAL_MATHEMATICAL_OPERATORS {0x2A00,0x2AFF}
+#define UNICODE_BLOCK_MISC_SYMBOLS_ARROWS                 {0x2B00,0x2BFF}
+#define UNICODE_BLOCK_SUPPLEMENTAL_PUNCTUATION            {0x2E00,0x2E7F}
+#define UNICODE_BLOCK_IDEOGRAPHIC_DESC_CHARS              {0x2FF0,0x2FFB}
+#define UNICODE_BLOCK_MODIFIER_TONE_LETTERS               {0xA700,0xA71F}
+// Supplementary Multilingual Plane (SMP)
+#define UNICODE_BLOCK_GEOMETRIC_SHAPES_EXTENDED           {0x1F780,0x1F7FF}
+#define UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_C               {0x1F800,0x1F8FF}
 
 global s32 BFNT_PIXEL_FORMAT_BPP[] = 
 { // _bytes_ por pixel de cada formato
@@ -85,8 +114,8 @@ struct BitmapFontHeader
 
 internal BitmapFontHeader *
 GenerateBitmapFont (const char *filename, 
-                    u32 *chars, 
-                    u16 encoding, 
+                    UnicodeBlock *unicode_blocks,
+                    u32 block_count, 
                     u16 pixel_format, 
                     u16 glyph_height,
                     b32 pack)
@@ -114,31 +143,29 @@ GenerateBitmapFont (const char *filename,
     stbtt_fontinfo font;
     stbtt_InitFont(&font, font_data, stbtt_GetFontOffsetForIndex(font_data,0));
 
-    u32 glyph_count = 1;
-    switch(encoding) // TODO: outros encodings
+    u32 glyph_count = 1; // p/ caractere indefinido
+    for (u32 i = 0; i < block_count; ++i)
     {
-        case BFNT_ENCODING_UNICODE_FULL:
-        case BFNT_ENCODING_ASCII:
-        {
-            u32 *c = chars;
-            while(*(c++) != '\0') ++glyph_count;
-        } break;
-
-
-        default:
-            printf("encoding desconhecido! (%u)", encoding);
-            goto end; 
+        glyph_count += (unicode_blocks[i].last - unicode_blocks[i].first);
     }
-
-    // removendo codepoints n presentes na fonte
     u32 undefined_codepoints = 0;
-    for (s32 i = 0; i < glyph_count; ++i)
+    u32 *chars = (u32*)calloc(glyph_count,sizeof(u32));
+    u32 *c = chars+1;
+    for (u32 i = 0; i < block_count; ++i)
     {
-        s32 index = stbtt_FindGlyphIndex(&font, chars[i]);
-        if(index == 0)
+        u32 first = unicode_blocks[i].first;
+        u32 last = unicode_blocks[i].last;
+        for (u32 j = first; j <= last; ++j)
         {
-            chars[i] = 0;
-            undefined_codepoints++;
+            s32 index = stbtt_FindGlyphIndex(&font, j);
+            if(index != 0)
+            {
+                *(c++) = j;
+            }
+            else
+            {
+                ++undefined_codepoints;
+            }
         }
     }
 
@@ -157,7 +184,7 @@ GenerateBitmapFont (const char *filename,
     }
 
     // movendo codepoints para que fique apenas um undefined, hopefully
-    if(undefined_codepoints > 1)
+    if(undefined_codepoints > 0)
     {
         printf("u:%.4x\n", chars[undefined_codepoints]);
         for (s32 i = undefined_codepoints; i < glyph_count; ++i)
@@ -178,6 +205,7 @@ GenerateBitmapFont (const char *filename,
 
     // alocando memoria do resultado
     u16 dim = (u16)ceil(sqrtf(glyph_count));
+    u16 dim_pot = pow(2, ceil(log(dim)/log(2))); // next pow
     u32 pixel_data_size = (pack ? 
                             (glyph_count * BFNT_PIXEL_FORMAT_BPP[pixel_format] * (glyph_width * glyph_height)) : 
                             ((dim*dim) * BFNT_PIXEL_FORMAT_BPP[pixel_format] * (glyph_width * glyph_height)));
@@ -194,16 +222,15 @@ GenerateBitmapFont (const char *filename,
     res->glyph_count = glyph_count;
     res->glyph_width = glyph_width;
     res->glyph_height = glyph_height;
-    // p = pow(2, ceil(log(p)/log(2))); // next pow
     res->glyph_count_x = dim;
     res->glyph_count_y = dim;
-    res->cp_encoding = encoding;
+    res->cp_encoding = BFNT_ENCODING_UNICODE_FULL;
     res->cp_segment_count = cp_segment_count;
     printf("-%u %u %u\n", glyph_count, dim, dim*dim);
 
-    u32 *cp_segment_ends = (u32*)(res+1);
-    u32 *cp_segment_starts = cp_segment_ends + cp_segment_count;
-    s32 *cp_segment_deltas = (s32*)(cp_segment_starts + cp_segment_count);
+    u32 *cp_segment_ends = CP_SEGMENT_ENDS(res);
+    u32 *cp_segment_starts = CP_SEGMENT_STARTS(res);
+    s32 *cp_segment_deltas = CP_SEGMENT_DELTAS(res);
 
     // computando ends, starts e deltas
     u16 cur_segment = 0;
@@ -226,12 +253,14 @@ GenerateBitmapFont (const char *filename,
         }
         else if(i == glyph_count-1)
         {
+            if(chars[i]-chars[i-1] > 1)
+                cp_segment_starts[cur_segment] = chars[i];
             cp_segment_ends[cur_segment] = chars[i];
             cp_segment_deltas[cur_segment] = delta;
         }
     }
 
-    u8 *pixels = (u8*)(cp_segment_deltas+cp_segment_count);
+    u8 *pixels = PIXEL_DATA(res);
 
     // u32 x = 0;
     // u32 y = 0;
@@ -244,13 +273,21 @@ GenerateBitmapFont (const char *filename,
             if(g >= glyph_count)
                 break;
             
-            r32 s = stbtt_ScaleForMappingEmToPixels(&font, glyph_height);//stbtt_ScaleForPixelHeight(&font, glyph_height);
-            
+            r32 scale = stbtt_ScaleForPixelHeight(&font, glyph_height);
+            // stbtt_ScaleForMappingEmToPixels(&font, glyph_height);
+            s32 advance, lsb, x0,y0,x1,y1;
             s32 gi = stbtt_FindGlyphIndex(&font, chars[g]);
+            // stbtt_GetGlyphHMetrics(&font, gi, &advance, &lsb);
+            // stbtt_GetGlyphBitmapBox(&font, gi, scale,scale, &x0,&y0,&x1,&y1);
+            
+
             if(chars[g]==0) gi = 0;
             
-            u8 *src_pixels = stbtt_GetGlyphBitmap(&font, 0,s, gi, &w, &h, 0,0);
+            u8 *src_pixels = stbtt_GetGlyphBitmap(&font, 0,scale, gi, &w, &h, 0,0);
             // if(src_pixels) STBTT_free(0,src_pixels);
+            // if(chars[g] == 'A')
+            //     printf("w:%d h:%d bb:[%d,%d][%d,%d] a:%d lsb:%d\n", w,h, x0,y0,x1,y1, advance,lsb);
+            
             for (s32 yy = 0; yy < h; ++yy)
             {   
                 for (s32 xx = 0; xx < w; ++xx)
@@ -274,12 +311,11 @@ GenerateBitmapFont (const char *filename,
             // printf("\n");
             if(src_pixels)
                 STBTT_free(0,src_pixels);
-
-            // if((x+1)%(glyph_width*dim) == 0) ++y;
-            // x = (x+1)%(glyph_width*dim);
         }
     }
     
+    free(chars);
+
     end:
     if(font_data) free(font_data);
     return res;

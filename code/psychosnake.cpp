@@ -33,10 +33,10 @@ SetMapBlock (u32 *map, u32 x, u32 y, b32 value)
 
 }
 
-internal u8
-GetWall (u32 *map, u8 *wall_set, u32 x, u32 y)
+internal u32
+GetWall (u32 *map, u32 *wall_set, u32 x, u32 y)
 {
-    u8 res = wall_set[WALL_CENTER];
+    u32 res = wall_set[WALL_CENTER];
 
     if((x < SCREEN_WIDTH) && (y < SCREEN_HEIGHT))
     {
@@ -81,15 +81,14 @@ GetWall (u32 *map, u8 *wall_set, u32 x, u32 y)
     return res;
 }
 
-
-
-
+#define SNAKE_COLOR      COLOR(19,161,14,255)
+#define FOOD_COLOR       COLOR(249,241,165,255)
+#define WALL_COLOR       COLOR(242,242,242,255)
+#define BACKGROUND_COLOR COLOR(12,12,12,255)
 
 internal void 
-GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
+GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 {
-
-
     if(!game_state->initialized)
     {
         game_state->posicao_x[game_state->gomos] = SCREEN_WIDTH/2.0f;
@@ -100,9 +99,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         game_state->initialized = true;
     }
 
-
-
-    LimparTela(buffer, ' ', RGBColor(1,1,1,0, 0,0,0,0)/*(FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE)*/);
+    ClearRenderBuffer(&renderer->buffer, ' ', BACKGROUND_COLOR,BACKGROUND_COLOR);
 
     // desenhando mapa
     for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
@@ -111,8 +108,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         {
             if(IsOccupied(wall_map,x,y))
             {
-                buffer[x+(y*SCREEN_WIDTH)].Char.UnicodeChar = 219;//GetWall(wall_map, weird_walls, x,y);
-                buffer[x+(y*SCREEN_WIDTH)].Attributes = RGBColor(1,1,1,1, 0,0,0,0);
+                SetChar(&renderer->buffer, x, y, 219, WALL_COLOR, BACKGROUND_COLOR);
             }
         }
     }
@@ -125,15 +121,13 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         bool space = IS_KEY_DOWN(VK_SPACE);
         bool pause = IS_KEY_DOWN(0x50);
 
-        r32 player_speed = 10.0f;
-        if(game_state->gomos >= 10)
-        {
-            player_speed = 15.0f;
-        }
+        r32 player_speed = 13.0f;
+        // if(game_state->gomos >= 10)
+        // {
+        //     player_speed = 15.0f;
+        // }
         r32 npx = game_state->posicao_x[0];
         r32 npy = game_state->posicao_y[0];
-        i32 var_Local_X = 0;
-        i32 var_Local_Y = 0;
         r32 nvx = game_state->velocidade_x;
         r32 nvy = game_state->velocidade_y;
 
@@ -186,7 +180,7 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
 
             if(((u32)game_state->posicao_x[0]!=(u32)npx)||((u32)game_state->posicao_y[0]!=(u32)npy))
             {
-                for(i32 i=game_state->gomos; i>0; i--)
+                for(s32 i = game_state->gomos; i > 0; i--)
                 {
                     game_state->posicao_x[i] = game_state->posicao_x[i-1];
                     game_state->posicao_y[i] = game_state->posicao_y[i-1];
@@ -197,62 +191,57 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
             game_state->posicao_y[0] = npy;
 
         }
-        else
-        {
+        // else
+        // {
 
-            FILE *scores;
-            scores = fopen("scores.txt", "a");
-            fprintf(scores, "Score:%d\n", game_state->gomos);
-            fclose(scores); 
+        //     FILE *scores;
+        //     scores = fopen("scores.txt", "a");
+        //     fprintf(scores, "Score:%d\n", game_state->gomos);
+        //     fclose(scores); 
 
-            game_state->velocidade_x = 0.0;
-            game_state->velocidade_y = 0.0;
-            game_state->gomos=0;
-            game_state->posicao_x[game_state->gomos] = ((SCREEN_WIDTH)/2);
-            game_state->posicao_y[game_state->gomos] = ((SCREEN_HEIGHT)/2);
+        //     game_state->velocidade_x = 0.0;
+        //     game_state->velocidade_y = 0.0;
+        //     game_state->gomos=0;
+        //     game_state->posicao_x[game_state->gomos] = ((SCREEN_WIDTH)/2);
+        //     game_state->posicao_y[game_state->gomos] = ((SCREEN_HEIGHT)/2);
             
-            game_state->dead_count += 1;
-        }
+        //     game_state->dead_count += 1;
+        // }
 
         //COLISÃO ENTRE O COPOR DA SNAKE
-        for(u32 i =1; i< game_state->gomos; i++)
-        {
-            if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
-                (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[i])))
-            {
-                game_state->velocidade_x = 0.0;
-                game_state->velocidade_y = 0.0;
-                game_state->gomos=0;
-                game_state->posicao_x[game_state->gomos] = ((SCREEN_WIDTH)/2);
-                game_state->posicao_y[game_state->gomos] = ((SCREEN_HEIGHT)/2);
+        // for(u32 i =1; i< game_state->gomos; i++)
+        // {
+        //     if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
+        //         (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[i])))
+        //     {
+        //         game_state->velocidade_x = 0.0;
+        //         game_state->velocidade_y = 0.0;
+        //         game_state->gomos=0;
+        //         game_state->posicao_x[game_state->gomos] = ((SCREEN_WIDTH)/2);
+        //         game_state->posicao_y[game_state->gomos] = ((SCREEN_HEIGHT)/2);
 
-            }
-        }
+        //     }
+        // }
   
-        const char player_char[] = {(char)219,(char)178,(char)177,(char)176};
-        for(i32 i=game_state->gomos; i>=0; --i)
+        const u32 player_char[] = {0x2588,0x2593,0x2592,0x2591};
+        for(s32 i=game_state->gomos; i>=0; --i)
         {
             u32 dist_index = (u32)((r32)i * (4.0f/(game_state->gomos+1)));
-            buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Char.UnicodeChar = player_char[dist_index];
+            u32 gomo_index = (u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH);
+            u32 codepoint = player_char[dist_index];
             
-            u16 color = RGBColor(0,1,0,0, 0,0,0,0);
-            if(i==0)
-            {
-                for(u32 j = 1; j<game_state->gomos; j++)
-                {
-                    if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[j]))&&
-                    (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[j])))
-                    {
-                        color = RGBColor(1,0,0,0, 0,0,0,0);
-                    }
-                }
-            }
-
-            buffer[(u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH)].Attributes = color;
-        
+            Color color = SNAKE_COLOR;
+            r32 damp = (game_state->gomos+2)*2;
+            color.r *= (damp-i)*(1.0f/damp);
+            color.g *= (damp-i)*(1.0f/damp);
+            color.b *= (damp-i)*(1.0f/damp);
+            
+            SetChar(&renderer->buffer, 
+                    (u16)game_state->posicao_x[i], (u16)game_state->posicao_y[i], 
+                    codepoint, color, BACKGROUND_COLOR);
         }   
 
-        i32 SHUFFLE_X, SHUFFLE_Y;
+        s32 SHUFFLE_X, SHUFFLE_Y;
 
         //SETANDO COMINDA RANDOM 
         if(IsOccupied(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0]))
@@ -290,12 +279,9 @@ GameUpdateAndRender (GameState *game_state, CHAR_INFO *buffer, r32 dt)
         {
             if(IsOccupied(food_map,x,y))
             {
-                buffer[x+(y*SCREEN_WIDTH)].Char.UnicodeChar = 254;
-                buffer[x+(y*SCREEN_WIDTH)].Attributes = RGBColor(1,1,0,1, 0,0,0,0);
+                SetChar(&renderer->buffer, x, y, 0x1F78D, FOOD_COLOR, BACKGROUND_COLOR);
             }
         }
-    }          
-
-
+    }
 
 }

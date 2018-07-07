@@ -25,3 +25,8 @@ tools/genbmpfont.ilk
 tools/genbmpfont.exe
 tools/.vs/genbmpfont/v15/Browse.VC.opendb
 tools/.vs/genbmpfont/v15/Browse.VC.db
+tools/.vs/genbmpfont/v15/.suo
+build/psychosnake_build_timings.ctm
+build/.vs/psychosnake/v15/Browse.VC.opendb
+build/.vs/psychosnake/v15/Browse.VC.db
+build/.vs/psychosnake/v15/.suo

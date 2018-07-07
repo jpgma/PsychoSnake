@@ -75,19 +75,37 @@ int main(int argc, char *argv[])
         u16 glyph_height = 32;
         const char *filename = (const char *)argv[1];        
         
-        u32 *chars = GenerateCharacterList();
+        UnicodeBlock unicode_blocks[] = 
+        {
+            UNICODE_BLOCK_BASIC_LATIN,
+            UNICODE_BLOCK_LATIN_1_SUPPLEMENT,
+            // UNICODE_BLOCK_GENERAL_PUNCTUATION,
+            // UNICODE_BLOCK_SUPERSCRIPS_SUBSCRIPTS,
+            // UNICODE_BLOCK_NUMBER_FORMS,
+            // UNICODE_BLOCK_ARROWS,
+            // UNICODE_BLOCK_MATHEMATICAL_OPERATORS,
+            UNICODE_BLOCK_BOX_DRAWING,
+            UNICODE_BLOCK_BLOCK_ELEMENTS,
+            UNICODE_BLOCK_GEOMETRIC_SHAPES,
+            // UNICODE_BLOCK_GEOMETRIC_SHAPES_EXTENDED,
+            // UNICODE_BLOCK_BRAILLE_PATTERNS,
+            // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_A,
+            // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_B,
+            // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_C,
+        };
+        u32 block_count = sizeof(unicode_blocks)/sizeof(UnicodeBlock*);
 
-        BitmapFontHeader *header = GenerateBitmapFont(filename, chars, 
-                                                      BFNT_ENCODING_UNICODE_FULL, 
+        BitmapFontHeader *header = GenerateBitmapFont(filename, 
+                                                      unicode_blocks, block_count, 
                                                       BFNT_PIXEL_FORMAT_ALPHA8, 
                                                       glyph_height, false);
 
         
         printf("codepoints:\n");
-        for (s32 i = 0; i < header->glyph_count; ++i)
-        {
-            printf("\t%u ", chars[i]);
-        }
+        // for (s32 i = 0; i < header->glyph_count; ++i)
+        // {
+        //     printf("\t%u ", chars[i]);
+        // }
         printf("\nsegments:\n");
         u32 *cp_segment_ends   = CP_SEGMENT_ENDS(header);
         u32 *cp_segment_starts = CP_SEGMENT_STARTS(header);
@@ -111,7 +129,6 @@ int main(int argc, char *argv[])
         printf("\n");
 
         free(header);
-        free(chars);
     }
  
     return 0;
