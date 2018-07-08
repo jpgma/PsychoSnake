@@ -1,4 +1,4 @@
-/* Caracteres p/ construçao de obstaculos:
+/* Caracteres p/ referencia:
 
     0x2591 ░
     0x2592 ▒

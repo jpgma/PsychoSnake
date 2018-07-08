@@ -35,6 +35,7 @@ struct Char
     u32 codepoint;
     Color foreground_color;
     Color background_color;
+    GlyphHeader *glyph_header;
 };
 
 struct RenderBuffer
@@ -45,6 +46,7 @@ struct RenderBuffer
     u32   *codepoints;
     Color *foreground_colors;
     Color *background_colors;
+    GlyphHeader **glyph_headers;
 };
 
 struct Renderer
@@ -60,6 +62,18 @@ internal RenderBuffer AllocRenderBuffer (u16 width, u16 height, u16 debug_lines)
 internal void FreeRenderBuffer (RenderBuffer *buffer);
 internal void RenderBufferToScreen (Renderer *renderer);
 
+internal GlyphHeader *
+GetGlyphHeader (BitmapFontHeader *font, u32 codepoint)
+{
+    GlyphHeader *res = 0;
+    if(font)
+    {
+        u32 index = GetGlyphIndex(font, codepoint);
+        res = GLYPH_HEADERS(font) + index;
+    }
+    return res;
+}
+
 internal void
 SetChari (RenderBuffer *buffer, u16 i, 
           u32 codepoint, Color foreground_color, Color background_color)
@@ -69,6 +83,7 @@ SetChari (RenderBuffer *buffer, u16 i,
         buffer->codepoints[i] = codepoint;
         buffer->foreground_colors[i] = foreground_color;
         buffer->background_colors[i] = background_color;
+        buffer->glyph_headers[i] = 0;
     }
  }
 
@@ -87,9 +102,6 @@ ClearRenderBuffer (RenderBuffer *buffer, u32 clear_codepoint, Color foreground_c
     for (u16 i = 0; i < char_count; ++i)
     {
         SetChari (buffer, i,clear_codepoint,foreground_color,background_color);
-        // buffer->codepoints[i] = clear_codepoint;
-        // buffer->foreground_colors[i] = foreground_color;
-        // buffer->background_colors[i] = background_color;
     }
 }
 

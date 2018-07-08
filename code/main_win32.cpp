@@ -67,6 +67,7 @@ AllocRenderBuffer (u16 width, u16 height, u16 debug_lines)
     res.codepoints = (u32*)calloc(char_count,sizeof(u32));
     res.foreground_colors = (Color*)calloc(char_count,sizeof(Color));
     res.background_colors = (Color*)calloc(char_count,sizeof(Color));
+    res.glyph_headers = (GlyphHeader**)calloc(char_count,sizeof(GlyphHeader*));
     
     return res;
 }
@@ -80,6 +81,7 @@ FreeRenderBuffer (RenderBuffer *buffer)
     free(buffer->codepoints);
     free(buffer->foreground_colors);
     free(buffer->background_colors);
+    free(buffer->glyph_headers);
 }
 
 // TODO: colocar no renderer->api
@@ -89,14 +91,16 @@ global HWND       GLOBAL_WINDOW_HANDLE;
 global u8 *       GLOBAL_BITMAP_MEMORY;
 global u32        GLOBAL_BITMAP_WIDTH;
 global u32        GLOBAL_BITMAP_HEIGHT;
+global u32        GLOBAL_FONT_WIDTH;
+global u32        GLOBAL_FONT_HEIGHT;
 
 internal void 
 RenderBufferToScreen (Renderer *renderer)
 {
-    u32 src_pixels_width = renderer->font->glyph_count_x * renderer->font->glyph_width;
-    u32 src_pixels_height = renderer->font->glyph_count_y * renderer->font->glyph_height;
-    u8 *src_pixels = PIXEL_DATA(renderer->font);
-    u32 *dst_pixels = (u32*)GLOBAL_BITMAP_MEMORY;
+    // u32 src_pixels_width = renderer->font->glyph_count_x * renderer->font->glyph_width;
+    // u32 src_pixels_height = renderer->font->glyph_count_y * renderer->font->glyph_height;
+    u8 *src = GLYPH_DATA(renderer->font);
+    u32 *dst = (u32*)GLOBAL_BITMAP_MEMORY;
     
     // preenchendo bitmap com charmap
     switch(GLOBAL_RENDER_MODE)
@@ -108,12 +112,12 @@ RenderBufferToScreen (Renderer *renderer)
                 for (u16 x = 0; x < renderer->buffer.width; ++x)
                 {
                     Color color = renderer->buffer.foreground_colors[x+(y*renderer->buffer.width)];
-                    for (s32 yy = 0; yy < renderer->char_size; ++yy)
+                    for (s32 yy = 0; yy < GLOBAL_FONT_HEIGHT; ++yy)
                     {   
-                        for (s32 xx = 0; xx < renderer->char_size; ++xx)
+                        for (s32 xx = 0; xx < GLOBAL_FONT_WIDTH; ++xx)
                         {
-                            u32 index = ((x*renderer->char_size)+xx) + (((y*renderer->char_size)+yy)*(renderer->char_size*renderer->buffer.width));
-                            dst_pixels[index] = (color.value);
+                            u32 index = ((x*GLOBAL_FONT_WIDTH)+xx) + (((y*GLOBAL_FONT_HEIGHT)+yy)*(GLOBAL_FONT_WIDTH*renderer->buffer.width));
+                            dst[index] = (color.value);
                         }
                     }
                 }
@@ -123,64 +127,89 @@ RenderBufferToScreen (Renderer *renderer)
 
         case RENDER_MODE_CODEPOINTS:
         {
+            GlyphHeader *glyph_headers = GLYPH_HEADERS(renderer->font);
             for (u16 y = 0; y < (renderer->buffer.height + renderer->buffer.debug_lines); ++y)
             {
                 for (u16 x = 0; x < renderer->buffer.width; ++x)
                 {
-                    u32 codepoint = renderer->buffer.codepoints[x+(y*renderer->buffer.width)];
-                    u32 glyph_offset = GetGlyphOffset(renderer->font, codepoint);
-                    Color foreground = renderer->buffer.foreground_colors[x+(y*renderer->buffer.width)];
-                    Color background = renderer->buffer.background_colors[x+(y*renderer->buffer.width)];
-                    for (s32 yy = 0; yy < renderer->char_size; ++yy)
+                    u32 index = x+(y*renderer->buffer.width);
+                    GlyphHeader *glyph_header = renderer->buffer.glyph_headers[index];
+                    if(!glyph_header)
+                    {
+                        u32 codepoint = renderer->buffer.codepoints[index];
+                        glyph_header = glyph_headers + GetGlyphIndex(renderer->font,codepoint);
+                    }
+                    Color foreground = renderer->buffer.foreground_colors[index];
+                    Color background = renderer->buffer.background_colors[index];
+                    s16 min_x = glyph_header->lsb;
+                    s16 min_y = renderer->font->ascent + glyph_header->min_y;
+                    for (u32 yy = 0; yy < GLOBAL_FONT_HEIGHT; ++yy)
                     {   
-                        for (s32 xx = 0; xx < renderer->char_size; ++xx)
+                        for (u32 xx = 0; xx < GLOBAL_FONT_WIDTH; ++xx)
                         {
-                            u8 src_value = 0;
-                            u32 src_index = glyph_offset + (xx + (yy*(renderer->font->glyph_width*renderer->font->glyph_count_x)));
-                            u32 dst_index = ((x*renderer->char_size)+xx) + 
-                                             (((y*renderer->char_size)+yy)*(renderer->char_size*renderer->buffer.width));
-                            if(src_index < (src_pixels_width*src_pixels_height))
+                            r32 src_value = 0.0f;
+                            if((xx >= min_x) && (xx <= (min_x+glyph_header->width-1)) &&
+                               (yy >= min_y) && (yy <= (min_y+glyph_header->height-1)))
                             {
-                                r32 src_value = src_pixels[src_index]/255.0f;
-                                dst_pixels[dst_index] = COLOR((src_value*foreground.r) + ((1.0f-src_value)*background.r),
-                                                              (src_value*foreground.g) + ((1.0f-src_value)*background.g),
-                                                              (src_value*foreground.b) + ((1.0f-src_value)*background.b), 255).value;
-                                // if(src_value > 0)
-                                // {
-                                //     dst_pixels[dst_index] = COLOR(src_value*foreground.r,
-                                //                                   src_value*foreground.g,
-                                //                                   src_value*foreground.b, 255).value;
-                                // }
-                                // else
-                                // {
-                                //     dst_pixels[dst_index] = COLOR(src_value*background.r,
-                                //                                   src_value*background.g,
-                                //                                   src_value*background.b, 255).value;
-                                // }
+                                src_value = src[glyph_header->data_offset + ((xx-abs(min_x))+((yy-abs(min_y))*glyph_header->width))]/255.0f;
                             }
+
+                            u32 dst_value = COLOR((src_value*foreground.r) + ((1.0f-src_value)*background.r),
+                                                  (src_value*foreground.g) + ((1.0f-src_value)*background.g),
+                                                  (src_value*foreground.b) + ((1.0f-src_value)*background.b), 255).value;
+                            u32 dst_index = ((x*GLOBAL_FONT_WIDTH)+xx) + 
+                                             (((y*GLOBAL_FONT_HEIGHT)+yy)*(GLOBAL_FONT_WIDTH*renderer->buffer.width));
+                            dst[dst_index] = dst_value;
                         }
                     }
                 }
             }
+            // for (u16 y = 0; y < (renderer->buffer.height + renderer->buffer.debug_lines); ++y)
+            // {
+            //     for (u16 x = 0; x < renderer->buffer.width; ++x)
+            //     {
+            //         u32 codepoint = renderer->buffer.codepoints[x+(y*renderer->buffer.width)];
+            //         u32 glyph_offset = GetGlyphOffset(renderer->font, codepoint);
+            //         Color foreground = renderer->buffer.foreground_colors[x+(y*renderer->buffer.width)];
+            //         Color background = renderer->buffer.background_colors[x+(y*renderer->buffer.width)];
+            //         for (s32 yy = 0; yy < renderer->char_size; ++yy)
+            //         {   
+            //             for (s32 xx = 0; xx < renderer->char_size; ++xx)
+            //             {
+            //                 u8 src_value = 0;
+            //                 u32 src_index = glyph_offset + (xx + (yy*(renderer->font->glyph_width*renderer->font->glyph_count_x)));
+            //                 u32 dst_index = ((x*renderer->char_size)+xx) + 
+            //                                  (((y*renderer->char_size)+yy)*(renderer->char_size*renderer->buffer.width));
+            //                 if(src_index < (src_pixels_width*src_pixels_height))
+            //                 {
+            //                     r32 src_value = src_pixels[src_index]/255.0f;
+            //                     dst_pixels[dst_index] = COLOR((src_value*foreground.r) + ((1.0f-src_value)*background.r),
+            //                                                   (src_value*foreground.g) + ((1.0f-src_value)*background.g),
+            //                                                   (src_value*foreground.b) + ((1.0f-src_value)*background.b), 255).value;
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
         } break;
 
 
         case RENDER_MODE_FONT_GLYPHS:
         {
-            for (u32 y = 0; y < GLOBAL_BITMAP_HEIGHT; ++y)
-            {
-                for (u32 x = 0; x < GLOBAL_BITMAP_WIDTH; ++x)
-                {
-                    u8 src_value = 0;
-                    if((x < src_pixels_width) &&
-                        (y < src_pixels_height))
-                    {
-                        src_value = src_pixels[x+(y*src_pixels_width)];
-                    }
-                    Color color = COLOR(src_value,src_value,src_value,255);
-                    dst_pixels[x+(y*GLOBAL_BITMAP_WIDTH)] = color.value;
-                }
-            }
+            // for (u32 y = 0; y < GLOBAL_BITMAP_HEIGHT; ++y)
+            // {
+            //     for (u32 x = 0; x < GLOBAL_BITMAP_WIDTH; ++x)
+            //     {
+            //         u8 src_value = 0;
+            //         if((x < src_pixels_width) &&
+            //             (y < src_pixels_height))
+            //         {
+            //             src_value = src_pixels[x+(y*src_pixels_width)];
+            //         }
+            //         Color color = COLOR(src_value,src_value,src_value,255);
+            //         dst_pixels[x+(y*GLOBAL_BITMAP_WIDTH)] = color.value;
+            //     }
+            // }
         } break;
     }
 
@@ -481,7 +510,7 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
         MessageBoxA(NULL, "Window Registration Failed!", "Error!", MB_ICONERROR|MB_OK);
         goto end;
     }
-
+    
     Renderer *renderer = (Renderer*)calloc(1,sizeof(Renderer));
 
     u16 screen_width = SCREEN_WIDTH;
@@ -491,20 +520,7 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
 
     renderer->buffer = AllocRenderBuffer(screen_width, screen_height, debug_lines);
     renderer->char_size = char_size;
-    
-    GLOBAL_BITMAP_WIDTH = screen_width * char_size;
-    GLOBAL_BITMAP_HEIGHT = (screen_height+debug_lines) * char_size;
-    
-    u32 bytes_per_pixel = 4;
-    GLOBAL_BITMAP_INFO.bmiHeader.biSize = sizeof(GLOBAL_BITMAP_INFO.bmiHeader);
-    GLOBAL_BITMAP_INFO.bmiHeader.biWidth = GLOBAL_BITMAP_WIDTH;
-    GLOBAL_BITMAP_INFO.bmiHeader.biHeight = -GLOBAL_BITMAP_HEIGHT;
-    GLOBAL_BITMAP_INFO.bmiHeader.biPlanes = 1;
-    GLOBAL_BITMAP_INFO.bmiHeader.biBitCount = (bytes_per_pixel*8);
-    GLOBAL_BITMAP_INFO.bmiHeader.biCompression = BI_RGB;
-    
-    GLOBAL_BITMAP_MEMORY = (u8*)calloc((GLOBAL_BITMAP_WIDTH*GLOBAL_BITMAP_HEIGHT),bytes_per_pixel);
-    
+
     { // gerando fonte
         UnicodeBlock unicode_blocks[] = 
         {
@@ -525,7 +541,8 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
             // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_C,
         };
         //seguisym.ttf
-        //unifont-11.0.01.ttf
+        //unifont.ttf
+        //consola.ttf
         //proggy.ttf
         //dejavu.ttf
         //blockway.ttf
@@ -537,12 +554,27 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
         renderer->font = GenerateBitmapFont("data\\seguisym.ttf", 
                                               unicode_blocks, block_count, 
                                               BFNT_PIXEL_FORMAT_ALPHA8, 
-                                              renderer->char_size, false);
+                                              renderer->char_size);
+        GLOBAL_FONT_WIDTH = renderer->font->max_advance;
+        GLOBAL_FONT_HEIGHT = abs(renderer->font->ascent)+abs(renderer->font->descent);
         if(!renderer->font)
         {
             MessageBoxA(NULL, "Erro no carregamento da fonte!", "Error!", MB_ICONERROR|MB_OK);
         }
     }
+    
+    GLOBAL_BITMAP_WIDTH = screen_width * GLOBAL_FONT_WIDTH;
+    GLOBAL_BITMAP_HEIGHT = (screen_height+debug_lines) * GLOBAL_FONT_HEIGHT;
+    
+    u32 bytes_per_pixel = 4;
+    GLOBAL_BITMAP_INFO.bmiHeader.biSize = sizeof(GLOBAL_BITMAP_INFO.bmiHeader);
+    GLOBAL_BITMAP_INFO.bmiHeader.biWidth = GLOBAL_BITMAP_WIDTH;
+    GLOBAL_BITMAP_INFO.bmiHeader.biHeight = -GLOBAL_BITMAP_HEIGHT;
+    GLOBAL_BITMAP_INFO.bmiHeader.biPlanes = 1;
+    GLOBAL_BITMAP_INFO.bmiHeader.biBitCount = (bytes_per_pixel*8);
+    GLOBAL_BITMAP_INFO.bmiHeader.biCompression = BI_RGB;
+    
+    GLOBAL_BITMAP_MEMORY = (u8*)calloc((GLOBAL_BITMAP_WIDTH*GLOBAL_BITMAP_HEIGHT),bytes_per_pixel);
 
     // Iniciando DirectSound
     // u32 nchannels = 2; // dois channels de audio, esquerda e direita

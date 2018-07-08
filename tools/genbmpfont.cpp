@@ -68,6 +68,48 @@ GenerateCharacterList ()
     return res;
 }
 
+// char buffer[24<<20];
+// unsigned char screen[20][79];
+
+// int main(int arg, char **argv)
+// {
+//    stbtt_fontinfo font;
+//    int i,j,ascent,baseline,ch=0;
+//    float scale, xpos=2; // leave a little padding in case the character extends left
+//    char *text = "Heljo World!"; // intentionally misspelled to show 'lj' brokenness
+
+//    fread((void*)buffer, 1, 1000000, fopen("c:/windows/fonts/arialbd.ttf", "rb"));
+//    stbtt_InitFont(&font, (const unsigned char*)buffer, 0);
+
+//    scale = stbtt_ScaleForPixelHeight(&font, 15);
+//    stbtt_GetFontVMetrics(&font, &ascent,0,0);
+//    baseline = (int) (ascent*scale);
+
+//    while (text[ch]) {
+//       int advance,lsb,x0,y0,x1,y1;
+//       float x_shift = xpos - (float) floor(xpos);
+//       stbtt_GetCodepointHMetrics(&font, text[ch], &advance, &lsb);
+//       stbtt_GetCodepointBitmapBoxSubpixel(&font, text[ch], scale,scale,x_shift,0, &x0,&y0,&x1,&y1);
+//       stbtt_MakeCodepointBitmapSubpixel(&font, &screen[baseline + y0][(int) xpos + x0], x1-x0,y1-y0, 79, scale,scale,x_shift,0, text[ch]);
+//       // note that this stomps the old data, so where character boxes overlap (e.g. 'lj') it's wrong
+//       // because this API is really for baking character bitmaps into textures. if you want to render
+//       // a sequence of characters, you really need to render each bitmap to a temp buffer, then
+//       // "alpha blend" that into the working buffer
+//       xpos += (advance * scale);
+//       if (text[ch+1])
+//          xpos += scale*stbtt_GetCodepointKernAdvance(&font, text[ch],text[ch+1]);
+//       ++ch;
+//    }
+
+//    for (j=0; j < 20; ++j) {
+//       for (i=0; i < 78; ++i)
+//          putchar(" .:ioVM@"[screen[j][i]>>5]);
+//       putchar('\n');
+//    }
+
+//    return 0;
+// }
+
 int main(int argc, char *argv[])
 {
     if(argc >= 2)
@@ -95,50 +137,46 @@ int main(int argc, char *argv[])
         };
         u32 block_count = sizeof(unicode_blocks)/sizeof(UnicodeBlock*);
 
-        BitmapFontHeader *header = GenerateBitmapFont(filename, 
+        BitmapFontHeader *font = GenerateBitmapFont(filename, 
                                                       unicode_blocks, block_count, 
                                                       BFNT_PIXEL_FORMAT_ALPHA8, 
-                                                      glyph_height, false);
-
+                                                      glyph_height);
         
-        printf("codepoints:\n");
-        // for (s32 i = 0; i < header->glyph_count; ++i)
-        // {
-        //     printf("\t%u ", chars[i]);
-        // }
+        printf("font: gc:%u asc:%d desc:%d lg:%d s:%d\n", 
+                font->glyph_count,
+                font->ascent,font->descent,font->line_gap,
+                (abs(font->ascent)+abs(font->descent)));
         printf("\nsegments:\n");
-        u32 *cp_segment_ends   = CP_SEGMENT_ENDS(header);
-        u32 *cp_segment_starts = CP_SEGMENT_STARTS(header);
-        s32 *cp_segment_deltas = CP_SEGMENT_DELTAS(header);
-        for (s32 i = 0; i < header->cp_segment_count; ++i)
+        u32 *cp_segment_ends   = CP_SEGMENT_ENDS(font);
+        u32 *cp_segment_starts = CP_SEGMENT_STARTS(font);
+        s32 *cp_segment_deltas = CP_SEGMENT_DELTAS(font);
+        for (s32 i = 0; i < font->cp_segment_count; ++i)
         {
             printf("\t%d [%u %u] %d\n", i,cp_segment_starts[i],
                                           cp_segment_ends[i],
                                           cp_segment_deltas[i]);
         }
 
-        u32 w = header->glyph_count_x * header->glyph_width;
-        u32 h = header->glyph_count_y * header->glyph_height;
-        u8 *pixel_data = PIXEL_DATA(header);
+        GlyphHeader *glyph_headers = GLYPH_HEADERS(font);
+        u8 *glyph_data = GLYPH_DATA(font);
 
-        u32 codepoint = 'J';
-        u32 glyph_offset = GetGlyphOffset(header, codepoint);
-        for (s32 j=0; j < header->glyph_height; ++j) 
+        u32 codepoint = 'B';
+        for (s32 i = 0; i < font->glyph_count; ++i)
         {
-          for (s32 i=0; i < header->glyph_width; ++i)
-             putchar(" .:ioVM@"[pixel_data[glyph_offset + j*w+i]>>5]);
-          putchar('\n');
+            GlyphHeader glyph_header = glyph_headers[i];
+            printf("w:%u h%u lsb:%d adv:%d\n", 
+                    glyph_header.width, glyph_header.height,
+                    glyph_header.lsb, glyph_header.advance);
+            for (s32 y=0; y < glyph_header.height; ++y) 
+            {
+              for (s32 x=0; x < glyph_header.width; ++x)
+                 putchar(" .:ioVM@"[glyph_data[glyph_header.data_offset + x+(y*glyph_header.width)]>>5]);
+              putchar('\n');
+            }
+            putchar('\n');
         }
 
-        for (s32 j=0; j < h; ++j) 
-        {
-          for (s32 i=0; i < w; ++i)
-             putchar(" .:ioVM@"[pixel_data[j*w+i]>>5]);
-          putchar('\n');
-        }
-        printf("\n");
-
-        free(header);
+        free(font);
     }
  
     return 0;
