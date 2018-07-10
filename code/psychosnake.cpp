@@ -109,7 +109,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             if(IsOccupied(wall_map,x,y))
             {
                 SetChar(&renderer->buffer, x, y, 
-                        /*0x2588*/ GetWall(wall_map, thin_walls, x,y), 
+                        /*0x2588*/ GetWall(wall_map, double_walls, x,y), 
                         WALL_COLOR, BACKGROUND_COLOR);
             }
         }

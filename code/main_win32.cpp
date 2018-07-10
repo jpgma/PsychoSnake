@@ -1,3 +1,4 @@
+
 // #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <malloc.h>
@@ -51,7 +52,7 @@ U32Swap(u32 n)
 #define RENDER_MODE_SOLID       1
 #define RENDER_MODE_CODEPOINTS  2
 #define RENDER_MODE_FONT_GLYPHS 3
-global u32 GLOBAL_RENDER_MODE = 2;
+global u32 GLOBAL_RENDER_MODE = RENDER_MODE_CODEPOINTS;
 
 internal RenderBuffer 
 AllocRenderBuffer (u16 width, u16 height, u16 debug_lines)
@@ -230,23 +231,23 @@ RenderBufferToScreen (Renderer *renderer)
         } break;
 
 
-        case RENDER_MODE_FONT_GLYPHS:
-        {
-            // for (u32 y = 0; y < GLOBAL_BITMAP_HEIGHT; ++y)
-            // {
-            //     for (u32 x = 0; x < GLOBAL_BITMAP_WIDTH; ++x)
-            //     {
-            //         u8 src_value = 0;
-            //         if((x < src_pixels_width) &&
-            //             (y < src_pixels_height))
-            //         {
-            //             src_value = src_pixels[x+(y*src_pixels_width)];
-            //         }
-            //         Color color = COLOR(src_value,src_value,src_value,255);
-            //         dst_pixels[x+(y*GLOBAL_BITMAP_WIDTH)] = color.value;
-            //     }
-            // }
-        } break;
+        // case RENDER_MODE_FONT_GLYPHS:
+        // {
+        //     // for (u32 y = 0; y < GLOBAL_BITMAP_HEIGHT; ++y)
+        //     // {
+        //     //     for (u32 x = 0; x < GLOBAL_BITMAP_WIDTH; ++x)
+        //     //     {
+        //     //         u8 src_value = 0;
+        //     //         if((x < src_pixels_width) &&
+        //     //             (y < src_pixels_height))
+        //     //         {
+        //     //             src_value = src_pixels[x+(y*src_pixels_width)];
+        //     //         }
+        //     //         Color color = COLOR(src_value,src_value,src_value,255);
+        //     //         dst_pixels[x+(y*GLOBAL_BITMAP_WIDTH)] = color.value;
+        //     //     }
+        //     // }
+        // } break;
     }
 
     // colocando bitmap na tela
