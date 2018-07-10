@@ -81,6 +81,17 @@ GetWall (u32 *map, u32 *wall_set, u32 x, u32 y)
     return res;
 }
 
+internal void
+ResetSnake (GameState *game_state)
+{
+    game_state->gomos = 0;
+    game_state->posicao_x[game_state->gomos] = SCREEN_WIDTH/2.0f;
+    game_state->posicao_y[game_state->gomos] = SCREEN_HEIGHT/2.0f;
+    game_state->dead_count = 0;
+    game_state->velocidade_x = 0.0f;
+    game_state->velocidade_y = 0.0f;
+}
+
 #define SNAKE_COLOR      COLOR(19,161,14,255)
 #define FOOD_COLOR       COLOR(249,241,165,255)
 #define WALL_COLOR       COLOR(242,242,242,255)
@@ -91,11 +102,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 {
     if(!game_state->initialized)
     {
-        game_state->posicao_x[game_state->gomos] = SCREEN_WIDTH/2.0f;
-        game_state->posicao_y[game_state->gomos] = SCREEN_HEIGHT/2.0f;
-
-        game_state->dead_count = 0;
-
+        ResetSnake(game_state);
         game_state->initialized = true;
     }
 
@@ -109,7 +116,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             if(IsOccupied(wall_map,x,y))
             {
                 SetChar(&renderer->buffer, x, y, 
-                        /*0x2588*/ GetWall(wall_map, double_walls, x,y), 
+                        /*0x2588*/ GetWall(wall_map, curved_walls, x,y), 
                         WALL_COLOR, BACKGROUND_COLOR);
             }
         }
@@ -199,34 +206,24 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         //     FILE *scores;
         //     scores = fopen("scores.txt", "a");
         //     fprintf(scores, "Score:%d\n", game_state->gomos);
-        //     fclose(scores); 
+        //     fclose(scores);
 
-        //     game_state->velocidade_x = 0.0;
-        //     game_state->velocidade_y = 0.0;
-        //     game_state->gomos=0;
-        //     game_state->posicao_x[game_state->gomos] = ((SCREEN_WIDTH)/2);
-        //     game_state->posicao_y[game_state->gomos] = ((SCREEN_HEIGHT)/2);
-            
+        //     ResetSnake(game_state);
+        
         //     game_state->dead_count += 1;
         // }
 
-        //COLISÃO ENTRE O COPOR DA SNAKE
+        // //COLISÃO ENTRE O CORPO DA SNAKE
         // for(u32 i =1; i< game_state->gomos; i++)
         // {
         //     if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
         //         (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[i])))
         //     {
-        //         game_state->velocidade_x = 0.0;
-        //         game_state->velocidade_y = 0.0;
-        //         game_state->gomos=0;
-        //         game_state->posicao_x[game_state->gomos] = ((SCREEN_WIDTH)/2);
-        //         game_state->posicao_y[game_state->gomos] = ((SCREEN_HEIGHT)/2);
-
+        //         ResetSnake(game_state);
         //     }
         // }
   
         const u32 player_char[] = {0x2588,0x2593,0x2592,0x2591};
-        // const u32 player_char[] = {'A','B','C','D'};
         const r32 player_char_count = (r32)(sizeof(player_char)/sizeof(u32));
         for(s32 i=game_state->gomos; i>=0; --i)
         {
@@ -279,7 +276,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
     //desenhando food_map com animacao
     const u32 food_char[] = {0x25AA, 0x25FE, 0x25FC, 
                              0x25A0, 0x25A0, 0x25A0,
-                             0x25FC, 0x25FE, 0x25AA};
+                             0x25FC, 0x25FE, /*0x25AA*/};
     const u32 food_char_count = sizeof(food_char)/sizeof(u32);
     game_state->food_char_index =  game_state->food_char_index+((food_char_count)*dt);
     if(game_state->food_char_index > food_char_count) game_state->food_char_index = 0.0f;

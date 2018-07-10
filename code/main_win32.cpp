@@ -183,7 +183,7 @@ RenderBufferToScreen (Renderer *renderer)
 
                                 u32 dst_value = COLOR((src_value*foreground.r) + ((1.0f-src_value)*last_color.r),
                                                       (src_value*foreground.g) + ((1.0f-src_value)*last_color.g),
-                                                      (src_value*foreground.b) + ((1.0f-src_value)*last_color.b), 255).value;
+                                                      (src_value*foreground.b) + ((1.0f-src_value)*last_color.b),255).value;
                                 
                                 dst[dst_index] = dst_value;
                             }

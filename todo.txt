@@ -1,7 +1,8 @@
 /////////////////
 ////////// TASKS
 
- - Fonte carregando espaço antes do caractere nulo
  - Operacoes de cor mais praticas
  - Ajustar SetChar p/ receber Char, evitando busca de chars
- - entender problema na altura dos chars da fonte
+ - entender problema na altura dos chars da fonte:
+    - raster do stb_truetype n gera resultados muito
+    previsiveis, afaik.
