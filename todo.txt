@@ -1,0 +1,7 @@
+/////////////////
+////////// TASKS
+
+ - Fonte carregando espaço antes do caractere nulo
+ - Operacoes de cor mais praticas
+ - Ajustar SetChar p/ receber Char, evitando busca de chars
+ - entender problema na altura dos chars da fonte

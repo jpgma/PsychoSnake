@@ -36,12 +36,11 @@ U32Swap(u32 n)
 
 #define SCREEN_WIDTH 32
 #define SCREEN_HEIGHT 16
-#define CHAR_SIZE 32
+#define CHAR_SIZE 16
 #define DEBUG_LINE_COUNT 1
 
 ///////////////////////
 // GDI Renderer
-
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
@@ -127,6 +126,26 @@ RenderBufferToScreen (Renderer *renderer)
 
         case RENDER_MODE_CODEPOINTS:
         {
+            u32 window_pixel_count = (GLOBAL_BITMAP_WIDTH*GLOBAL_BITMAP_HEIGHT);
+            for (u16 y = 0; y < (renderer->buffer.height + renderer->buffer.debug_lines); ++y)
+            {
+                for (u16 x = 0; x < renderer->buffer.width; ++x)
+                {
+                    Color color = renderer->buffer.background_colors[x+(y*renderer->buffer.width)];
+                    for (s32 yy = 0; yy < GLOBAL_FONT_HEIGHT; ++yy)
+                    {   
+                        for (s32 xx = 0; xx < GLOBAL_FONT_WIDTH; ++xx)
+                        {
+                            u32 index = ((x*GLOBAL_FONT_WIDTH)+xx) + 
+                                         (((y*GLOBAL_FONT_HEIGHT)+yy)*(GLOBAL_FONT_WIDTH*renderer->buffer.width));
+                            dst[index] = (color.value);
+                        }
+                    }
+                }
+            }
+
+            u32 advance = 0;
+            u32 baseline = renderer->font->ascent;
             GlyphHeader *glyph_headers = GLYPH_HEADERS(renderer->font);
             for (u16 y = 0; y < (renderer->buffer.height + renderer->buffer.debug_lines); ++y)
             {
@@ -141,28 +160,45 @@ RenderBufferToScreen (Renderer *renderer)
                     }
                     Color foreground = renderer->buffer.foreground_colors[index];
                     Color background = renderer->buffer.background_colors[index];
-                    s16 min_x = glyph_header->lsb;
-                    s16 min_y = renderer->font->ascent + glyph_header->min_y;
-                    for (u32 yy = 0; yy < GLOBAL_FONT_HEIGHT; ++yy)
+                    
+                    s16 min_x = advance + glyph_header->lsb;
+                    s16 min_y = baseline + glyph_header->min_y;
+                    
+                    // s32 width = ((min_x + glyph_header->width) % GLOBAL_BITMAP_WIDTH) - min_x;
+                    // s32 height = ((min_y + glyph_header->height) % GLOBAL_BITMAP_HEIGHT) - min_y;
+                    for (s32 yy = 0; yy < glyph_header->height; ++yy)
                     {   
-                        for (u32 xx = 0; xx < GLOBAL_FONT_WIDTH; ++xx)
+                        for (s32 xx = 0; xx < glyph_header->width; ++xx)
                         {
-                            r32 src_value = 0.0f;
-                            if((xx >= min_x) && (xx <= (min_x+glyph_header->width-1)) &&
-                               (yy >= min_y) && (yy <= (min_y+glyph_header->height-1)))
+                            s32 dst_index = (min_x+xx) + ((min_y+yy)*GLOBAL_BITMAP_WIDTH);
+                            if(dst_index >= 0 && dst_index < window_pixel_count)
                             {
-                                src_value = src[glyph_header->data_offset + ((xx-abs(min_x))+((yy-abs(min_y))*glyph_header->width))]/255.0f;
-                            }
+                                Color last_color = COLOR(dst[dst_index]);
+                                
+                                r32 src_value = 0.0f;
+                                {
+                                    src_value = src[glyph_header->data_offset + (xx+(yy*glyph_header->width))]/255.0f;
+                                }
 
-                            u32 dst_value = COLOR((src_value*foreground.r) + ((1.0f-src_value)*background.r),
-                                                  (src_value*foreground.g) + ((1.0f-src_value)*background.g),
-                                                  (src_value*foreground.b) + ((1.0f-src_value)*background.b), 255).value;
-                            u32 dst_index = ((x*GLOBAL_FONT_WIDTH)+xx) + 
-                                             (((y*GLOBAL_FONT_HEIGHT)+yy)*(GLOBAL_FONT_WIDTH*renderer->buffer.width));
-                            dst[dst_index] = dst_value;
+                                u32 dst_value = COLOR((src_value*foreground.r) + ((1.0f-src_value)*last_color.r),
+                                                      (src_value*foreground.g) + ((1.0f-src_value)*last_color.g),
+                                                      (src_value*foreground.b) + ((1.0f-src_value)*last_color.b), 255).value;
+                                
+                                dst[dst_index] = dst_value;
+                            }
                         }
                     }
+
+                    // forca monospaced no mundo, variacao nas debug_lines
+                    if(y < renderer->buffer.height)
+                        advance += renderer->font->max_advance;
+                        // advance += glyph_header->advance;
+                    else
+                        advance += glyph_header->advance;
+
                 }
+                advance = 0;
+                baseline += GLOBAL_FONT_HEIGHT;
             }
             // for (u16 y = 0; y < (renderer->buffer.height + renderer->buffer.debug_lines); ++y)
             // {
@@ -550,8 +586,9 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
         //SourceCodePro-Black.otf
         //SourceCodePro-Light.otf
         //SourceCodePro-Regular.otf
+        //psychosnake.ttf
         u32 block_count = sizeof(unicode_blocks)/sizeof(UnicodeBlock*);
-        renderer->font = GenerateBitmapFont("data\\seguisym.ttf", 
+        renderer->font = GenerateBitmapFont("data\\psychosnake.ttf", 
                                               unicode_blocks, block_count, 
                                               BFNT_PIXEL_FORMAT_ALPHA8, 
                                               renderer->char_size);
