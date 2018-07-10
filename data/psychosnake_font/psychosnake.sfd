@@ -23,7 +23,7 @@ OS2Version: 4
 OS2_WeightWidthSlopeOnly: 0
 OS2_UseTypoMetrics: 0
 CreationTime: 1531071785
-ModificationTime: 1531192683
+ModificationTime: 1531194255
 PfmFamily: 17
 TTFWeight: 400
 TTFWidth: 5
@@ -89,9 +89,9 @@ NameList: AGL For New Fonts
 DisplaySize: -36
 AntiAlias: 1
 FitToEm: 0
-WinInfo: 9324 36 11
+WinInfo: 9396 36 11
 AnchorClass2: "char_top""" 
-BeginChars: 1114112 127
+BeginChars: 1114112 130
 
 StartChar: u10000
 Encoding: 65536 65536 0
@@ -4200,12 +4200,11 @@ Flags: W
 LayerCount: 2
 Fore
 SplineSet
-434 466 m 29,0,-1
- 590 466 l 5,1,-1
- 590 310 l 5,2,-1
- 434 310 l 5,3,-1
- 434 466 l 29,0,-1
-434 466 m 1029,4,-1
+384 516 m 5,0,-1
+ 640 516 l 5,1,-1
+ 640 260 l 5,2,-1
+ 384 260 l 5,3,-1
+ 384 516 l 5,0,-1
 EndSplineSet
 EndChar
 
@@ -4763,6 +4762,53 @@ SplineSet
  4 199 l 5,13,-1
 EndSplineSet
 Validated: 1
+EndChar
+
+StartChar: filledbox
+Encoding: 9632 9632 127
+Width: 1024
+VWidth: 0
+LayerCount: 2
+Fore
+SplineSet
+128 772 m 5,0,-1
+ 896 772 l 5,1,-1
+ 896 4 l 5,2,-1
+ 128 4 l 5,3,-1
+ 128 772 l 5,0,-1
+EndSplineSet
+EndChar
+
+StartChar: uni25FC
+Encoding: 9724 9724 128
+Width: 1024
+VWidth: 0
+Flags: W
+LayerCount: 2
+Fore
+SplineSet
+256 644 m 5,0,-1
+ 768 644 l 5,1,-1
+ 768 133 l 5,2,-1
+ 256 132 l 5,3,-1
+ 256 644 l 5,0,-1
+EndSplineSet
+EndChar
+
+StartChar: uni25FE
+Encoding: 9726 9726 129
+Width: 1024
+VWidth: 0
+Flags: W
+LayerCount: 2
+Fore
+SplineSet
+320 580 m 5,0,-1
+ 704 580 l 5,1,-1
+ 704 197 l 5,2,-1
+ 320 196 l 5,3,-1
+ 320 580 l 5,0,-1
+EndSplineSet
 EndChar
 EndChars
 EndSplineFont

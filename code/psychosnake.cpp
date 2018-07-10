@@ -277,8 +277,9 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 
 
     //desenhando food_map com animacao
-    const u32 food_char[] = {0x25AA, 0x25FE, 0x25A0, 0x25A0, 0x25A0, 0x25A0,
-                             0x1F793, 0x1F792, 0x1F791,0x1F791, 0x1F792, 0x1F793, 0x25A0, 0x25FE};
+    const u32 food_char[] = {0x25AA, 0x25FE, 0x25FC, 
+                             0x25A0, 0x25A0, 0x25A0,
+                             0x25FC, 0x25FE, 0x25AA};
     const u32 food_char_count = sizeof(food_char)/sizeof(u32);
     game_state->food_char_index =  game_state->food_char_index+((food_char_count)*dt);
     if(game_state->food_char_index > food_char_count) game_state->food_char_index = 0.0f;
@@ -289,7 +290,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             if(IsOccupied(food_map,x,y))
             {
                 SetChar(&renderer->buffer, x, y, 
-                        0x25AA,//food_char[(u32)game_state->food_char_index], 
+                        food_char[(u32)game_state->food_char_index], 
                         FOOD_COLOR, BACKGROUND_COLOR);
             }
         }

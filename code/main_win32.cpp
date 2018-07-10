@@ -429,7 +429,22 @@ GetTimeElapsed (s64 a, s64 b, s64 perf_frequency)
 
 global b32 QUIT_REQUESTED = false;
 global b32 WINDOW_ACTIVE = true;
-global b32 WINDOW_BORDERLESS = false;
+global b32 WINDOW_BORDERLESS = true;
+
+internal void
+SetWindowBorderless (b32 make_borderless)
+{
+    ShowWindow(GLOBAL_WINDOW_HANDLE, SW_HIDE);
+    if(make_borderless)
+    {   
+        SetWindowLong(GLOBAL_WINDOW_HANDLE, GWL_STYLE, WS_TILED);
+    }
+    else
+    {
+        SetWindowLong(GLOBAL_WINDOW_HANDLE, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+    }
+    ShowWindow(GLOBAL_WINDOW_HANDLE, SW_SHOW);
+}
 
 LRESULT CALLBACK 
 WindowProcedure(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -441,20 +456,8 @@ WindowProcedure(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
             switch (wparam) 
             { 
                 case VK_F2:
-                    if(WINDOW_BORDERLESS)
-                    {
-                        ShowWindow(window, SW_HIDE);
-                        SetWindowLong(window, GWL_STYLE, WS_OVERLAPPEDWINDOW);
-                        ShowWindow(window, SW_SHOW);
-                        WINDOW_BORDERLESS = false;
-                    }
-                    else
-                    {
-                        ShowWindow(window, SW_HIDE);
-                        SetWindowLong(window, GWL_STYLE, WS_TILED);
-                        ShowWindow(window, SW_SHOW);
-                        WINDOW_BORDERLESS = true;
-                    }
+                    WINDOW_BORDERLESS = !WINDOW_BORDERLESS;
+                    SetWindowBorderless(WINDOW_BORDERLESS);
                 break;
 
                 case '1':
@@ -530,10 +533,10 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
                                     NULL, NULL, instance, NULL);
         if(window)
         {
-            // SetWindowLong(window, GWL_STYLE, 0); //remove all window styles   
             ShowWindow(window, cmd_show);
             GLOBAL_WINDOW_HANDLE = window;
             GLOBAL_WINDOW_HDC = GetDC(window);
+            SetWindowBorderless(WINDOW_BORDERLESS);
         }
         else
         {
