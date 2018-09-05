@@ -6,3 +6,8 @@
  - entender problema na altura dos chars da fonte:
     - raster do stb_truetype n gera resultados muito
     previsiveis, afaik.
+ - FPS ajustavel
+ - Suporte para multiplas resoluçoes nas fontes
+    - Transicoes animadas entre resolucoes no renderer
+ - Suporte para multiplas fontes no renderer?
+ - Caching do intervalo ascii?

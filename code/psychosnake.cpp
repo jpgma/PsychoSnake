@@ -1,4 +1,20 @@
 
+/*
+    Ideias de gameplay
+
+    - Jogo começa com visual classico, apenas blocos quadrados de 8x8, 
+    buzzes de 1-5Hz simulando som de um piezo
+    
+    - Quando alcança um certo tamanho (5 gomos?) a comida spawnada tem um efeito colorido, 
+    ao ingerir é feita a primeira transicao de resolução p/ 16x16
+
+    - Introduzir gradualmente os tipos de comida e o que causam, com efeitos visuais 
+    progressivamente psicodélicos. Usar formas geométricas presentes em alguns blocos do unicode:
+
+    - 
+
+*/
+
 internal b32
 IsOccupied (u32 *map, u32 x, u32 y)
 {
@@ -116,7 +132,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             if(IsOccupied(wall_map,x,y))
             {
                 SetChar(&renderer->buffer, x, y, 
-                        /*0x2588*/ GetWall(wall_map, curved_walls, x,y), 
+                        0x2588 /*GetWall(wall_map, curved_walls, x,y)*/, 
                         WALL_COLOR, BACKGROUND_COLOR);
             }
         }
@@ -130,7 +146,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         bool space = IS_KEY_DOWN(VK_SPACE);
         bool pause = IS_KEY_DOWN(0x50);
 
-        r32 player_speed = 8.0f;
+        r32 player_speed = 10.0f;
         // if(game_state->gomos >= 10)
         // {
         //     player_speed = 15.0f;

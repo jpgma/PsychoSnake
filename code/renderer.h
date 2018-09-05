@@ -1,4 +1,16 @@
 
+/*
+    Definicao dos structs e funcoes que compoem um renderer.
+
+    Funcoes independentes de plataforma podem ser implementadas aqui.
+    
+    Funcoes como AllocRenderBuffer, FreeRenderBuffer e RenderBufferToScreen devem
+    ser implementadas em um arquivo de uma plataforma em especifico (ex: renderer_gdi.cpp).
+
+    O struct renderer guarda variaveis especificas de plataforma em void *api, alocado em 
+    algum ponto na inicializacao do renderer.
+*/
+
 union Color
 {
     u32 value;
@@ -76,16 +88,37 @@ GetGlyphHeader (BitmapFontHeader *font, u32 codepoint)
 
 internal void
 SetChari (RenderBuffer *buffer, u16 i, 
-          u32 codepoint, Color foreground_color, Color background_color)
- {
+          u32 codepoint, Color foreground_color, Color background_color,
+          GlyphHeader *glyph_header)
+{
     if(i < (buffer->width*(buffer->height+buffer->debug_lines)))
     {
         buffer->codepoints[i] = codepoint;
         buffer->foreground_colors[i] = foreground_color;
         buffer->background_colors[i] = background_color;
-        buffer->glyph_headers[i] = 0;
+        buffer->glyph_headers[i] = glyph_header;
     }
- }
+}
+
+inline void
+SetChari (RenderBuffer *buffer, u16 i, Char c)
+{
+    SetChari(buffer, i, c.codepoint, c.foreground_color, c.background_color, c.glyph_header);
+}
+
+inline void
+SetChari (RenderBuffer *buffer, u16 i, 
+          u32 codepoint, Color foreground_color, Color background_color)
+{
+    SetChari(buffer, i, codepoint, foreground_color, background_color, 0);
+}
+
+inline void
+SetChar (RenderBuffer *buffer, u16 x, u16 y, Char c)
+{
+    u16 i = x + (y * buffer->width);
+    SetChari(buffer, i, c);
+}
 
 inline void
 SetChar (RenderBuffer *buffer, u16 x, u16 y,
