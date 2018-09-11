@@ -87,6 +87,7 @@ InitGDIRenderer (HWND window, u16 width, u16 height, u16 debug_lines, u16 char_s
         // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_A,
         // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_B,
         // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_C,
+        UNICODE_BLOCK_PRIVATE_USE_AREA_0,
     };
     u32 block_count = sizeof(unicode_blocks)/sizeof(UnicodeBlock*);
     BitmapFontHeader *font = GenerateBitmapFont("data\\stickmen.ttf", 
