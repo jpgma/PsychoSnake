@@ -1,4 +1,3 @@
-#define IS_KEY_DOWN(key) ((GetAsyncKeyState(key) & WIN32_KEY_DOWN) == WIN32_KEY_DOWN)
 #define SCREEN_WIDTH 32
 #define SCREEN_HEIGHT 16
 #define CHAR_SIZE 16
@@ -24,6 +23,22 @@ struct GameState
 };
 
 
+struct V2
+{
+    r32 x,y;
+};
+
+V2 operator + (V2 a, V2 b)
+{
+    return {a.x+b.x, a.y+b.y};
+}
+
+V2 operator * (V2 v, r32 s)
+{
+    return{v.x*s, v.y*s};
+}
+
+
 internal void 
 GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 {
@@ -36,14 +51,37 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 		
     ClearRenderBuffer(&renderer->buffer, ' ', COLOR(165,165,249,255),COLOR(165,165,249,255));
 
+	//POSICAO ESPAÇO DA TELA
+	u16 ptx;
+	u16 pty;
+
+    { // animando reta
+        
+        V2 a = {0.0f,0.0f};
+        ptx = ((u16)a.x) + (SCREEN_WIDTH/2);
+        pty = ((u16)a.y) + (SCREEN_HEIGHT/2);
+        SetChar(&renderer->buffer, ptx,pty, 0x2588, COLOR(255,0,0,50),COLOR(165,165,249,255));
+
+        V2 b = {5.0f,2.0f};
+        ptx = ((u16)b.x) + (SCREEN_WIDTH/2);
+        pty = ((u16)b.y) + (SCREEN_HEIGHT/2);
+        SetChar(&renderer->buffer, ptx,pty, 0x2588, COLOR(255,0,0,50),COLOR(165,165,249,255));
+
+        static r32 t = 0.0f;
+        t += 2.0f*dt;
+        if(t > 1.0f) t = 0.0f;
+
+        V2 p = a + (b * t);
+        ptx = ((u16)p.x) + (SCREEN_WIDTH/2);
+        pty = ((u16)p.y) + (SCREEN_HEIGHT/2);
+        SetChar(&renderer->buffer, ptx,pty, 0x2588, COLOR(0,0,0,50),COLOR(165,165,249,255));
+    }
+
 	bool up = IS_KEY_DOWN(VK_UP);
 	bool down = IS_KEY_DOWN(VK_DOWN);
 	bool left = IS_KEY_DOWN(VK_LEFT);
 	bool right = IS_KEY_DOWN(VK_RIGHT);
 
-	//POSICAO ESPAÇO DA TELA
-	u16 ptx;
-	u16 pty;
 
 	game_state->vx = (right ? 1.0 : 0.0)+(left ? -1.0 : 0.0);
 	game_state->vy = (down ? 1.0 : 0.0)+(up ? -1.0 : 0.0);
@@ -126,6 +164,6 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 	ptx = (u16)game_state->px;
 	pty = (u16)game_state->py;
 
-	SetChar(&renderer->buffer,ptx,pty,0xe000, COLOR(0,0,0,0), COLOR(0,0,0,0));
+	SetChar(&renderer->buffer,ptx,pty,0xE000, COLOR(255,0,0,0), COLOR(0,0,0,0));
 }
 

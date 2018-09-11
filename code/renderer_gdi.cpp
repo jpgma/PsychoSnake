@@ -89,7 +89,7 @@ InitGDIRenderer (HWND window, u16 width, u16 height, u16 debug_lines, u16 char_s
         // UNICODE_BLOCK_SUPPLEMENTAL_ARROWS_C,
     };
     u32 block_count = sizeof(unicode_blocks)/sizeof(UnicodeBlock*);
-    BitmapFontHeader *font = GenerateBitmapFont("data\\psychosnake.ttf", 
+    BitmapFontHeader *font = GenerateBitmapFont("data\\stickmen.ttf", 
                                                 unicode_blocks, block_count, 
                                                 BFNT_PIXEL_FORMAT_ALPHA8, 
                                                 res->char_size);
