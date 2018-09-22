@@ -15,6 +15,19 @@
 
 */
 
+#include "psychosnake.h"
+
+// TODO: fazer essas constantes variaveis
+#define SCREEN_WIDTH 32
+#define SCREEN_HEIGHT 16
+#define CHAR_SIZE 16
+#define DEBUG_LINE_COUNT 1
+
+#define TARGET_FPS 60
+#define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
+
+#define DBG_TEXT_COLOR   COLOR(59,120,255,255)
+
 internal b32
 IsOccupied (u32 *map, u32 x, u32 y)
 {

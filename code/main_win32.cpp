@@ -45,9 +45,6 @@ U32Swap(u32 n)
 #include "renderer.h"
 #include "renderer_gdi.cpp"
 
-#include "sound.h"
-#include "sound_dsound.cpp"
-
 global GDIRenderer *GDI;
 
 ///////////////////////
@@ -134,20 +131,8 @@ WindowProcedure(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
     return 0;
 }
 
-// #include "psychosnake.h"
-#include "shooterchar.cpp"
-
-
-// TODO: fazer essas constantes variaveis
-#define SCREEN_WIDTH 32
-#define SCREEN_HEIGHT 16
-#define CHAR_SIZE 16
-#define DEBUG_LINE_COUNT 1
-
-#define TARGET_FPS 60
-#define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
-
-#define DBG_TEXT_COLOR   COLOR(59,120,255,255)
+#include "psychosnake.cpp"
+// #include "shooterchar.cpp"
 
 s32 WINAPI
 WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
@@ -210,9 +195,6 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
     Renderer *renderer = InitGDIRenderer(window, SCREEN_WIDTH, SCREEN_HEIGHT, DEBUG_LINE_COUNT, CHAR_SIZE);
     GDI = (GDIRenderer*)renderer->api;
 
-    SoundMixer *sound_mixer = InitDSSoundMixer(window, 48000, 2, sizeof(s16), 1, TARGET_FPS);
-    // StartPlayingSystemBuffer(sound_mixer, true);
-
     GameState *game_state = (GameState*)calloc(1,sizeof(GameState));
 
     // iniciando o contador de tempo do windows
@@ -246,8 +228,6 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
 
             RenderBufferToScreen(renderer);
 
-            // WriteToSystemSoundBuffer(sound_mixer);
-
             // contando frames, ms_for_frame = final do frame - inicio do frame
             ++frame_count;
             s64 frame_end = GetTime();
@@ -279,8 +259,6 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
             }
 
             frame_start = frame_end;
-
-            // GetSystemSoundBufferPosition(sound_mixer);
         }
     }
 
@@ -288,12 +266,8 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
     /////////
     // desalocando memoria do programa
 
-    FreeGDIRenderer(renderer);
-    FreeDSSoundMixer(sound_mixer);
     free(game_state);
 
     end:
     return 0;
 }
-
-// #include "psychosnake.cpp"

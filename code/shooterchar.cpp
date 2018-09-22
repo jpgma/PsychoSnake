@@ -82,7 +82,6 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 	bool left = IS_KEY_DOWN(VK_LEFT);
 	bool right = IS_KEY_DOWN(VK_RIGHT);
 
-
 	//DESLOCAMENTO DO FRAME
     game_state->v.x = (right ? 1.0 : 0.0)+(left ? -1.0 : 0.0);
     game_state->v.y = (down ? 1.0 : 0.0)+(up ? -1.0 : 0.0);
