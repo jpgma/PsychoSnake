@@ -1,26 +1,38 @@
 
 /*
-    Ideias de gameplay
+   Gameplay
 
-    - Jogo começa com visual classico, apenas blocos quadrados de 8x8, 
-    buzzes de 1-5Hz simulando som de um piezo
+    - O ideia principal do jogo é introduzir mecânicas baseadas
+    nas possibilidades do formato clássico do snake.
+
+    - As mecânicas são introduzidas por meio de blocos de comida de
+    aparência sugestiva quanto às suas funções.
+
+    - 1ª etapa:         
+        - visual clássico, monocromático, snake de dois gomos, tela de 16x16 chars, char_size 32.
+        - audio retro, simples buzzes de *1-5Hz simulando som de um piezo.
+        - ao consumir *3 blocos de comida, o próximo gerado exibe uma animação que indica crescimento.
+        - ao consumir o bloco animado, a próxima etapa é introduzida.
     
-    - Quando alcança um certo tamanho (5 gomos?) a comida spawnada tem um efeito colorido, 
-    ao ingerir é feita a primeira transicao de resolução p/ 16x16
+    - 2ª etapa:
+        - tela dobra em resolução, agora 32x32, cada gomo da snake 4x4, char_size 16.
+        - som *dobra em resolução, acompanhando o tema.
+        - 
 
-    - Introduzir gradualmente os tipos de comida e o que causam, com efeitos visuais 
-    progressivamente psicodélicos. Usar formas geométricas presentes em alguns blocos do unicode:
+    - 3ª etapa:
+    - 4ª etapa:
+    - 5ª etapa:
 
-    - 
 
+    * : incerto, sujeito a experimentação
 */
 
 #include "psychosnake.h"
 
 // TODO: fazer essas constantes variaveis
-#define SCREEN_WIDTH 32
+#define SCREEN_WIDTH 16
 #define SCREEN_HEIGHT 16
-#define CHAR_SIZE 16
+#define CHAR_SIZE 32
 #define DEBUG_LINE_COUNT 1
 
 #define TARGET_FPS 60
@@ -113,13 +125,20 @@ GetWall (u32 *map, u32 *wall_set, u32 x, u32 y)
 internal void
 ResetSnake (GameState *game_state)
 {
-    game_state->gomos = 0;
-    game_state->posicao_x[game_state->gomos] = SCREEN_WIDTH/2.0f;
-    game_state->posicao_y[game_state->gomos] = SCREEN_HEIGHT/2.0f;
+    game_state->gomos = 1;
+    for (int i = 0; i < game_state->gomos+1; ++i)
+    {
+        game_state->posicao_x[i] = (SCREEN_WIDTH/2.0f) - i;
+        game_state->posicao_y[i] = SCREEN_HEIGHT/2.0f;
+    }
     game_state->dead_count = 0;
     game_state->velocidade_x = 0.0f;
     game_state->velocidade_y = 0.0f;
 }
+
+
+#define CLASSIC_COLOR_BACKGROUND COLOR(30,30,30,255)
+#define CLASSIC_COLOR_FOREGROUND COLOR(249,241,165,255)
 
 #define SNAKE_COLOR      COLOR(19,161,14,255)
 #define FOOD_COLOR       COLOR(249,241,165,255)
@@ -135,7 +154,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         game_state->initialized = true;
     }
 
-    ClearRenderBuffer(&renderer->buffer, ' ', BACKGROUND_COLOR,BACKGROUND_COLOR);
+    ClearRenderBuffer(&renderer->buffer, ' ', CLASSIC_COLOR_BACKGROUND,CLASSIC_COLOR_BACKGROUND);
 
     // desenhando mapa
     for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
@@ -146,7 +165,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             {
                 SetChar(&renderer->buffer, x, y, 
                         0x2588 /*GetWall(wall_map, curved_walls, x,y)*/, 
-                        WALL_COLOR, BACKGROUND_COLOR);
+                        CLASSIC_COLOR_FOREGROUND, CLASSIC_COLOR_BACKGROUND);
             }
         }
     }
@@ -159,7 +178,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         bool space = IS_KEY_DOWN(VK_SPACE);
         bool pause = IS_KEY_DOWN(0x50);
 
-        r32 player_speed = 10.0f;
+        r32 player_speed = 5.0f;
         // if(game_state->gomos >= 10)
         // {
         //     player_speed = 15.0f;
@@ -229,28 +248,28 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             game_state->posicao_y[0] = npy;
 
         }
-        // else
-        // {
+        else
+        {
 
-        //     FILE *scores;
-        //     scores = fopen("scores.txt", "a");
-        //     fprintf(scores, "Score:%d\n", game_state->gomos);
-        //     fclose(scores);
+            FILE *scores;
+            scores = fopen("scores.txt", "a");
+            fprintf(scores, "Score:%d\n", game_state->gomos);
+            fclose(scores);
 
-        //     ResetSnake(game_state);
+            ResetSnake(game_state);
         
-        //     game_state->dead_count += 1;
-        // }
+            game_state->dead_count += 1;
+        }
 
-        // //COLISÃO ENTRE O CORPO DA SNAKE
-        // for(u32 i =1; i< game_state->gomos; i++)
-        // {
-        //     if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
-        //         (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[i])))
-        //     {
-        //         ResetSnake(game_state);
-        //     }
-        // }
+        //COLISÃO ENTRE O CORPO DA SNAKE
+        for(u32 i =1; i< game_state->gomos; i++)
+        {
+            if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
+                (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[i])))
+            {
+                ResetSnake(game_state);
+            }
+        }
   
         const u32 player_char[] = {0x2588,0x2593,0x2592,0x2591};
         const r32 player_char_count = (r32)(sizeof(player_char)/sizeof(u32));
@@ -260,7 +279,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             u32 gomo_index = (u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH);
             u32 codepoint = 0x2588;//player_char[dist_index];
             
-            Color color = SNAKE_COLOR;
+            Color color = CLASSIC_COLOR_FOREGROUND;//SNAKE_COLOR;
             r32 damp = (game_state->gomos+2)*2;
             color.r *= (damp-i)*(1.0f/damp);
             color.g *= (damp-i)*(1.0f/damp);
@@ -268,7 +287,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             
             SetChar(&renderer->buffer, 
                     (u16)game_state->posicao_x[i], (u16)game_state->posicao_y[i], 
-                    codepoint, color, BACKGROUND_COLOR);
+                    codepoint, color, CLASSIC_COLOR_BACKGROUND);
         }   
 
         s32 SHUFFLE_X, SHUFFLE_Y;
@@ -284,14 +303,14 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             do
             {
                 SHUFFLE_X = rand()%SCREEN_WIDTH;
-                SHUFFLE_Y = rand()%(SCREEN_HEIGHT-1);
+                SHUFFLE_Y = rand()%(SCREEN_HEIGHT);
                 //COLISÃO COMIDA / CORPO SNAKE
                 for(u32 j=1; j<game_state->gomos; j++)
                 {
-                    if((SHUFFLE_X==game_state->posicao_x[j])&&(SHUFFLE_Y)==game_state->posicao_y[j])
+                    if((SHUFFLE_X == ((u32)game_state->posicao_x[j]))&&(SHUFFLE_Y==((u32)game_state->posicao_y[j])))
                     {
                         SHUFFLE_X = rand()%SCREEN_WIDTH;
-                        SHUFFLE_Y = rand()%(SCREEN_HEIGHT-1);
+                        SHUFFLE_Y = rand()%(SCREEN_HEIGHT);
                     }    
                 }
                 
@@ -316,8 +335,8 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             if(IsOccupied(food_map,x,y))
             {
                 SetChar(&renderer->buffer, x, y, 
-                        food_char[(u32)game_state->food_char_index], 
-                        FOOD_COLOR, BACKGROUND_COLOR);
+                        0x25A0,//food_char[(u32)game_state->food_char_index], 
+                        CLASSIC_COLOR_FOREGROUND, CLASSIC_COLOR_BACKGROUND);
             }
         }
     }

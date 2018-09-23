@@ -6,7 +6,6 @@
 
 #define RENDER_MODE_SOLID       1
 #define RENDER_MODE_CODEPOINTS  2
-#define RENDER_MODE_FONT_GLYPHS 3
 
 struct GDIRenderer
 {
@@ -90,7 +89,7 @@ InitGDIRenderer (HWND window, u16 width, u16 height, u16 debug_lines, u16 char_s
         UNICODE_BLOCK_PRIVATE_USE_AREA_0,
     };
     u32 block_count = sizeof(unicode_blocks)/sizeof(UnicodeBlock*);
-    BitmapFontHeader *font = GenerateBitmapFont("data\\stickmen.ttf", 
+    BitmapFontHeader *font = GenerateBitmapFont("data\\psychosnake.ttf", 
                                                 unicode_blocks, block_count, 
                                                 BFNT_PIXEL_FORMAT_ALPHA8, 
                                                 res->char_size);
@@ -122,14 +121,17 @@ InitGDIRenderer (HWND window, u16 width, u16 height, u16 debug_lines, u16 char_s
 }
 
 internal void
-FreeGDIRenderer (Renderer *renderer)
+FreeGDIRenderer (Renderer **renderer)
 {
-    GDIRenderer *gdi_renderer = (GDIRenderer*)renderer->api;
+    GDIRenderer *gdi_renderer = (GDIRenderer*)(*renderer)->api;
     free(gdi_renderer->bitmap_memory);
     free(gdi_renderer);
 
-    FreeRenderBuffer(&renderer->buffer);
-    free(renderer->font);
+    FreeRenderBuffer(&(*renderer)->buffer);
+    free((*renderer)->font);
+
+    free(*renderer);
+    *renderer = 0;
 }
 
 internal void 
@@ -246,8 +248,10 @@ RenderBufferToScreen (Renderer *renderer)
     GetClientRect(gdi_renderer->window_handle,&rect);
     s32 window_width = rect.right - rect.left;
     s32 window_height = rect.bottom - rect.top;
+    s32 window_left = (window_width - gdi_renderer->bitmap_width)/2;
+    s32 window_top = (window_height - gdi_renderer->bitmap_height)/2;
     StretchDIBits(gdi_renderer->window_hdc,
-                    0,0,window_width,window_height,
+                    window_left,window_top,gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
                     0,0,gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
                     (void*)gdi_renderer->bitmap_memory,
                     &gdi_renderer->bitmap_info,

@@ -71,7 +71,7 @@ GetTimeElapsed (s64 a, s64 b, s64 perf_frequency)
 
 global b32 QUIT_REQUESTED = false;
 global b32 WINDOW_ACTIVE = true;
-global b32 WINDOW_BORDERLESS = true;
+global b32 WINDOW_BORDERLESS = false;
 global HWND GLOBAL_WINDOW_HANDLE;
 
 internal void
@@ -107,8 +107,8 @@ WindowProcedure(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
                 case VK_NUMPAD1: GDI->render_mode = RENDER_MODE_SOLID; break;
                 case '2':
                 case VK_NUMPAD2: GDI->render_mode = RENDER_MODE_CODEPOINTS; break;
-                case '3':
-                case VK_NUMPAD3: GDI->render_mode = RENDER_MODE_FONT_GLYPHS; break;
+
+                case VK_ESCAPE: QUIT_REQUESTED = true; break;
             }
         } 
 
@@ -158,8 +158,8 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
                                          LR_DEFAULTCOLOR|LR_SHARED|LR_DEFAULTSIZE);
     if(RegisterClassExA(&wc))
     {
-        s32 window_width = (SCREEN_WIDTH*CHAR_SIZE);
-        s32 window_height = (SCREEN_HEIGHT*CHAR_SIZE);
+        s32 window_width = (SCREEN_WIDTH*CHAR_SIZE) + 48;
+        s32 window_height = (SCREEN_HEIGHT*CHAR_SIZE) + 64;
      
         s32 monitor_width = GetSystemMetrics(SM_CXSCREEN);
         s32 monitor_height = GetSystemMetrics(SM_CYSCREEN);
@@ -220,7 +220,8 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
             TranslateMessage(&msg);
             DispatchMessageA(&msg);
         }
-        if(IS_KEY_DOWN(VK_ESCAPE) || QUIT_REQUESTED) running = false;
+
+        if(QUIT_REQUESTED) running = false;
 
         if(WINDOW_ACTIVE)
         {
@@ -252,7 +253,7 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
                 wsprintf(str, "[%d FPS]", frame_count);
                 // copiar str p/ linha de debug no buffer
                 WriteDebugText(renderer, (const char *)str, DBG_TEXT_COLOR,COLOR_BLACK);
-                SetWindowText(window, str);
+                // SetWindowText(window, str);
 
                 ms_since_last_s = 0.0;
                 frame_count = 0;
@@ -267,6 +268,7 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
     // desalocando memoria do programa
 
     free(game_state);
+    FreeGDIRenderer(&renderer);
 
     end:
     return 0;
