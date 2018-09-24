@@ -1,38 +1,10 @@
 
-/*
-   Gameplay
-
-    - O ideia principal do jogo é introduzir mecânicas baseadas
-    nas possibilidades do formato clássico do snake.
-
-    - As mecânicas são introduzidas por meio de blocos de comida de
-    aparência sugestiva quanto às suas funções.
-
-    - 1ª etapa:         
-        - visual clássico, monocromático, snake de dois gomos, tela de 16x16 chars, char_size 32.
-        - audio retro, simples buzzes de *1-5Hz simulando som de um piezo.
-        - ao consumir *3 blocos de comida, o próximo gerado exibe uma animação que indica crescimento.
-        - ao consumir o bloco animado, a próxima etapa é introduzida.
-    
-    - 2ª etapa:
-        - tela dobra em resolução, agora 32x32, cada gomo da snake 4x4, char_size 16.
-        - som *dobra em resolução, acompanhando o tema.
-        - 
-
-    - 3ª etapa:
-    - 4ª etapa:
-    - 5ª etapa:
-
-
-    * : incerto, sujeito a experimentação
-*/
-
 #include "psychosnake.h"
 
 // TODO: fazer essas constantes variaveis
 #define SCREEN_WIDTH 16
 #define SCREEN_HEIGHT 16
-#define CHAR_SIZE 32
+#define CHAR_SIZE 16
 #define DEBUG_LINE_COUNT 1
 
 #define TARGET_FPS 60

@@ -1,0 +1,67 @@
+Gameplay
+
+- O ideia principal do jogo é introduzir mecânicas baseadas
+nas possibilidades do formato clássico do snake.
+
+- As mecânicas são introduzidas por meio de blocos de comida de
+aparência sugestiva quanto às suas funções.
+
+- Após a introdução das mecânicas, blocos de comida aleatórios são gerados,
+dando início a um modo de sobrevivência onde, hopefully, o player comece a 
+usar os efeitos em conjunto pra facilitar essa tarefa.
+
+- Alguns efeitos envolverão encurtamento da snake sem morte, o que permite rounds 
+de sobrevivência potencialmente infinitos, já que o espaço na tela não seria totalmente
+consumido.
+
+- O estado do mapa e snake será salvo ao sair do jogo.
+
+- Pra fins de administração de tempo faremos as 5 melhores etapas possíveis entre as
+idéias, deixando um sistema que facilite a introdução de novas etapas.
+
+- 1ª etapa:         
+    - visual clássico, monocromático, snake de dois gomos, mapa de 16x16 chars, char_size 16.
+    - audio retrô, simples buzzes de *1-5Hz simulando som de um piezo.
+    - ao consumir *3 blocos de comida, o próximo gerado exibe uma animação que indica crescimento.
+    - ao consumir o bloco animado, a próxima etapa é introduzida.
+
+- 2ª etapa:
+    - snake dobra em tamanho, cada gomo agora 2x2.
+    - som *dobra em resolução, acompanhando o tema.
+    - 
+
+- 3ª etapa:
+- 4ª etapa:
+- 5ª etapa:
+
+- Detalhes a serem determinados
+    - tempo de efeito de cada comida:
+        - permanente? - caos
+        - até a próxima comida com efeito? - limitaria interação entre efeitos
+        - tempo fixo? - 10s? a primeira etapa teria que estabelecer esse fato
+        - todas as alternativas? - dificulta o surgimento de estratégias emergentes, imprevisível/difícil de prever.
+    - introdução dos efeitos:
+        - reintrodução de cada efeito em ordem após morte
+            - cansativo, aumenta barreira de entrada, diminuir "replay value" do jogo.
+            - facilita a criação de exemplos de introdução, visto que o estado anterior pode ser previsto.
+        - introduzir efeitos ainda não introduzidos até o momento da morte:
+            - demanda bons exemplos de introdução, independentes de estado anterior, o que é bom dada a natureza
+            (semi?) aleatória do modo principal de sebrevivência.
+            - efeitos podem ser esquecidos ou não assimilados.
+
+- *Ideias:
+    - bloco de comida com efeito colorido em ondas, cores contrastantes, psicodélicas.
+    Faz com que o cenário se mova em padrões similares a animação da comida.
+    - bloco de comida que se movimenta verticalmente, faz a snake "serpentear", se mover
+    como uma cobra real.
+    - paredes podem ser trincadas e quebradas com snakes de "massa" suficiente; 
+    tamanho do gomo? qtd de gomos? tipos de parede?
+    - bloco que parece se desintegrar, faz com que a snake deixe pra trás alguns gomos; 
+    variação nas cores do bloco determinam o que acontece com os gomos dropados? (desintegram depois de um tempo, viram paredes)
+    interação com blocos anteriores?
+    - bloco que vira parede depois de um tempo se não consumido.
+    - bloco maior, desce visualmente ao longo dos gomos da snake e termina em grande gomo no centro, como uma cobra comendo uma animal maior.
+    
+
+
+* : incerto, sujeito a experimentação
