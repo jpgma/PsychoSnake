@@ -12,6 +12,10 @@
 
 #define DBG_TEXT_COLOR   COLOR(59,120,255,255)
 
+
+enum FOOD_ID { FOODTYPE1=1, FOODTYPE2, FOODTYPE3, FOODTYPE4, FOODTYPE5}
+
+
 internal b32
 IsOccupied (u32 *map, u32 x, u32 y)
 {
@@ -111,6 +115,7 @@ ResetSnake (GameState *game_state)
 
 #define CLASSIC_COLOR_BACKGROUND COLOR(30,30,30,255)
 #define CLASSIC_COLOR_FOREGROUND COLOR(249,241,165,255)
+#define CLASSIC_COLOR_BLACK COLOR(0,0,0,0)
 
 #define SNAKE_COLOR      COLOR(19,161,14,255)
 #define FOOD_COLOR       COLOR(249,241,165,255)
@@ -124,6 +129,9 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
     {
         ResetSnake(game_state);
         game_state->initialized = true;
+        game_state->food_px = rand()%SCREEN_WIDTH;
+        game_state->food_py = rand()%SCREEN_HEIGHT;
+        game_state->food_type = rand()%5+1;
     }
 
     ClearRenderBuffer(&renderer->buffer, ' ', CLASSIC_COLOR_BACKGROUND,CLASSIC_COLOR_BACKGROUND);
@@ -262,10 +270,10 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
                     codepoint, color, CLASSIC_COLOR_BACKGROUND);
         }   
 
-        s32 SHUFFLE_X, SHUFFLE_Y;
+        s32 shuffle_x, shuffle_y;
 
-        //SETANDO COMINDA RANDOM 
-        if(IsOccupied(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0]))
+       //SETANDO COMINDA RANDOM 
+        /*if(IsOccupied(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0]))
         {
             SetMapBlock(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0],0);
             
@@ -274,21 +282,50 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             game_state->posicao_y[game_state->gomos] = game_state->posicao_y[game_state->gomos-1];
             do
             {
-                SHUFFLE_X = rand()%SCREEN_WIDTH;
-                SHUFFLE_Y = rand()%(SCREEN_HEIGHT);
+                shuffle_x = rand()%SCREEN_WIDTH;
+                shuffle_y = rand()%(SCREEN_HEIGHT);
                 //COLISÃO COMIDA / CORPO SNAKE
                 for(u32 j=1; j<game_state->gomos; j++)
                 {
-                    if((SHUFFLE_X == ((u32)game_state->posicao_x[j]))&&(SHUFFLE_Y==((u32)game_state->posicao_y[j])))
+                    if((shuffle_x == ((u32)game_state->posicao_x[j]))&&(shuffle_y==((u32)game_state->posicao_y[j])))
                     {
-                        SHUFFLE_X = rand()%SCREEN_WIDTH;
-                        SHUFFLE_Y = rand()%(SCREEN_HEIGHT);
+                        shuffle_x = rand()%SCREEN_WIDTH;
+                        shuffle_y = rand()%(SCREEN_HEIGHT);
                     }    
                 }
                 
-            }while(IsOccupied(wall_map, SHUFFLE_X, SHUFFLE_Y));
+            }while(IsOccupied(wall_map, shuffle_x, shuffle_y));
 
-            SetMapBlock(food_map, SHUFFLE_X,SHUFFLE_Y,1);
+            SetMapBlock(food_map, shuffle_x,shuffle_y,1);
+        }*/
+
+
+
+        if((((u32)game_state->posicao_x[0]==game_state->food_px)&&((u32)game_state->posicao_y[0])==game_state->food_py))
+        {
+            game_state->gomos++;
+            game_state->posicao_x[game_state->gomos] = game_state->posicao_x[game_state->gomos-1];
+            game_state->posicao_y[game_state->gomos] = game_state->posicao_y[game_state->gomos-1];
+
+            game_state->food_px = rand()%SCREEN_WIDTH;
+            game_state->food_py = rand()%SCREEN_HEIGHT;
+
+            for(u32 j=1; j<game_state->gomos; j++)
+            {
+                if((game_state->food_px == ((u32)game_state->posicao_x[j]))&&(game_state->food_py==((u32)game_state->posicao_y[j])))
+                {
+                    game_state->food_px = rand()%SCREEN_WIDTH;
+                    game_state->food_py = rand()%(SCREEN_HEIGHT);
+                }    
+            }
+
+            game_state->food_type = rand()%5+1;
+
+        }    
+        if(IsOccupied(wall_map, game_state->food_px, game_state->food_py))
+        {
+            game_state->food_px = rand()%SCREEN_WIDTH;
+            game_state->food_py = rand()%SCREEN_HEIGHT;  
         }
     }
 
@@ -300,7 +337,43 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
     const u32 food_char_count = sizeof(food_char)/sizeof(u32);
     game_state->food_char_index =  game_state->food_char_index+((food_char_count)*dt);
     if(game_state->food_char_index > food_char_count) game_state->food_char_index = 0.0f;
-    for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
+    
+    switch(game_state->food_type)
+    {
+        case FOODTYPE1:
+            Color color1 = COLOR(66, 194, 244, 0);
+            SetChar(&renderer->buffer, 
+                (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color1,CLASSIC_COLOR_BLACK);
+        break;
+
+        case FOODTYPE2:
+            Color color2 = COLOR(78,41,173,0);
+            SetChar(&renderer->buffer, 
+                (u16)game_state->food_px, (u16)game_state->food_py, 0x25FE, color2,CLASSIC_COLOR_BLACK);
+        break;
+
+        case FOODTYPE3:
+            Color color3 = COLOR(3,157,196,0);
+            SetChar(&renderer->buffer, 
+                (u16)game_state->food_px, (u16)game_state->food_py, 0x25A0, color3,CLASSIC_COLOR_BLACK);
+        break;
+
+        case FOODTYPE4:
+            Color color4 = COLOR(60, 69, 242,0);
+            SetChar(&renderer->buffer, 
+                (u16)game_state->food_px, (u16)game_state->food_py, 0x1F793, color4,CLASSIC_COLOR_BLACK);
+        break;
+
+        case FOODTYPE5:
+            Color color5 = COLOR(11,58,119,0);
+            SetChar(&renderer->buffer, 
+                (u16)game_state->food_px, (u16)game_state->food_py, 0x1F791, color5,CLASSIC_COLOR_BLACK);
+        break;
+    }
+
+
+
+    /*for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
     {
         for (u32 x = 0; x < SCREEN_WIDTH; ++x)
         {
@@ -311,6 +384,6 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
                         CLASSIC_COLOR_FOREGROUND, CLASSIC_COLOR_BACKGROUND);
             }
         }
-    }
+    }*/
 
 }

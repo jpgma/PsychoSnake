@@ -168,7 +168,9 @@ struct GameState
     r32 velocidade_x;
     r32 velocidade_y;
     s32 gomos = 0;
-
+    u32 food_type;
+    u32 food_px;
+    u32 food_py;
     r32 food_char_index;
 };
 
