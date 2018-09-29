@@ -13,8 +13,12 @@
         s32 cp_segment_deltas[cp_segment_count]
             - cp_segment_ends, cp_segment_starts e cp_segment_deltas 
             representam os intervalos de caracteres colocados na fonte. 
-            A posicao do bitmap do caractere e obtida pela subtracao do
+            A posicao do bitmap do caractere e obtida pela adição do
             cp_segment_deltas correspondente ao intervalo contendo o caractere.
+
+        HeightGroupHeader height_group_headers[height_group_count]
+            - Headers com informações específicas das resoulções de
+            glyphs presentes, escala pra métricas.
 
         GlyphHeader glyph_headers[glyph_count]
             - Headers com informacoes do offset de cada bitmap e
@@ -22,6 +26,7 @@
 
         u8 glyph_data[glyph_data_size]
             - Bytes dos pixels representando os caracteres da fonte.
+            u32 scaled_glyph_data_offset[height_group_count]
 
         exemplo:
             caracteres representados: "123ABCabc" + 255
@@ -96,18 +101,24 @@ global s32 BFNT_PIXEL_FORMAT_BPP[] =
 
 struct GlyphHeader
 {
-    s16 min_x;
-    s16 min_y;
-    s16 max_x;
-    s16 max_y;
+    s16 raw_min_x;
+    s16 raw_min_y;
+    s16 raw_max_x;
+    s16 raw_max_y;
 
-    u16 width;
-    u16 height;
+    u16 raw_width;
+    u16 raw_height;
     
-    s16 lsb;
-    s16 advance;
+    s16 raw_lsb;
+    s16 raw_advance;
     
     u32 data_offset;
+};
+
+struct HeightGroupHeader
+{
+    u32 height;
+    r32 scale;
 };
 
 struct BitmapFontHeader
@@ -117,265 +128,128 @@ struct BitmapFontHeader
     
     u32 glyph_count;
     u32 glyph_data_size;
-    
-    s16 ascent;
-    s16 descent;
-    s16 line_gap;
-    u16 max_advance;
+
+    s16 raw_ascent;
+    s16 raw_descent;
+    s16 raw_line_gap;
+    u16 raw_max_advance;
 
     u16 cp_encoding;
     u16 cp_segment_count;
+
+    u32 height_group_count;
 };
-#define CP_SEGMENT_ENDS(header)   ((u32*)((header)+1))
-#define CP_SEGMENT_STARTS(header) (((u32*)((header)+1))+(header)->cp_segment_count)
-#define CP_SEGMENT_DELTAS(header) (((s32*)((header)+1))+((header)->cp_segment_count*2))
-#define GLYPH_HEADERS(header) ((GlyphHeader*)(((s32*)((header)+1))+((header)->cp_segment_count*3)))
-#define GLYPH_DATA(header) (((u8*)((header)+1))+((header)->cp_segment_count*sizeof(u32)*3)+((header)->glyph_count*sizeof(GlyphHeader)))
 
 #pragma pack(pop)
 
-inline r32
-Round (r32 n)
+struct BitmapFont
 {
-    r32 res = n;
-    // n -= ((u64)n);
-    // if(n <= 0.5f)
-    //     res = floorf(res);
-    // else
-    //     res = ceilf(res);
-    return res;
-}
+    BitmapFontHeader *header;
 
-internal u32 
-GetGlyphIndex (BitmapFontHeader *font, u32 codepoint)
-{
-    u32 res = 0;
-    if(font)
-    {
-        u32 *cp_segment_ends = CP_SEGMENT_ENDS(font);
-        u32 *cp_segment_starts = CP_SEGMENT_STARTS(font);
-        s32 *cp_segment_deltas = CP_SEGMENT_DELTAS(font);
-        for (u32 i = 0; i < font->cp_segment_count; ++i)
-        {
-            if((cp_segment_ends[i] >= codepoint) &&
-                (cp_segment_starts[i] <= codepoint))
-            {
-                res = codepoint + cp_segment_deltas[i];
-                break;
-            }
-        }
-        // u32 x = (index%font->glyph_count_x);
-        // u32 y = (index/font->glyph_count_x);
-        // res = (x*font->glyph_width) + (y*font->glyph_count_x*font->glyph_width*font->glyph_height);
-    }
-    return res;
-}
+    u32 *cp_segment_ends;
+    u32 *cp_segment_starts;
+    u32 *cp_segment_deltas;
+    
+    HeightGroupHeader *height_group_headers;
 
-internal BitmapFontHeader *
-GenerateBitmapFont (const char *filename, 
-                    UnicodeBlock *unicode_blocks,
-                    u32 block_count, 
-                    u16 pixel_format, 
-                    u16 glyph_height)
+    GlyphHeader *glyph_headers;
+
+    u8 *glyph_data;
+
+    u32 font_size;
+};
+
+internal BitmapFont
+LoadBitmapFont (const char *filename)
 {
-    BitmapFontHeader *res = 0;
-    u16 glyph_width = glyph_height;
+    BitmapFont res = {};
 
     u8 *font_data = 0;
+    s64 font_data_size = 0;
     FILE *f = fopen(filename, "rb");
     if(f)
     {
         fseek(f, 0, SEEK_END);
-        long fsize = ftell(f);
+        font_data_size = ftell(f);
         fseek(f, 0, SEEK_SET);
-        font_data = (u8*)calloc(1,fsize);
-        fread(font_data, 1, fsize, f);
+        font_data = (u8*)calloc(1,font_data_size);
+        fread(font_data, 1, font_data_size, f);
+    }
+
+    if(font_data)
+    {
+        // com infos do header, checar se completa
+        res.header = (BitmapFontHeader *)font_data;
+        res.cp_segment_ends = (u32*)(res.header + 1);
+        res.cp_segment_starts = res.cp_segment_ends + res.header->cp_segment_count;
+        res.cp_segment_deltas = res.cp_segment_starts + res.header->cp_segment_count;
+        res.height_group_headers = (HeightGroupHeader*)(res.cp_segment_deltas + res.header->cp_segment_count);
+        res.glyph_headers = (GlyphHeader*)(res.height_group_headers + res.header->height_group_count);
+        res.glyph_data = (u8*)(res.glyph_headers + res.header->glyph_count);
+        res.font_size = font_data_size;
     }
     else
     {
-        printf("n foi possivel abrir arquivo \"%s\"\n", filename);
-        goto end;
+        // notificar erro
+        assert(0);
     }
 
-    // inicando fonte do stb truetype
-    stbtt_fontinfo font;
-    stbtt_InitFont(&font, font_data, stbtt_GetFontOffsetForIndex(font_data,0));
-    r32 glyph_scale = stbtt_ScaleForPixelHeight(&font, glyph_height);
 
-    u32 glyph_count = 1; // p/ caractere indefinido
-    for (u32 i = 0; i < block_count; ++i)
-    {
-        glyph_count += (unicode_blocks[i].last - unicode_blocks[i].first) + 1;
-    }
-    u32 undefined_codepoints = 0;
-    u32 *chars = (u32*)calloc(glyph_count,sizeof(u32));
-    u32 *c = chars+1;
-    for (u32 i = 0; i < block_count; ++i)
-    {
-        u32 first = unicode_blocks[i].first;
-        u32 last = unicode_blocks[i].last;
-        for (u32 j = first; j <= last; ++j)
-        {
-            s32 index = stbtt_FindGlyphIndex(&font, j);
-            if(index != 0)
-            {
-                *(c++) = j;
-            }
-            else
-            {
-                ++undefined_codepoints;
-            }
-        }
-    }
-
-    // ordenando codepoints
-    for (s32 i = 0; i < glyph_count; ++i)
-    {
-        for (s32 j = i+1; j < glyph_count; ++j)
-        {
-            if(chars[j] < chars[i])
-            {
-                u32 a = chars[i];
-                chars[i] = chars[j];
-                chars[j] = a;
-            }
-        }
-    }
-
-    // movendo codepoints para que fique apenas um undefined, hopefully
-    if(undefined_codepoints > 0)
-    {
-        undefined_codepoints += 1;
-        // printf("u:%.4x\n", chars[undefined_codepoints]);
-        for (s32 i = undefined_codepoints; i < glyph_count; ++i)
-        {
-            chars[i-undefined_codepoints+1] = chars[i];
-        }
-        glyph_count -= undefined_codepoints-1;
-    }
-
-    for (s32 i = 0; i < glyph_count; ++i)
-    {
-        printf("-u:%u ", chars[i]);
-    }
-
-    // contando segmentos de chars
-    u16 cp_segment_count = 1;
-    for (s32 i = 1; i < glyph_count; ++i)
-    {
-        if(chars[i]-chars[i-1] > 1)
-            ++cp_segment_count;
-    }
-    // printf("cp_segment_count:%u\n", cp_segment_count);
-  
-    u32 glyph_data_size = 0;
-    for (s32 i = 0; i < glyph_count; ++i)
-    {
-        s32 ix0,iy0,ix1,iy1;
-        stbtt_GetCodepointBitmapBox(&font, chars[i], 
-                                    glyph_scale,glyph_scale, 
-                                    &ix0, &iy0, &ix1, &iy1);
-        u32 pixel_count = abs(ix1-ix0)*abs(iy1-iy0);
-        glyph_data_size += pixel_count;
-    }
-    u32 res_data_size = sizeof(BitmapFontHeader) + 
-                        (sizeof(u32)*cp_segment_count) + 
-                        (sizeof(u32)*cp_segment_count) + 
-                        (sizeof(s32)*cp_segment_count) +
-                        (sizeof(GlyphHeader)*glyph_count) +
-                        glyph_data_size;
-    u8 *res_data = (u8*)calloc(res_data_size,1);
-
-    res = (BitmapFontHeader*)res_data;
-    res->tag = 'bfnt';
-    res->flags = pixel_format;
-    res->glyph_count = glyph_count;
-    res->cp_encoding = BFNT_ENCODING_UNICODE_FULL;
-    res->cp_segment_count = cp_segment_count;
-    s32 ascent, descent, line_gap;
-    stbtt_GetFontVMetrics(&font, &ascent, &descent, &line_gap);
-    res->ascent = Round(ascent*glyph_scale);
-    res->descent = Round(descent*glyph_scale);
-    res->line_gap = Round(line_gap*glyph_scale);
-
-    u32 *cp_segment_ends = CP_SEGMENT_ENDS(res);
-    u32 *cp_segment_starts = CP_SEGMENT_STARTS(res);
-    s32 *cp_segment_deltas = CP_SEGMENT_DELTAS(res);
-
-    // preenchendo glyph headers
-    u32 offset = 0;
-    GlyphHeader *glyph_headers = GLYPH_HEADERS(res);
-    for (u32 i = 0; i < glyph_count; ++i)
-    {
-        u32 gi = stbtt_FindGlyphIndex(&font, chars[i]);
-
-        s32 ix0,iy0,ix1,iy1, lsb, advance;
-        stbtt_GetGlyphBitmapBox(&font, gi, 
-                                glyph_scale,glyph_scale, 
-                                &ix0, &iy0, &ix1, &iy1);
-        stbtt_GetGlyphHMetrics(&font, gi, &advance, &lsb);
-
-        glyph_headers[i].min_x = ix0;
-        glyph_headers[i].min_y = iy0;
-        glyph_headers[i].max_x = ix1;
-        glyph_headers[i].max_y = iy1;
-
-        glyph_headers[i].width = abs(ix1-ix0);
-        glyph_headers[i].height = abs(iy1-iy0);
-
-        glyph_headers[i].lsb = Round(lsb*glyph_scale);
-        glyph_headers[i].advance = Round(advance*glyph_scale);
-        if(glyph_headers[i].advance > res->max_advance)
-            res->max_advance = glyph_headers[i].advance;
-
-        glyph_headers[i].data_offset = offset;
-        offset += (glyph_headers[i].width*glyph_headers[i].height);
-    }
-
-    // computando ends, starts e deltas
-    u16 cur_segment = 0;
-    cp_segment_starts[0] = chars[0];
-    s32 delta = -cp_segment_starts[0];
-    for (s32 i = 1; i < glyph_count; ++i)
-    {
-        if(chars[i]-chars[i-1] > 1)
-        {
-            cp_segment_ends[cur_segment] = chars[i-1];
-            cp_segment_deltas[cur_segment] = delta;
-
-            if((cur_segment+1) < cp_segment_count)
-            {
-                cp_segment_starts[cur_segment+1] = chars[i];
-                delta = -cp_segment_starts[cur_segment+1] + i;
-            }
-
-            ++cur_segment;
-        }
-        
-        if(i == glyph_count-1)
-        {
-            if(chars[i]-chars[i-1] > 1)
-                cp_segment_starts[cur_segment] = chars[i];
-            cp_segment_ends[cur_segment] = chars[i];
-            cp_segment_deltas[cur_segment] = delta;
-        }
-    }
-
-    u8 *glyph_data = GLYPH_DATA(res);
-
-    for (s32 i = 0; i < glyph_count; ++i)
-    {
-        u32 gi = stbtt_FindGlyphIndex(&font, chars[i]);
-        
-        GlyphHeader gh = glyph_headers[i];
-        u8 *dst = glyph_data + gh.data_offset;
-
-        stbtt_MakeGlyphBitmap(&font, dst, gh.width, gh.height, gh.width, glyph_scale,glyph_scale, gi);
-    }
-    
-    free(chars);
-
-    end:
-    if(font_data) free(font_data);
     return res;
+}
+
+internal u32 
+GetGlyphIndex (BitmapFont font, u32 codepoint)
+{
+    u32 res = 0;
+
+    for (u32 i = 0; i < font.header->cp_segment_count; ++i)
+    {
+        if((font.cp_segment_ends[i] >= codepoint) &&
+            (font.cp_segment_starts[i] <= codepoint))
+        {
+            res = codepoint + font.cp_segment_deltas[i];
+            break;
+        }
+    }
+
+    return res;
+}
+
+internal s32
+GetExactHeightIndex (BitmapFont font, u32 height)
+{
+    s32 res = -1;
+
+    for (s32 i = 0; i < font.header->height_group_count; ++i)
+    {
+        if(font.height_group_headers[i].height == height)
+        {
+            res = i;
+            break;
+        }
+    }
+
+    return res;
+}
+
+internal u8 *
+GetScaledGlyphData (BitmapFont font, u32 glyph_index, u32 height_index)
+{
+    assert(glyph_index < font.header->glyph_count);
+    assert(height_index < font.header->height_group_count);
+ 
+    u8 *res = 0;
+
+    GlyphHeader *header = font.glyph_headers + glyph_index;
+    u32 scaled_data_offset = ((u32*)(font.glyph_data + header->data_offset))[height_index];
+    res = font.glyph_data + scaled_data_offset;
+
+    return res;
+}
+
+internal void
+FreeBitmapFont (BitmapFont font)
+{
+    free(font.header);
 }

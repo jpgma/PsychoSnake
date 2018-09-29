@@ -28,7 +28,6 @@ idéias, deixando um sistema que facilite a introdução de novas etapas.
 - 2ª etapa:
     - snake dobra em tamanho, cada gomo agora 2x2.
     - som *dobra em resolução, acompanhando o tema.
-    - 
 
 - 3ª etapa:
 - 4ª etapa:
@@ -61,7 +60,9 @@ idéias, deixando um sistema que facilite a introdução de novas etapas.
     interação com blocos anteriores?
     - bloco que vira parede depois de um tempo se não consumido.
     - bloco maior, desce visualmente ao longo dos gomos da snake e termina em grande gomo no centro, como uma cobra comendo uma animal maior.
-    
+    - bloco que rotaciona no próprio eixo, gira o cenário na direção em que anima, 90º?
+    - blocos de comida permanecem visíveis onde se juntaram a snake, perdendo o efeito só quando se desprendem
+
 
 
 * : incerto, sujeito a experimentação

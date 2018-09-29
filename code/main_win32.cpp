@@ -5,43 +5,13 @@
 // TODO: eliminar no futuro!
 #include <windows.h>
 #include <malloc.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 #include <dsound.h>
 #include <math.h>
 
-///////////////////////
-// Definicoes basicas
-
-typedef uint64_t u64;
-typedef uint32_t u32;
-typedef uint16_t u16;
-typedef uint8_t u8;
-typedef int64_t s64;
-typedef int32_t s32;
-typedef int16_t s16;
-typedef int8_t s8;
-typedef float r32;
-typedef double r64;
-typedef u32 b32;
-#define internal static;
-#define global static;
-#define assert(x) {if(!(x)) *((int*)0) = 0;}
-
-#define PI (3.1415927)
-
-inline u32 
-U32Swap(u32 n)
-{ // funcao p/ inverter um u32 (endianness)
-    n = ((n << 8) & 0xFF00FF00 ) | ((n >> 8) & 0xFF00FF ); 
-    return (n << 16) | (n >> 16);
-}
-
-#define STB_TRUETYPE_IMPLEMENTATION
-#include "stb_truetype.h"
+#include "types.h"
 #include "bitmap_font.cpp"
-
 #include "renderer.h"
 #include "renderer_gdi.cpp"
 
@@ -192,7 +162,10 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
         goto end;
     }
 
-    Renderer *renderer = InitGDIRenderer(window, SCREEN_WIDTH, SCREEN_HEIGHT, DEBUG_LINE_COUNT, CHAR_SIZE);
+    Renderer *renderer = InitGDIUnicodeRenderer(window,
+                                                "data\\psychosnake.bfnt",
+                                                SCREEN_WIDTH, SCREEN_HEIGHT, 
+                                                DEBUG_LINE_COUNT, CHAR_SIZE);
     GDI = (GDIRenderer*)renderer->api;
 
     GameState *game_state = (GameState*)calloc(1,sizeof(GameState));
@@ -225,6 +198,11 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
 
         if(WINDOW_ACTIVE)
         {
+            static r32 char_size = renderer->char_size;
+            if(IS_KEY_DOWN(VK_ADD))      char_size += 4.0f;
+            if(IS_KEY_DOWN(VK_SUBTRACT)) char_size -= 4.0f;
+            renderer->char_size = char_size;
+
             GameUpdateAndRender(game_state,renderer,dt);
 
             RenderBufferToScreen(renderer);

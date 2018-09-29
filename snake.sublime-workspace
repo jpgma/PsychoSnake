@@ -4,12 +4,208 @@
 		"selected_items":
 		[
 			[
-				"Get",
-				"GetTime"
+				"rende",
+				"renderer"
+			],
+			[
+				"gly",
+				"glyph_index"
+			],
+			[
+				"glyph",
+				"glyph_headers"
+			],
+			[
+				"glyp",
+				"glyph_index"
+			],
+			[
+				"src",
+				"src_value"
+			],
+			[
+				"render",
+				"renderer"
+			],
+			[
+				"scale",
+				"scaled_height"
+			],
+			[
+				"glyphhe",
+				"glyph_header"
+			],
+			[
+				"scaled",
+				"scaled_width"
+			],
+			[
+				"heigh",
+				"height_index"
+			],
+			[
+				"hei",
+				"height_group_count"
+			],
+			[
+				"res_da",
+				"res_data_size"
+			],
+			[
+				"font",
+				"font_size"
+			],
+			[
+				"g",
+				"glyph_headers"
+			],
+			[
+				"he",
+				"header"
+			],
+			[
+				"glyph_sc",
+				"glyph_scales"
+			],
+			[
+				"glyh",
+				"glyph_height_count"
 			],
 			[
 				"bitma",
-				"bitmap_memory"
+				"bitmap_memory_size"
+			],
+			[
+				"chars",
+				"char_size"
+			],
+			[
+				"gdi",
+				"gdi_renderer"
+			],
+			[
+				"fi",
+				"font_data_size"
+			],
+			[
+				"fontda",
+				"font_data_size"
+			],
+			[
+				"cpsegm",
+				"cp_segment_starts"
+			],
+			[
+				"cpse",
+				"cp_segment_ends"
+			],
+			[
+				"Bitma",
+				"BitmapFontHeader"
+			],
+			[
+				"height",
+				"height_group_headers"
+			],
+			[
+				"Get",
+				"GetGlyphHeader"
+			],
+			[
+				"GetGl",
+				"GetGlyphData"
+			],
+			[
+				"GetC",
+				"GetCPSegmentEnds"
+			],
+			[
+				"He",
+				"HeightGroupHeader"
+			],
+			[
+				"heightgrou",
+				"height_group_count"
+			],
+			[
+				"fist",
+				"first_data_offset"
+			],
+			[
+				"GL",
+				"GLYPH_HEADERS"
+			],
+			[
+				"HE",
+				"HeightGroupHeader"
+			],
+			[
+				"Font",
+				"BitmapFontHeader"
+			],
+			[
+				"heihg",
+				"height_index"
+			],
+			[
+				"glyphsca",
+				"glyph_scales"
+			],
+			[
+				"glyphhei",
+				"glyph_height_count"
+			],
+			[
+				"glyphs",
+				"glyph_size_count"
+			],
+			[
+				"UPda",
+				"UpdateStage01"
+			],
+			[
+				"pos",
+				"posicao_y"
+			],
+			[
+				"CLASSI",
+				"CLASSIC_COLOR_BACKGROUND"
+			],
+			[
+				"CLA",
+				"CLASSIC_COLOR_BACKGROUND"
+			],
+			[
+				"SPA",
+				"SPACEBLOCKTYPE_EMPTY"
+			],
+			[
+				"spa",
+				"space_block_type"
+			],
+			[
+				"SCREE",
+				"SCREEN_WIDTH"
+			],
+			[
+				"SCRE",
+				"SCREEN_WIDTH"
+			],
+			[
+				"foo",
+				"food_in_snake"
+			],
+			[
+				"foo_in",
+				"food_in_wall"
+			],
+			[
+				"SH",
+				"SHUFFLE_X"
+			],
+			[
+				"pause",
+				"paused"
 			],
 			[
 				"bim",
@@ -102,10 +298,6 @@
 			[
 				"sta",
 				"stage_index"
-			],
-			[
-				"SCRE",
-				"SCREEN_WIDTH"
 			],
 			[
 				"fade",
@@ -212,16 +404,8 @@
 				"ds_buffer"
 			],
 			[
-				"font",
-				"font_height"
-			],
-			[
 				"red",
 				"renderer"
-			],
-			[
-				"rende",
-				"render_mode"
 			],
 			[
 				"window",
@@ -330,200 +514,42 @@
 			[
 				"ope",
 				"operation_logs"
-			],
-			[
-				"da",
-				"day_logs"
-			],
-			[
-				"mai",
-				"account_mail"
-			],
-			[
-				"file",
-				"filename"
-			],
-			[
-				"lo",
-				"loaded_log"
-			],
-			[
-				"rend",
-				"renda"
-			],
-			[
-				"renda",
-				"renda_accum"
-			],
-			[
-				"banca",
-				"banca_atual"
-			],
-			[
-				"gomo",
-				"gomos"
-			],
-			[
-				"vel",
-				"velocidade_y"
-			],
-			[
-				"v",
-				"velocidade_x"
-			],
-			[
-				"cur",
-				"curx"
-			],
-			[
-				"Set",
-				"SetChar"
-			],
-			[
-				"GLOBA",
-				"GLOBAL_WINDOW_HANDLE"
-			],
-			[
-				"WINDOW",
-				"WINDOW_BORDERLESS"
-			],
-			[
-				"RENDE",
-				"RENDER_MODE_CODEPOINTS"
-			],
-			[
-				"COLOR",
-				"BACKGROUND_COLOR"
-			],
-			[
-				"Colo",
-				"COLOR"
-			],
-			[
-				"windwo",
-				"window_pixel_count"
-			],
-			[
-				"se",
-				"seguisym"
-			],
-			[
-				"GLOBAL",
-				"GLOBAL_BITMAP_WIDTH"
-			],
-			[
-				"min",
-				"min_x"
-			],
-			[
-				"glyph",
-				"glyph_header"
-			],
-			[
-				"GLOBALFONT",
-				"GLOBAL_FONT_HEIGHT"
-			],
-			[
-				"GLOL",
-				"GLOBAL_BITMAP_HEIGHT"
-			],
-			[
-				"uni",
-				"unifont-11"
-			],
-			[
-				"gly",
-				"glyph_header"
-			],
-			[
-				"FON",
-				"GLOBAL_FONT_WIDTH"
-			],
-			[
-				"dst",
-				"dst_value"
-			],
-			[
-				"GloBA",
-				"GLOBAL_FONT_WIDTH"
-			],
-			[
-				"GLO",
-				"GLOBAL_FONT_WIDTH"
-			],
-			[
-				"GLOBAL_FONT",
-				"GLOBAL_FONT_WIDTH"
-			],
-			[
-				"rene",
-				"renderer-"
-			],
-			[
-				"max",
-				"max_advance"
-			],
-			[
-				"u",
-				"u16"
-			],
-			[
-				"as",
-				"ascent"
-			],
-			[
-				"w",
-				"width"
-			],
-			[
-				"glyphhe",
-				"glyph_headers"
-			],
-			[
-				"a",
-				"advance"
-			],
-			[
-				"iy",
-				"iy1"
-			],
-			[
-				"ix",
-				"ix1"
-			],
-			[
-				"GLY",
-				"GLYPH_HEADERS"
-			],
-			[
-				"glyphd",
-				"glyph_data_size"
-			],
-			[
-				"G",
-				"GlyphHeader"
-			],
-			[
-				"glyphco",
-				"glyph_count"
-			],
-			[
-				"cpse",
-				"cp_segment_ends"
-			],
-			[
-				"food",
-				"food_char_count"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
+			"file": "code/bitmap_font.cpp",
+			"settings":
+			{
+				"buffer_size": 7679,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/Joao/code/projects/bags/platform.h",
+			"settings":
+			{
+				"buffer_size": 3700,
+				"line_ending": "Windows"
+			}
+		},
+		{
 			"file": "code/psychosnake.h",
 			"settings":
 			{
-				"buffer_size": 4609,
+				"buffer_size": 4977,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "code/types.h",
+			"settings":
+			{
+				"buffer_size": 577,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -537,28 +563,28 @@
 			}
 		},
 		{
-			"file": "code/bitmap_font.cpp",
-			"settings":
-			{
-				"buffer_size": 12528,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
 			"file": "code/main_win32.cpp",
 			"settings":
 			{
-				"buffer_size": 7591,
+				"buffer_size": 7370,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "/C/Users/Joao/code/snake.bat",
+			"file": "build.bat",
 			"settings":
 			{
-				"buffer_size": 158,
+				"buffer_size": 536,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "code/genfont.cpp",
+			"settings":
+			{
+				"buffer_size": 10769,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -567,7 +593,34 @@
 			"file": "code/psychosnake.cpp",
 			"settings":
 			{
-				"buffer_size": 10394,
+				"buffer_size": 11381,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "gameplay.txt",
+			"settings":
+			{
+				"buffer_size": 3435,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "code/renderer.h",
+			"settings":
+			{
+				"buffer_size": 3497,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "code/renderer_gdi.cpp",
+			"settings":
+			{
+				"buffer_size": 9975,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -605,6 +658,10 @@
 	},
 	"file_history":
 	[
+		"/C/Users/Joao/code/projects/psychosnake/dbg.bat",
+		"/C/Users/Joao/code/projects/bags/platform.cpp",
+		"/C/Users/Joao/code/projects/psychosnake/code/bitmap_font.cpp",
+		"/C/Users/Joao/code/snake.bat",
 		"/C/Users/Joao/code/projects/draw/code/main_win32.cpp",
 		"/C/Users/Joao/code/projects/bags/win32.cpp",
 		"/C/Users/Joao/code/projects/psychosnake/code/renderer_gdi.cpp",
@@ -706,7 +763,6 @@
 		"/C/Users/Joao/Desktop/main.cpp",
 		"/C/Users/Joao/code/projects/tradelog/code/nuklear.h",
 		"/C/Users/Joao/code/projects/tradelog/code/tradelog.cpp",
-		"/C/Users/Joao/code/projects/psychosnake/code/bitmap_font.cpp",
 		"/C/Users/Joao/code/projects/tradelog/build.bat",
 		"/C/Users/Joao/code/projects/tradelog/dbg.bat",
 		"/C/Users/Joao/code/projects/tradelog/run.bat",
@@ -726,17 +782,14 @@
 		"/C/Users/Joao/code/projects/psychosnake/code/renderer_win32.cpp",
 		"/C/Users/Joao/code/projects/psychosnake/code/sound.cpp",
 		"/C/Users/Joao/code/projects/bags/opentype.cpp",
-		"/C/Users/Joao/code/projects/bags/platform.cpp",
 		"/C/Users/Joao/code/projects/bags/platform.h",
 		"/C/Users/Joao/code/projects/bags/tests/fonts/log.txt",
 		"/C/Users/Joao/code/projects/zero/code/zero.cpp",
-		"/C/Users/Joao/code/projects/bags/tests/fonts/code/main.cpp",
-		"/C/Users/Joao/code/projects/bags/_old/opentype.cpp",
-		"/C/Users/Joao/code/snake.bat"
+		"/C/Users/Joao/code/projects/bags/tests/fonts/code/main.cpp"
 	],
 	"find":
 	{
-		"height": 23.0
+		"height": 40.0
 	},
 	"find_in_files":
 	{
@@ -750,6 +803,11 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"stbtt_MakeGlyphBitmap",
+			"stbtt_GetGlyphBitmapBox",
+			"width",
+			"max_advance",
+			"0x1F793",
 			"TARGET_MS_PER_FRAME",
 			"psychosnake"
 		],
@@ -776,19 +834,19 @@
 			[
 				{
 					"buffer": 0,
-					"file": "code/psychosnake.h",
+					"file": "code/bitmap_font.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4609,
+						"buffer_size": 7679,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								7565,
+								7583
 							]
 						],
 						"settings":
@@ -798,14 +856,101 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2770.4,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
+					"file": "/C/Users/Joao/code/projects/bags/platform.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3700,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								864,
+								890
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "code/psychosnake.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4977,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4385,
+								4385
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1960.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "code/types.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 577,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								192,
+								195
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 10,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
 					"file": "code/stb_truetype.h",
 					"semi_transient": false,
 					"settings":
@@ -817,8 +962,8 @@
 						"selection":
 						[
 							[
-								0,
-								0
+								38718,
+								38739
 							]
 						],
 						"settings":
@@ -828,40 +973,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 10826.4,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "code/bitmap_font.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 12528,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 588.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
+					"stack_index": 7,
 					"type": "text"
 				}
 			]
@@ -871,20 +986,20 @@
 			"sheets":
 			[
 				{
-					"buffer": 3,
+					"buffer": 5,
 					"file": "code/main_win32.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 7591,
+						"buffer_size": 7370,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6679,
-								6720
+								5851,
+								5832
 							]
 						],
 						"settings":
@@ -894,27 +1009,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3131.0,
+						"translation.y": 1496.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "/C/Users/Joao/code/snake.bat",
+					"buffer": 6,
+					"file": "build.bat",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 158,
+						"buffer_size": 536,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								157,
-								157
+								118,
+								118
 							]
 						],
 						"settings":
@@ -929,20 +1044,49 @@
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "code/psychosnake.cpp",
+					"buffer": 7,
+					"file": "code/genfont.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10394,
+						"buffer_size": 10769,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								1414,
+								1414
+							]
+						],
+						"settings":
+						{
+							"auto_name": "",
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 164.8,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "code/psychosnake.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11381,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11017,
+								11017
 							]
 						],
 						"settings":
@@ -952,7 +1096,97 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 3548.8,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "gameplay.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3435,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3435,
+								3435
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 214.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "code/renderer.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3497,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2431,
+								2431
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1131.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "code/renderer_gdi.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9975,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4862,
+								4862
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1792.8,
 						"zoom_level": 1.0
 					},
 					"stack_index": 5,
@@ -963,7 +1197,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 23.0
+		"height": 27.0
 	},
 	"input":
 	{
@@ -989,7 +1223,7 @@
 		"cols":
 		[
 			0.0,
-			0.235416666667,
+			0.403260916841,
 			1.0
 		],
 		"rows":
@@ -1007,7 +1241,7 @@
 	"project": "snake.sublime-project",
 	"replace":
 	{
-		"height": 42.0
+		"height": 72.0
 	},
 	"save_all_on_build": true,
 	"select_file":

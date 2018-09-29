@@ -1,20 +1,27 @@
 
 #include "psychosnake.h"
 
-// TODO: fazer essas constantes variaveis
-#define SCREEN_WIDTH 16
-#define SCREEN_HEIGHT 16
-#define CHAR_SIZE 16
-#define DEBUG_LINE_COUNT 1
-
 #define TARGET_FPS 60
 #define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
 
 #define DBG_TEXT_COLOR   COLOR(59,120,255,255)
 
 
-enum FOOD_ID { FOODTYPE1=1, FOODTYPE2, FOODTYPE3, FOODTYPE4, FOODTYPE5}
+enum FoodType 
+{ 
+    FOODTYPE0, 
+    FOODTYPE1, 
+    FOODTYPE2, 
+    FOODTYPE3, 
+    FOODTYPE4, 
+    FOODTYPE5
+};
 
+enum SpaceBlockType
+{
+    SPACEBLOCKTYPE_EMPTY,
+    SPACEBLOCKTYPE_FULL_WALL,
+};
 
 internal b32
 IsOccupied (u32 *map, u32 x, u32 y)
@@ -113,14 +120,25 @@ ResetSnake (GameState *game_state)
 }
 
 
-#define CLASSIC_COLOR_BACKGROUND COLOR(30,30,30,255)
-#define CLASSIC_COLOR_FOREGROUND COLOR(249,241,165,255)
+#define CLASSIC_COLOR_BACKGROUND COLOR( 30, 30, 30,255)
+#define CLASSIC_COLOR_FOREGROUND COLOR(249,241,241,255)
 #define CLASSIC_COLOR_BLACK COLOR(0,0,0,0)
 
-#define SNAKE_COLOR      COLOR(19,161,14,255)
+#define SNAKE_COLOR      COLOR( 19,161, 14,255)
 #define FOOD_COLOR       COLOR(249,241,165,255)
 #define WALL_COLOR       COLOR(242,242,242,255)
-#define BACKGROUND_COLOR COLOR(12,12,12,255)
+#define BACKGROUND_COLOR COLOR( 12, 12, 12,255)
+
+internal void
+UpdateStage01 (GameState *game_state, r32 dt)
+{
+
+};
+
+global void *UpdateStage[] = 
+{
+    UpdateStage01,
+};
 
 internal void 
 GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
@@ -128,27 +146,29 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
     if(!game_state->initialized)
     {
         ResetSnake(game_state);
+        
+        game_state->food_px = game_state->posicao_x[0] + 1;
+        game_state->food_py = game_state->posicao_y[0] + 1;
+
+        // for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
+        // {
+        //     for (u32 x = 0; x < SCREEN_WIDTH; ++x)
+        //     {
+        //         if(((x > 39)&&(x < 56)) && ((y >= 16)&&(y < 32)))
+        //         {
+        //             game_state->space_block_type[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_EMPTY;
+        //         }
+        //         else
+        //         {
+        //             game_state->space_block_type[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_FULL_WALL;
+        //         }
+        //     }
+        // }
+
         game_state->initialized = true;
-        game_state->food_px = rand()%SCREEN_WIDTH;
-        game_state->food_py = rand()%SCREEN_HEIGHT;
-        game_state->food_type = rand()%5+1;
     }
 
     ClearRenderBuffer(&renderer->buffer, ' ', CLASSIC_COLOR_BACKGROUND,CLASSIC_COLOR_BACKGROUND);
-
-    // desenhando mapa
-    for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
-    {
-        for (u32 x = 0; x < SCREEN_WIDTH; ++x)
-        {
-            if(IsOccupied(wall_map,x,y))
-            {
-                SetChar(&renderer->buffer, x, y, 
-                        0x2588 /*GetWall(wall_map, curved_walls, x,y)*/, 
-                        CLASSIC_COLOR_FOREGROUND, CLASSIC_COLOR_BACKGROUND);
-            }
-        }
-    }
 
     { // movimentando player
         bool up = IS_KEY_DOWN(VK_UP);
@@ -212,7 +232,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 
 
         //MOVIMENTO DA SNAKE(GOMO BY GOMO)
-        if(!IsOccupied(wall_map,(u32)npx,(u32)npy))
+        if(game_state->space_block_type[((u32)npx)+(((u32)npy)*SCREEN_WIDTH)] == SPACEBLOCKTYPE_EMPTY)
         {
 
             if(((u32)game_state->posicao_x[0]!=(u32)npx)||((u32)game_state->posicao_y[0]!=(u32)npy))
@@ -228,162 +248,148 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             game_state->posicao_y[0] = npy;
 
         }
-        else
-        {
+        // else
+        // {
 
-            FILE *scores;
-            scores = fopen("scores.txt", "a");
-            fprintf(scores, "Score:%d\n", game_state->gomos);
-            fclose(scores);
+        //     FILE *scores;
+        //     scores = fopen("scores.txt", "a");
+        //     fprintf(scores, "Score:%d\n", game_state->gomos);
+        //     fclose(scores);
 
-            ResetSnake(game_state);
+        //     ResetSnake(game_state);
         
-            game_state->dead_count += 1;
-        }
+        //     game_state->dead_count += 1;
+        // }
 
         //COLISÃO ENTRE O CORPO DA SNAKE
-        for(u32 i =1; i< game_state->gomos; i++)
+        // for(u32 i =1; i< game_state->gomos; i++)
+        // {
+        //     if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
+        //         (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[i])))
+        //     {
+        //         ResetSnake(game_state);
+        //     }
+        // }
+    }
+
+    if((((u32)game_state->posicao_x[0]==game_state->food_px)&&((u32)game_state->posicao_y[0])==game_state->food_py))
+    {
+        game_state->gomos++;
+        game_state->food_type = rand()%5+1;
+        game_state->posicao_x[game_state->gomos] = game_state->posicao_x[game_state->gomos-1];
+        game_state->posicao_y[game_state->gomos] = game_state->posicao_y[game_state->gomos-1];
+
+        
+
+        b32 food_in_wall, food_in_snake;
+
+        do
         {
-            if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
-                (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[i])))
-            {
-                ResetSnake(game_state);
-            }
-        }
-  
-        const u32 player_char[] = {0x2588,0x2593,0x2592,0x2591};
-        const r32 player_char_count = (r32)(sizeof(player_char)/sizeof(u32));
-        for(s32 i=game_state->gomos; i>=0; --i)
-        {
-            u32 dist_index = (u32)((r32)i * (player_char_count/(game_state->gomos+1)));
-            u32 gomo_index = (u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH);
-            u32 codepoint = 0x2588;//player_char[dist_index];
-            
-            Color color = CLASSIC_COLOR_FOREGROUND;//SNAKE_COLOR;
-            r32 damp = (game_state->gomos+2)*2;
-            color.r *= (damp-i)*(1.0f/damp);
-            color.g *= (damp-i)*(1.0f/damp);
-            color.b *= (damp-i)*(1.0f/damp);
-            
-            SetChar(&renderer->buffer, 
-                    (u16)game_state->posicao_x[i], (u16)game_state->posicao_y[i], 
-                    codepoint, color, CLASSIC_COLOR_BACKGROUND);
-        }   
-
-        s32 shuffle_x, shuffle_y;
-
-       //SETANDO COMINDA RANDOM 
-        /*if(IsOccupied(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0]))
-        {
-            SetMapBlock(food_map, (u32)game_state->posicao_x[0], (u32)game_state->posicao_y[0],0);
-            
-            game_state->gomos++;
-            game_state->posicao_x[game_state->gomos] = game_state->posicao_x[game_state->gomos-1];
-            game_state->posicao_y[game_state->gomos] = game_state->posicao_y[game_state->gomos-1];
-            do
-            {
-                shuffle_x = rand()%SCREEN_WIDTH;
-                shuffle_y = rand()%(SCREEN_HEIGHT);
-                //COLISÃO COMIDA / CORPO SNAKE
-                for(u32 j=1; j<game_state->gomos; j++)
-                {
-                    if((shuffle_x == ((u32)game_state->posicao_x[j]))&&(shuffle_y==((u32)game_state->posicao_y[j])))
-                    {
-                        shuffle_x = rand()%SCREEN_WIDTH;
-                        shuffle_y = rand()%(SCREEN_HEIGHT);
-                    }    
-                }
-                
-            }while(IsOccupied(wall_map, shuffle_x, shuffle_y));
-
-            SetMapBlock(food_map, shuffle_x,shuffle_y,1);
-        }*/
-
-
-
-        if((((u32)game_state->posicao_x[0]==game_state->food_px)&&((u32)game_state->posicao_y[0])==game_state->food_py))
-        {
-            game_state->gomos++;
-            game_state->posicao_x[game_state->gomos] = game_state->posicao_x[game_state->gomos-1];
-            game_state->posicao_y[game_state->gomos] = game_state->posicao_y[game_state->gomos-1];
-
             game_state->food_px = rand()%SCREEN_WIDTH;
             game_state->food_py = rand()%SCREEN_HEIGHT;
 
+            food_in_wall = ((game_state->space_block_type[((u32)game_state->food_px)+(((u32)game_state->food_py)*SCREEN_WIDTH)] == SPACEBLOCKTYPE_EMPTY) ? false : true);
+
+            food_in_snake = false;
             for(u32 j=1; j<game_state->gomos; j++)
             {
-                if((game_state->food_px == ((u32)game_state->posicao_x[j]))&&(game_state->food_py==((u32)game_state->posicao_y[j])))
+                if((game_state->food_px == ((u32)game_state->posicao_x[j])) && 
+                    (game_state->food_py == ((u32)game_state->posicao_y[j])))
                 {
-                    game_state->food_px = rand()%SCREEN_WIDTH;
-                    game_state->food_py = rand()%(SCREEN_HEIGHT);
+                    food_in_snake = true;
+                    break;
                 }    
             }
 
-            game_state->food_type = rand()%5+1;
-
-        }    
-        if(IsOccupied(wall_map, game_state->food_px, game_state->food_py))
-        {
-            game_state->food_px = rand()%SCREEN_WIDTH;
-            game_state->food_py = rand()%SCREEN_HEIGHT;  
-        }
-    }
-
-
-    //desenhando food_map com animacao
-    const u32 food_char[] = {0x25AA, 0x25FE, 0x25FC, 
-                             0x25A0, 0x25A0, 0x25A0,
-                             0x25FC, 0x25FE, /*0x25AA*/};
-    const u32 food_char_count = sizeof(food_char)/sizeof(u32);
-    game_state->food_char_index =  game_state->food_char_index+((food_char_count)*dt);
-    if(game_state->food_char_index > food_char_count) game_state->food_char_index = 0.0f;
-    
-    switch(game_state->food_type)
-    {
-        case FOODTYPE1:
-            Color color1 = COLOR(66, 194, 244, 0);
-            SetChar(&renderer->buffer, 
-                (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color1,CLASSIC_COLOR_BLACK);
-        break;
-
-        case FOODTYPE2:
-            Color color2 = COLOR(78,41,173,0);
-            SetChar(&renderer->buffer, 
-                (u16)game_state->food_px, (u16)game_state->food_py, 0x25FE, color2,CLASSIC_COLOR_BLACK);
-        break;
-
-        case FOODTYPE3:
-            Color color3 = COLOR(3,157,196,0);
-            SetChar(&renderer->buffer, 
-                (u16)game_state->food_px, (u16)game_state->food_py, 0x25A0, color3,CLASSIC_COLOR_BLACK);
-        break;
-
-        case FOODTYPE4:
-            Color color4 = COLOR(60, 69, 242,0);
-            SetChar(&renderer->buffer, 
-                (u16)game_state->food_px, (u16)game_state->food_py, 0x1F793, color4,CLASSIC_COLOR_BLACK);
-        break;
-
-        case FOODTYPE5:
-            Color color5 = COLOR(11,58,119,0);
-            SetChar(&renderer->buffer, 
-                (u16)game_state->food_px, (u16)game_state->food_py, 0x1F791, color5,CLASSIC_COLOR_BLACK);
-        break;
+        } while(food_in_wall || food_in_snake);
     }
 
 
 
-    /*for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
+    // desenhando mapa
+    for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
     {
         for (u32 x = 0; x < SCREEN_WIDTH; ++x)
         {
-            if(IsOccupied(food_map,x,y))
-            {
-                SetChar(&renderer->buffer, x, y, 
-                        0x25A0,//food_char[(u32)game_state->food_char_index], 
-                        CLASSIC_COLOR_FOREGROUND, CLASSIC_COLOR_BACKGROUND);
-            }
-        }
-    }*/
+            u32 space_block_type = game_state->space_block_type[x+(y*SCREEN_WIDTH)];
+            u32 codepoint = ' ';
 
+            switch(space_block_type)
+            {
+                case SPACEBLOCKTYPE_FULL_WALL:
+                {
+                    codepoint = 0x2588;
+                }break;
+            }
+
+            SetChar(&renderer->buffer, 
+                    x, y, codepoint, 
+                    CLASSIC_COLOR_FOREGROUND, CLASSIC_COLOR_BACKGROUND);
+        }
+    }
+
+    //desenhando foods
+    {
+        switch(game_state->food_type)
+        {
+
+            case FOODTYPE0:
+            {
+                Color color = CLASSIC_COLOR_FOREGROUND;
+                SetChar(&renderer->buffer, 
+                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color,CLASSIC_COLOR_BACKGROUND);
+            }
+            break;
+
+            case FOODTYPE1:
+                Color color1 = COLOR(66, 194, 244, 255);
+                SetChar(&renderer->buffer, 
+                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color1,CLASSIC_COLOR_BLACK);
+            break;
+
+            case FOODTYPE2:
+                Color color2 = COLOR(78,41,173,255);
+                SetChar(&renderer->buffer, 
+                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color2,CLASSIC_COLOR_BLACK);
+            break;
+
+            case FOODTYPE3:
+                Color color3 = COLOR(3,157,196,255);
+                SetChar(&renderer->buffer, 
+                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color3,CLASSIC_COLOR_BLACK);
+            break;
+
+            case FOODTYPE4:
+                Color color4 = COLOR(60, 69, 242,255);
+                SetChar(&renderer->buffer, 
+                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color4,CLASSIC_COLOR_BLACK);
+            break;
+
+            case FOODTYPE5:
+                Color color5 = COLOR(11,58,119,255);
+                SetChar(&renderer->buffer, 
+                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color5,CLASSIC_COLOR_BLACK);
+            break;
+        }
+    }
+
+    // desenhando snake
+    const u32 player_char[] = {0x2588,0x2593,0x2592,0x2591};
+    const r32 player_char_count = (r32)(sizeof(player_char)/sizeof(u32));
+    for(s32 i=game_state->gomos; i>=0; --i)
+    {
+        u32 dist_index = (u32)((r32)i * (player_char_count/(game_state->gomos+1)));
+        u32 gomo_index = (u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH);
+        u32 codepoint = 0x2588;//player_char[dist_index];
+
+        Color color = SNAKE_COLOR;
+        r32 damp = (game_state->gomos+2)*2;
+        color.r *= (damp-i)*(1.0f/damp);
+        color.g *= (damp-i)*(1.0f/damp);
+        color.b *= (damp-i)*(1.0f/damp);
+
+        SetChar(&renderer->buffer, 
+                (u16)game_state->posicao_x[i], (u16)game_state->posicao_y[i], 
+                codepoint, color, CLASSIC_COLOR_BACKGROUND);
+    }
 }

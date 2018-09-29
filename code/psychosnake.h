@@ -157,21 +157,36 @@ global u32 food_map[] =
     0b00000000000000000000000000000000,
 };
 
+
+// TODO: fazer essas constantes variaveis
+#define SCREEN_WIDTH 16//86
+#define SCREEN_HEIGHT 9//48
+#define CHAR_SIZE 32
+#define DEBUG_LINE_COUNT 1
+
 #define MAX_SNAKE_LENGTH 100
+
 struct GameState
 {
     b32 initialized;
 
     r32 posicao_x[MAX_SNAKE_LENGTH];
     r32 posicao_y[MAX_SNAKE_LENGTH];
-    s32 dead_count;
+    r32 snake_size_x[MAX_SNAKE_LENGTH];
+    r32 snake_size_y[MAX_SNAKE_LENGTH];
     r32 velocidade_x;
     r32 velocidade_y;
-    s32 gomos = 0;
-    u32 food_type;
+    s32 dead_count;
+    s32 gomos;
+
     u32 food_px;
     u32 food_py;
+    u32 food_type;
     r32 food_char_index;
+
+    u32 space_block_type[SCREEN_WIDTH * SCREEN_HEIGHT];
+
+    void *update_current_stage;
 };
 
 internal void GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt);
