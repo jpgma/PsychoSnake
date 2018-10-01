@@ -30,3 +30,9 @@ build/psychosnake_build_timings.ctm
 build/.vs/psychosnake/v15/Browse.VC.opendb
 build/.vs/psychosnake/v15/Browse.VC.db
 build/.vs/psychosnake/v15/.suo
+build/vc140.pdb
+build/genfont.pdb
+build/genfont.obj
+build/genfont.ilk
+build/genfont.exe
+build/.vs/psychosnake/v15/ipch/AutoPCH/5d43860df5965c82/MAIN_WIN32.ipch

@@ -88,6 +88,7 @@ GenerateBitmapFont (const char *filename,
     stbtt_fontinfo font;
     stbtt_InitFont(&font, font_data, stbtt_GetFontOffsetForIndex(font_data,0));
     
+    // TODO: assegurar ordem crescente de alturas!!!
     // obtendo escalas para as varias alturas
     r32 *glyph_scales = (r32*)calloc(glyph_height_count,sizeof(r32));
     for (s32 i = 0; i < glyph_height_count; ++i)
@@ -298,8 +299,8 @@ GenerateBitmapFont (const char *filename,
             scaled_offsets[height_index] = offset;
             
             r32 s = glyph_scales[height_index];
-            s32 scaled_width = abs(((s32)ceilf(ix1*s)) - ((s32)floorf(ix0*s)));
-            s32 scaled_height = abs(((s32)ceilf(iy1*s)) - ((s32)floorf(iy0*s)));
+            s32 scaled_width = fabs((ix1*s) - (ix0*s));
+            s32 scaled_height = fabs((iy1*s) - (iy0*s));
 
             // preenchendo glyph data                
             u8 *dst = res.glyph_data + offset;

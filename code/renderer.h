@@ -42,14 +42,6 @@ COLOR(u8 r, u8 g, u8 b, u8 a)
 #define COLOR_WHITE COLOR(0xffffffff)
 #define COLOR_BLACK COLOR(0xff000000)
 
-struct Char
-{
-    u32 codepoint;
-    Color foreground_color;
-    Color background_color;
-    GlyphHeader *glyph_header;
-};
-
 struct RenderBuffer
 {
     u16 width, height;
@@ -75,71 +67,50 @@ internal RenderBuffer AllocRenderBuffer (u16 width, u16 height, u16 debug_lines)
 internal void FreeRenderBuffer (RenderBuffer *buffer);
 internal void RenderBufferToScreen (Renderer *renderer);
 
-internal void
-SetChari (RenderBuffer *buffer, u16 i, 
-          u32 codepoint, Color foreground_color, Color background_color,
-          GlyphHeader *glyph_header)
-{
-    if(i < (buffer->width*(buffer->height+buffer->debug_lines)))
-    {
-        buffer->codepoints[i] = codepoint;
-        buffer->foreground_colors[i] = foreground_color;
-        buffer->background_colors[i] = background_color;
-    }
-}
-
-inline void
-SetChari (RenderBuffer *buffer, u16 i, Char c)
-{
-    SetChari(buffer, i, c.codepoint, c.foreground_color, c.background_color, c.glyph_header);
-}
-
-inline void
-SetChari (RenderBuffer *buffer, u16 i, 
-          u32 codepoint, Color foreground_color, Color background_color)
-{
-    SetChari(buffer, i, codepoint, foreground_color, background_color, 0);
-}
-
-inline void
-SetChar (RenderBuffer *buffer, u16 x, u16 y, Char c)
-{
-    u16 i = x + (y * buffer->width);
-    SetChari(buffer, i, c);
-}
-
 inline void
 SetChar (RenderBuffer *buffer, u16 x, u16 y,
          u32 codepoint, Color foreground_color, Color background_color)
 {
-    u16 i = x + (y * buffer->width);
-    SetChari(buffer, i, codepoint, foreground_color, background_color);
+    if((x < buffer->width) && (y < (buffer->height+buffer->debug_lines)))
+    {
+        u16 index = x + (y * buffer->width);
+
+        buffer->codepoints[index] = codepoint;
+        buffer->foreground_colors[index] = foreground_color;
+        buffer->background_colors[index] = background_color;
+    }
 }
 
 internal void 
 ClearRenderBuffer (RenderBuffer *buffer, u32 clear_codepoint, Color foreground_color, Color background_color)
 {
-    u16 char_count = buffer->width * buffer->height;
-    for (u16 i = 0; i < char_count; ++i)
+    for (u16 y = 0; y < buffer->height; ++y)
     {
-        SetChari (buffer, i,clear_codepoint,foreground_color,background_color);
+        for (u16 x = 0; x < buffer->width; ++x)
+        {
+            SetChar(buffer, x,y, clear_codepoint,foreground_color,background_color);
+        }
     }
 }
 
 internal void 
 WriteDebugText (Renderer *renderer, const char *txt, Color foreground, Color background)
 {
-    char *c = (char*)txt;
-    u16 start = renderer->buffer.width * renderer->buffer.height;
-    for (u16 i = 0; i < (renderer->buffer.width*renderer->buffer.debug_lines); ++i)
+    u32 txt_index = 0;
+
+    for (u16 y = renderer->buffer.height; y < (renderer->buffer.height+renderer->buffer.debug_lines); ++y)
     {
-        u32 codepoint = ' ';
-        if(*c != '\0')
+        for (u16 x = 0; x < renderer->buffer.width; ++x)
         {
-            codepoint = (u32)txt[i];
-            ++c;
+            u32 codepoint = ' ';
+            if(txt[txt_index] != '\0')
+            {
+                codepoint = (u32)txt[txt_index];
+                ++txt_index;
+            }
+
+            SetChar(&renderer->buffer, x,y , codepoint, foreground, background);
         }
-        SetChari(&renderer->buffer, (start+i), codepoint, foreground, background);
     }
 
 }

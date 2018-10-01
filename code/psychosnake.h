@@ -161,7 +161,7 @@ global u32 food_map[] =
 // TODO: fazer essas constantes variaveis
 #define SCREEN_WIDTH 16//86
 #define SCREEN_HEIGHT 9//48
-#define CHAR_SIZE 32
+#define CHAR_SIZE 16
 #define DEBUG_LINE_COUNT 1
 
 #define MAX_SNAKE_LENGTH 100

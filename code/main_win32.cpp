@@ -199,8 +199,8 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
         if(WINDOW_ACTIVE)
         {
             static r32 char_size = renderer->char_size;
-            if(IS_KEY_DOWN(VK_ADD))      char_size += 4.0f;
-            if(IS_KEY_DOWN(VK_SUBTRACT)) char_size -= 4.0f;
+            if(IS_KEY_DOWN(VK_ADD))      char_size += 4.0f * dt;
+            if(IS_KEY_DOWN(VK_SUBTRACT)) char_size -= 4.0f * dt;
             renderer->char_size = char_size;
 
             GameUpdateAndRender(game_state,renderer,dt);
@@ -228,7 +228,7 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
                 // escrevendo fps na linha de debug
                 char str[SCREEN_WIDTH];
                 // escrever frame_count em str
-                wsprintf(str, "[%d FPS]", frame_count);
+                wsprintf(str, "[%d FPS] cs:%d", frame_count, renderer->char_size);
                 // copiar str p/ linha de debug no buffer
                 WriteDebugText(renderer, (const char *)str, DBG_TEXT_COLOR,COLOR_BLACK);
                 // SetWindowText(window, str);

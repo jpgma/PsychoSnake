@@ -64,7 +64,7 @@ UpdateGDIRendererBitmap (Renderer *renderer)
     {
         gdi_renderer->char_size = renderer->char_size;
 
-        s32 height_index = GetExactHeightIndex(renderer->font, renderer->char_size);
+        s32 height_index = GetClosestHeightIndex(renderer->font, renderer->char_size);
         r32 scale = renderer->font.height_group_headers[height_index].scale;
 
         gdi_renderer->font_width = renderer->font.header->raw_max_advance * scale;
@@ -142,7 +142,7 @@ RenderBufferToScreen (Renderer *renderer)
     UpdateGDIRendererBitmap(renderer);
     
     // TODO: GetClosestHeightIndex
-    s32 height_index = GetExactHeightIndex(font, renderer->char_size);
+    s32 height_index = GetClosestHeightIndex(font, renderer->char_size);
     assert(height_index >= 0);
     r32 scale = font.height_group_headers[height_index].scale;
 
@@ -168,6 +168,23 @@ RenderBufferToScreen (Renderer *renderer)
     //     }
     // }
 
+    for (u16 y = 0; y < (renderer->buffer.height + renderer->buffer.debug_lines); ++y)
+    {
+        for (u16 x = 0; x < renderer->buffer.width; ++x)
+        {
+            Color color = renderer->buffer.background_colors[x+(y*renderer->buffer.width)];
+            for (s32 yy = 0; yy < gdi_renderer->font_height; ++yy)
+            {   
+                for (s32 xx = 0; xx < gdi_renderer->font_width; ++xx)
+                {
+                    u32 index = ((x*gdi_renderer->font_width)+xx) + 
+                                 (((y*gdi_renderer->font_height)+yy)*(gdi_renderer->font_width*renderer->buffer.width));
+                    dst[index] = (color.value);
+                }
+            }
+        }
+    }
+
     u32 advance = 0;
     u32 baseline = (font.header->raw_ascent * scale);
     for (u16 y = 0; y < (renderer->buffer.height + renderer->buffer.debug_lines); ++y)
@@ -184,13 +201,16 @@ RenderBufferToScreen (Renderer *renderer)
             Color foreground = renderer->buffer.foreground_colors[index];
             Color background = renderer->buffer.background_colors[index];
             
-            s16 min_x = advance + (s32)(glyph_header->raw_lsb * scale);
-            s16 min_y = baseline + (s32)(glyph_header->raw_min_y * scale);
+            s16 scaled_lsb = (s16)(glyph_header->raw_lsb * scale);
+            s16 scaled_min_y = (s16)(glyph_header->raw_min_y * scale);
+
+            s16 min_x = advance + scaled_lsb;
+            s16 min_y = baseline + scaled_min_y;
+            s32 scaled_width = glyph_header->raw_width * scale;
+            s32 scaled_height = glyph_header->raw_height * scale;
     
             u8 *src = GetScaledGlyphData(font, glyph_index, height_index);
 
-            s32 scaled_width = glyph_header->raw_width * scale;
-            s32 scaled_height = glyph_header->raw_height * scale;
             for (s32 yy = 0; yy < scaled_height; ++yy)
             {   
                 for (s32 xx = 0; xx < scaled_width; ++xx)
@@ -198,9 +218,10 @@ RenderBufferToScreen (Renderer *renderer)
                     s32 dst_index = (min_x+xx) + ((min_y+yy)*gdi_renderer->bitmap_width);
                     if(dst_index >= 0 && dst_index < window_pixel_count)
                     {
-                        Color last_color = COLOR(0,0,0,255);//COLOR(dst[dst_index]);
+                        Color last_color = {};
+                        last_color.value = dst[dst_index];
                         
-                        r32 src_value = src[xx+(yy*scaled_width)] / 255.0f;
+                        r32 src_value = src[(xx)+((yy)*scaled_width)] / 255.0f;
 
                         u32 dst_value = COLOR((src_value*foreground.r) + ((1.0f-src_value)*last_color.r),
                                               (src_value*foreground.g) + ((1.0f-src_value)*last_color.g),

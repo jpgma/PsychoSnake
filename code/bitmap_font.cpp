@@ -233,6 +233,50 @@ GetExactHeightIndex (BitmapFont font, u32 height)
     return res;
 }
 
+internal s32 
+GetClosestHeightIndex (BitmapFont font, u32 height)
+{
+    s32 res = -1;
+
+    if(height <= font.height_group_headers[0].height)
+    {
+        res = 0;
+    }
+    else if(height >= font.height_group_headers[font.header->height_group_count-1].height)
+    {
+        res = font.header->height_group_count-1;
+    }
+    else
+    {
+        for (s32 i = 0; i < font.header->height_group_count-1; ++i)
+        {
+            u32 this_height = font.height_group_headers[i].height;
+            u32 next_height = font.height_group_headers[i+1].height;
+            if(height == this_height)
+            {
+                res = i;
+                break;
+            } 
+            else if(height == next_height)
+            {
+                res = i+1;
+                break;
+            } 
+            else if((height > this_height) && (height < next_height))
+            {
+                u32 d = height - this_height;
+                if(d < (next_height - height))
+                    res = i;
+                else
+                    res = i+1;
+                break;
+            }
+        }
+    }
+
+    return res;
+}
+
 internal u8 *
 GetScaledGlyphData (BitmapFont font, u32 glyph_index, u32 height_index)
 {
@@ -243,7 +287,7 @@ GetScaledGlyphData (BitmapFont font, u32 glyph_index, u32 height_index)
 
     GlyphHeader *header = font.glyph_headers + glyph_index;
     u32 scaled_data_offset = ((u32*)(font.glyph_data + header->data_offset))[height_index];
-    res = font.glyph_data + scaled_data_offset;
+    res = font.glyph_data + (scaled_data_offset);
 
     return res;
 }
