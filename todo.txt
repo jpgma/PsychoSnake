@@ -1,13 +1,32 @@
 /////////////////
 ////////// TASKS
 
- - Operacoes de cor mais praticas
- - Ajustar SetChar p/ receber Char, evitando busca de chars
- - entender problema na altura dos chars da fonte:
-    - raster do stb_truetype n gera resultados muito
-    previsiveis, afaik.
- - FPS ajustavel
- - Suporte para multiplas resoluçoes nas fontes
+    - Operacoes de cor mais praticas
     - Transicoes animadas entre resolucoes no renderer
- - Suporte para multiplas fontes no renderer?
- - Caching do intervalo ascii?
+    - Caching de internavalos unicode mais utilizados
+    - Tiled rendering via GDI
+        - separar a tela em tiles, cada um responsavel pelo raster
+        na sua região
+        - usar um sistema de job queue pra distribuir os tiles pra outros
+        cores.
+    - Buffer extra no renderer p/ alpha blending correto das letras?
+        - ou achar uma alternativa que produza resultados corretos contra o
+        background de tamanho fixo
+        - background de tamanho dinâmico p/ espacamento dinâmico?
+        - buffer apenas p/ alpha?
+    - Fazer o escalonamento do bitmap de saída manualmente
+        - nearest-neighbour?
+
+ 
+//// DONE
+    - Suporte para multiplas resoluçoes nas fontes
+    - Suporte para multiplas fontes no renderer
+        - teóricamente basta recarregar o renderer com 
+        novos parametros.
+    - Entender problema na altura dos chars da fonte
+        - raster do stb_truetype n gera resultados muito
+        previsiveis, afaik.
+        - parcialmente resovido, parece uma questão de 
+        arredondamento, por alguma razão o uso de floor e ceil
+        da math.h n gera os mesmos resultados que dentro da stb_truetype,
+        provavelmente erro no mainha lógica.

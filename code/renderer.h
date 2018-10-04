@@ -24,7 +24,7 @@ inline Color
 COLOR(u32 color)
 {
     Color res = {};
-    res.value = (color); // invertendo a cor para poder usar rgba ao inves de abgr(formato do windows)
+    res.value = color; // inverter a cor para poder usar rgba ao inves de bgra(formato do windows) ?
     return res;
 }
 

@@ -122,23 +122,11 @@ ResetSnake (GameState *game_state)
 
 #define CLASSIC_COLOR_BACKGROUND COLOR( 30, 30, 30,255)
 #define CLASSIC_COLOR_FOREGROUND COLOR(249,241,241,255)
-#define CLASSIC_COLOR_BLACK COLOR(0,0,0,0)
 
 #define SNAKE_COLOR      COLOR( 19,161, 14,255)
 #define FOOD_COLOR       COLOR(249,241,165,255)
 #define WALL_COLOR       COLOR(242,242,242,255)
 #define BACKGROUND_COLOR COLOR( 12, 12, 12,255)
-
-internal void
-UpdateStage01 (GameState *game_state, r32 dt)
-{
-
-};
-
-global void *UpdateStage[] = 
-{
-    UpdateStage01,
-};
 
 internal void 
 GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)

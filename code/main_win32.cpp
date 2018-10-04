@@ -4,6 +4,7 @@
 
 // TODO: eliminar no futuro!
 #include <windows.h>
+#include <dwmapi.h>
 #include <malloc.h>
 #include <stdio.h>
 #include <time.h>
@@ -59,6 +60,21 @@ SetWindowBorderless (b32 make_borderless)
     ShowWindow(GLOBAL_WINDOW_HANDLE, SW_SHOW);
 }
 
+internal void
+SetWindowFullscreen (HWND window)
+{
+    HMONITOR monitor = MonitorFromWindow(window,MONITOR_DEFAULTTONEAREST);
+    MONITORINFO mi = { sizeof(mi) };
+    if(GetMonitorInfo(monitor, &mi))
+    {
+
+        SetWindowPos(window, NULL, mi.rcMonitor.left, mi.rcMonitor.top,
+                     mi.rcMonitor.right - mi.rcMonitor.left, 
+                     mi.rcMonitor.bottom - mi.rcMonitor.top,
+                     SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+    }
+}
+
 LRESULT CALLBACK 
 WindowProcedure(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -71,6 +87,14 @@ WindowProcedure(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
                 case VK_F2:
                     WINDOW_BORDERLESS = !WINDOW_BORDERLESS;
                     SetWindowBorderless(WINDOW_BORDERLESS);
+                break;
+                case VK_F11:
+                    if(!WINDOW_BORDERLESS)
+                    {
+                        WINDOW_BORDERLESS = true;
+                        SetWindowBorderless(WINDOW_BORDERLESS);   
+                    }
+                    SetWindowFullscreen(window);
                 break;
 
                 case '1':
@@ -128,8 +152,8 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
                                          LR_DEFAULTCOLOR|LR_SHARED|LR_DEFAULTSIZE);
     if(RegisterClassExA(&wc))
     {
-        s32 window_width = (SCREEN_WIDTH*CHAR_SIZE) + 48;
-        s32 window_height = (SCREEN_HEIGHT*CHAR_SIZE) + 64;
+        s32 window_width = (SCREEN_WIDTH*CHAR_SIZE) /*+ 48*/;
+        s32 window_height = (SCREEN_HEIGHT*CHAR_SIZE) /*+ 64*/;
      
         s32 monitor_width = GetSystemMetrics(SM_CXSCREEN);
         s32 monitor_height = GetSystemMetrics(SM_CYSCREEN);
@@ -228,10 +252,12 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
                 // escrevendo fps na linha de debug
                 char str[SCREEN_WIDTH];
                 // escrever frame_count em str
-                wsprintf(str, "[%d FPS] cs:%d", frame_count, renderer->char_size);
+                sprintf(str, "[%d FPS][%dx%d]", frame_count, 
+                         renderer->char_size*SCREEN_WIDTH,
+                         renderer->char_size*SCREEN_HEIGHT);
                 // copiar str p/ linha de debug no buffer
                 WriteDebugText(renderer, (const char *)str, DBG_TEXT_COLOR,COLOR_BLACK);
-                // SetWindowText(window, str);
+                SetWindowText(window, str);
 
                 ms_since_last_s = 0.0;
                 frame_count = 0;

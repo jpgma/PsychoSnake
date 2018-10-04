@@ -3,6 +3,11 @@ Gameplay
 - O ideia principal do jogo é introduzir mecânicas baseadas
 nas possibilidades do formato clássico do snake.
 
+- Visual clássico, monocromático, snake de dois gomos, mapa de 16x16 chars,
+ char_size 16, no começo.
+
+- audio retrô, simples buzzes de *1-5Hz simulando som de um piezo.
+
 - As mecânicas são introduzidas por meio de blocos de comida de
 aparência sugestiva quanto às suas funções.
 
@@ -19,19 +24,31 @@ consumido.
 - Pra fins de administração de tempo faremos as 5 melhores etapas possíveis entre as
 idéias, deixando um sistema que facilite a introdução de novas etapas.
 
-- 1ª etapa:         
-    - visual clássico, monocromático, snake de dois gomos, mapa de 16x16 chars, char_size 16.
-    - audio retrô, simples buzzes de *1-5Hz simulando som de um piezo.
-    - ao consumir *3 blocos de comida, o próximo gerado exibe uma animação que indica crescimento.
-    - ao consumir o bloco animado, a próxima etapa é introduzida.
+- 1ª etapa:
+    - introduzir modelo clássico, comidas normais que só aumentam um gomo.         
+    - *3 blocos de comida normais são gerados.
 
 - 2ª etapa:
-    - snake dobra em tamanho, cada gomo agora 2x2.
-    - som *dobra em resolução, acompanhando o tema.
+    - comida que exibe uma animação colorida, contraste contra o monocromático.
+    - snake começa a animar em cores diferentes.
+    - cenario movendo em círculos coloridos, abrindo algum espaço.
+    - algumas comidas normais geradas até esse efeito passar e um pouco depois.
 
 - 3ª etapa:
+    - comida que anima crescendo pro dobro do tamanho normal.
+    - snake dobra em tamanho, cada gomo agora 2x2.
+    - controles ficam mais lentos pra dar a noção de maior peso (equação de deslocamento tomando massa em consideração).
+    - som do movimento fica mais grave.
+    - snake quebra blocos menores ao colidir (menos de 4 blocos juntos em quadrado?).
+
 - 4ª etapa:
+    - comida que se movimenta verticalmente.
+    - faz a snake "serpentear", se mover como uma cobra real.
+
 - 5ª etapa:
+    - comida que parece um gomo da cobra virando parede.
+    - faz gomos da snake se soltarem (2 por segundo?).
+    - gomos soltos viram paredes.
 
 - Detalhes a serem determinados
     - tempo de efeito de cada comida:
@@ -49,7 +66,7 @@ idéias, deixando um sistema que facilite a introdução de novas etapas.
             - efeitos podem ser esquecidos ou não assimilados.
 
 - *Ideias:
-    - bloco de comida com efeito colorido em ondas, cores contrastantes, psicodélicas.
+    - bloco de comida com efeito colorido em ondas, cores contrastantes, psicodélicas. (2ª)
     Faz com que o cenário se mova em padrões similares a animação da comida.
     - bloco de comida que se movimenta verticalmente, faz a snake "serpentear", se mover
     como uma cobra real.
