@@ -47,7 +47,6 @@ struct RenderBuffer
     u16 width, height;
     u16 debug_lines;
 
-    u32   *codepoints;
     u32   *glyph_indexes;
     Color *foreground_colors;
     Color *background_colors;
@@ -69,26 +68,35 @@ internal void RenderBufferToScreen (Renderer *renderer);
 
 inline void
 SetChar (RenderBuffer *buffer, u16 x, u16 y,
-         u32 codepoint, Color foreground_color, Color background_color)
+         u32 glyph_index, Color foreground_color, Color background_color)
 {
     if((x < buffer->width) && (y < (buffer->height+buffer->debug_lines)))
     {
         u16 index = x + (y * buffer->width);
 
-        buffer->codepoints[index] = codepoint;
+        buffer->glyph_indexes[index] = glyph_index;
         buffer->foreground_colors[index] = foreground_color;
         buffer->background_colors[index] = background_color;
     }
 }
 
+inline void
+SetChar (Renderer *renderer, u16 x, u16 y,
+         u32 codepoint, Color foreground_color, Color background_color)
+{
+    u32 glyph_index = GetGlyphIndex (renderer->font, codepoint);
+    SetChar (&renderer->buffer, x,y, glyph_index, foreground_color,background_color);
+}
+
+
 internal void 
-ClearRenderBuffer (RenderBuffer *buffer, u32 clear_codepoint, Color foreground_color, Color background_color)
+ClearRenderBuffer (RenderBuffer *buffer, u32 clear_glyph_index, Color foreground_color, Color background_color)
 {
     for (u16 y = 0; y < buffer->height; ++y)
     {
         for (u16 x = 0; x < buffer->width; ++x)
         {
-            SetChar(buffer, x,y, clear_codepoint,foreground_color,background_color);
+            SetChar(buffer, x,y, clear_glyph_index,foreground_color,background_color);
         }
     }
 }
@@ -108,8 +116,8 @@ WriteDebugText (Renderer *renderer, const char *txt, Color foreground, Color bac
                 codepoint = (u32)txt[txt_index];
                 ++txt_index;
             }
-
-            SetChar(&renderer->buffer, x,y , codepoint, foreground, background);
+            u32 glyph_index = GetGlyphIndex (renderer->font, codepoint);
+            SetChar(&renderer->buffer, x,y , glyph_index, foreground, background);
         }
     }
 

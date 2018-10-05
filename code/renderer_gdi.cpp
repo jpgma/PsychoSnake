@@ -35,7 +35,6 @@ AllocRenderBuffer (u16 width, u16 height, u16 debug_lines)
     
     u32 char_count = (width*(height+debug_lines));
   
-    res.codepoints = (u32*)calloc(char_count,sizeof(u32));
     res.glyph_indexes = (u32*)calloc(char_count,sizeof(u32));
     res.foreground_colors = (Color*)calloc(char_count,sizeof(Color));
     res.background_colors = (Color*)calloc(char_count,sizeof(Color));
@@ -49,7 +48,6 @@ FreeRenderBuffer (RenderBuffer *buffer)
     buffer->width = 0;
     buffer->height = 0;
     buffer->debug_lines = 0;    
-    free(buffer->codepoints);
     free(buffer->glyph_indexes);
     free(buffer->foreground_colors);
     free(buffer->background_colors);
@@ -194,9 +192,8 @@ RenderBufferToScreen (Renderer *renderer)
         {
             u32 index = x+(y*renderer->buffer.width);
             
-            u32 codepoint = renderer->buffer.codepoints[index];
+            u32 glyph_index = renderer->buffer.glyph_indexes[index];
             
-            u32 glyph_index = GetGlyphIndex(font,codepoint); // cache!!!
             GlyphHeader *glyph_header = glyph_headers + glyph_index;
             
             Color foreground = renderer->buffer.foreground_colors[index];
@@ -273,12 +270,12 @@ RenderBufferToScreen (Renderer *renderer)
     s32 window_left = (window_width - gdi_renderer->bitmap_width)/2;
     s32 window_top = (window_height - gdi_renderer->bitmap_height)/2;
 
-    // StretchDIBits(gdi_renderer->window_hdc,
-    //                 0,0,gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
-    //                 0,0,gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
-    //                 (void*)gdi_renderer->bitmap_memory,
-    //                 &gdi_renderer->bitmap_info,
-    //                 DIB_RGB_COLORS, SRCCOPY);
+    StretchDIBits(gdi_renderer->window_hdc,
+                    0,0,gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
+                    0,0,gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
+                    (void*)gdi_renderer->bitmap_memory,
+                    &gdi_renderer->bitmap_info,
+                    DIB_RGB_COLORS, SRCCOPY);
 
     // StretchDIBits(gdi_renderer->window_hdc,
     //                 window_left,window_top, gdi_renderer->bitmap_width, gdi_renderer->bitmap_height,
@@ -287,12 +284,12 @@ RenderBufferToScreen (Renderer *renderer)
     //                 &gdi_renderer->bitmap_info,
     //                 DIB_RGB_COLORS, SRCCOPY);
     
-    StretchDIBits(gdi_renderer->window_hdc,
-                  0,0,window_width,window_height,
-                  0,0,gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
-                  (void*)gdi_renderer->bitmap_memory,
-                  &gdi_renderer->bitmap_info,
-                  DIB_RGB_COLORS, SRCCOPY);
+    // StretchDIBits(gdi_renderer->window_hdc,
+    //               0,0,window_width,window_height,
+    //               0,0,gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
+    //               (void*)gdi_renderer->bitmap_memory,
+    //               &gdi_renderer->bitmap_info,
+    //               DIB_RGB_COLORS, SRCCOPY);
 
     // SwapBuffers(GLOBAL_WINDOW_HDC);
     // UpdateWindow(GLOBAL_WINDOW_HANDLE);

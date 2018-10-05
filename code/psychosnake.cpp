@@ -310,7 +310,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
                 }break;
             }
 
-            SetChar(&renderer->buffer, 
+            SetChar(renderer, 
                     x, y, codepoint, 
                     CLASSIC_COLOR_FOREGROUND, CLASSIC_COLOR_BACKGROUND);
         }
@@ -324,38 +324,38 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             case FOODTYPE0:
             {
                 Color color = CLASSIC_COLOR_FOREGROUND;
-                SetChar(&renderer->buffer, 
+                SetChar(renderer, 
                     (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color,CLASSIC_COLOR_BACKGROUND);
             }
             break;
 
             case FOODTYPE1:
                 Color color1 = COLOR(66, 194, 244, 255);
-                SetChar(&renderer->buffer, 
+                SetChar(renderer, 
                     (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color1,CLASSIC_COLOR_BACKGROUND);
             break;
 
             case FOODTYPE2:
                 Color color2 = COLOR(78,41,173,255);
-                SetChar(&renderer->buffer, 
+                SetChar(renderer, 
                     (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color2,CLASSIC_COLOR_BACKGROUND);
             break;
 
             case FOODTYPE3:
                 Color color3 = COLOR(3,157,196,255);
-                SetChar(&renderer->buffer, 
+                SetChar(renderer, 
                     (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color3,CLASSIC_COLOR_BACKGROUND);
             break;
 
             case FOODTYPE4:
                 Color color4 = COLOR(60, 69, 242,255);
-                SetChar(&renderer->buffer, 
+                SetChar(renderer, 
                     (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color4,CLASSIC_COLOR_BACKGROUND);
             break;
 
             case FOODTYPE5:
                 Color color5 = COLOR(11,58,119,255);
-                SetChar(&renderer->buffer, 
+                SetChar(renderer, 
                     (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color5,CLASSIC_COLOR_BACKGROUND);
             break;
         }
@@ -376,7 +376,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         color.g *= (damp-i)*(1.0f/damp);
         color.b *= (damp-i)*(1.0f/damp);
 
-        SetChar(&renderer->buffer, 
+        SetChar(renderer, 
                 (u16)game_state->posicao_x[i], (u16)game_state->posicao_y[i], 
                 codepoint, color, CLASSIC_COLOR_BACKGROUND);
     }

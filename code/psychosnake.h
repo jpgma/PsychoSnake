@@ -109,8 +109,6 @@ struct GameState
     r32 food_char_index;
 
     u32 space_block_type[SCREEN_WIDTH * SCREEN_HEIGHT];
-
-    void *update_current_stage;
 };
 
 internal void GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt);
