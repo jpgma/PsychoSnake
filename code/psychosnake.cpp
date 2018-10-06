@@ -121,9 +121,9 @@ ResetSnake (GameState *game_state)
 
 
 #define CLASSIC_COLOR_BACKGROUND COLOR( 30, 30, 30,255)
-#define CLASSIC_COLOR_FOREGROUND COLOR(249,241,241,255)
+#define CLASSIC_COLOR_FOREGROUND COLOR(141,141,141,255)
 
-#define SNAKE_COLOR      COLOR( 19,161, 14,255)
+#define SNAKE_COLOR      COLOR(141,190,141,255)
 #define FOOD_COLOR       COLOR(249,241,165,255)
 #define WALL_COLOR       COLOR(242,242,242,255)
 #define BACKGROUND_COLOR COLOR( 12, 12, 12,255)
@@ -138,25 +138,27 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         game_state->food_px = game_state->posicao_x[0] + 1;
         game_state->food_py = game_state->posicao_y[0] + 1;
 
-        // for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
-        // {
-        //     for (u32 x = 0; x < SCREEN_WIDTH; ++x)
-        //     {
-        //         if(((x > 39)&&(x < 56)) && ((y >= 16)&&(y < 32)))
-        //         {
-        //             game_state->space_block_type[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_EMPTY;
-        //         }
-        //         else
-        //         {
-        //             game_state->space_block_type[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_FULL_WALL;
-        //         }
-        //     }
-        // }
+        u32 left = (SCREEN_WIDTH - 16)/2;
+        u32 right = left + 16;
+        u32 top = (SCREEN_HEIGHT - 16)/2;
+        u32 bottom = top + 16;
+        for (s32 i = 0; i < SCREEN_WIDTH*SCREEN_HEIGHT; ++i)
+        {
+            if(rand()%3 == 0)
+                game_state->space_block_type[i] = SPACEBLOCKTYPE_FULL_WALL;
+        }
+        for (u32 y = top; y < bottom; ++y)
+        {
+            for (u32 x = left; x < right; ++x)
+            {
+                game_state->space_block_type[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_EMPTY;
+            }
+        }
 
         game_state->initialized = true;
     }
 
-    ClearRenderBuffer(&renderer->buffer, ' ', CLASSIC_COLOR_BACKGROUND,CLASSIC_COLOR_BACKGROUND);
+    ClearRenderBuffer(&renderer->buffer, GetGlyphIndex (renderer->font, ' '), CLASSIC_COLOR_BACKGROUND,CLASSIC_COLOR_BACKGROUND);
 
     { // movimentando player
         bool up = IS_KEY_DOWN(VK_UP);
@@ -249,7 +251,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         //     game_state->dead_count += 1;
         // }
 
-        //COLISÃO ENTRE O CORPO DA SNAKE
+        // // COLISÃO ENTRE O CORPO DA SNAKE
         // for(u32 i =1; i< game_state->gomos; i++)
         // {
         //     if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
@@ -304,61 +306,68 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 
             switch(space_block_type)
             {
+                case SPACEBLOCKTYPE_EMPTY:
+                {
+                    SetChar(renderer, 
+                            x, y, codepoint, 
+                            CLASSIC_COLOR_FOREGROUND, CLASSIC_COLOR_BACKGROUND);
+
+                } break;
                 case SPACEBLOCKTYPE_FULL_WALL:
                 {
-                    codepoint = 0x2588;
-                }break;
+                    SetChar(renderer, 
+                            x, y, codepoint, 
+                            CLASSIC_COLOR_BACKGROUND, CLASSIC_COLOR_FOREGROUND);
+                } break;
             }
 
-            SetChar(renderer, 
-                    x, y, codepoint, 
-                    CLASSIC_COLOR_FOREGROUND, CLASSIC_COLOR_BACKGROUND);
         }
     }
 
     //desenhando foods
     {
+        Color foreground_color = CLASSIC_COLOR_FOREGROUND;
+        Color background_color = CLASSIC_COLOR_BACKGROUND;
+        u32 codepoint = ' ';
+
         switch(game_state->food_type)
         {
-
+            default:
             case FOODTYPE0:
             {
-                Color color = CLASSIC_COLOR_FOREGROUND;
-                SetChar(renderer, 
-                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color,CLASSIC_COLOR_BACKGROUND);
+                background_color = COLOR(255, 90, 90, 255);
             }
             break;
 
             case FOODTYPE1:
-                Color color1 = COLOR(66, 194, 244, 255);
-                SetChar(renderer, 
-                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color1,CLASSIC_COLOR_BACKGROUND);
-            break;
+            {
+                background_color = COLOR(66, 194, 244, 255);
+            } break;
 
             case FOODTYPE2:
-                Color color2 = COLOR(78,41,173,255);
-                SetChar(renderer, 
-                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color2,CLASSIC_COLOR_BACKGROUND);
-            break;
+            {
+                background_color = COLOR(78,41,173,255);
+            } break;
 
             case FOODTYPE3:
-                Color color3 = COLOR(3,157,196,255);
-                SetChar(renderer, 
-                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color3,CLASSIC_COLOR_BACKGROUND);
-            break;
+            {
+                background_color = COLOR(3,157,196,255);
+            } break;
 
             case FOODTYPE4:
-                Color color4 = COLOR(60, 69, 242,255);
-                SetChar(renderer, 
-                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color4,CLASSIC_COLOR_BACKGROUND);
-            break;
+            {
+                background_color = COLOR(60, 69, 242,255);
+            } break;
 
             case FOODTYPE5:
-                Color color5 = COLOR(11,58,119,255);
-                SetChar(renderer, 
-                    (u16)game_state->food_px, (u16)game_state->food_py, 0x25AA, color5,CLASSIC_COLOR_BACKGROUND);
-            break;
+            {
+                background_color = COLOR(11,58,119,255);
+            } break;
         }
+
+        SetChar(renderer, 
+                (u16)game_state->food_px,(u16)game_state->food_py, 
+                codepoint, foreground_color,background_color);
     }
 
     // desenhando snake
@@ -368,7 +377,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
     {
         u32 dist_index = (u32)((r32)i * (player_char_count/(game_state->gomos+1)));
         u32 gomo_index = (u32)game_state->posicao_x[i]+((u32)game_state->posicao_y[i]*SCREEN_WIDTH);
-        u32 codepoint = 0x2588;//player_char[dist_index];
+        u32 codepoint = ' ';//0x2588;//player_char[dist_index];
 
         Color color = SNAKE_COLOR;
         r32 damp = (game_state->gomos+2)*2;
@@ -378,6 +387,6 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 
         SetChar(renderer, 
                 (u16)game_state->posicao_x[i], (u16)game_state->posicao_y[i], 
-                codepoint, color, CLASSIC_COLOR_BACKGROUND);
+                codepoint, CLASSIC_COLOR_BACKGROUND, color);
     }
 }

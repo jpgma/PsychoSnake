@@ -152,19 +152,19 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
                                          LR_DEFAULTCOLOR|LR_SHARED|LR_DEFAULTSIZE);
     if(RegisterClassExA(&wc))
     {
-        s32 window_width = (SCREEN_WIDTH*CHAR_SIZE) /*+ 48*/;
-        s32 window_height = (SCREEN_HEIGHT*CHAR_SIZE) /*+ 64*/;
+        s32 window_width = (SCREEN_WIDTH*CHAR_SIZE) + 64;
+        s32 window_height = (SCREEN_HEIGHT*CHAR_SIZE) + 64;
      
-        s32 monitor_width = GetSystemMetrics(SM_CXSCREEN);
-        s32 monitor_height = GetSystemMetrics(SM_CYSCREEN);
-        s32 x = (monitor_width*0.5f)-(window_width*0.5f);
-        s32 y = (monitor_height*0.5f)-(window_height*0.5f);
+        // s32 monitor_width = GetSystemMetrics(SM_CXSCREEN);
+        // s32 monitor_height = GetSystemMetrics(SM_CYSCREEN);
+        // s32 x = (monitor_width*0.5f)-(window_width*0.5f);
+        // s32 y = (monitor_height*0.5f)-(window_height*0.5f);
      
         window = CreateWindowExA(WS_EX_CLIENTEDGE,
                                     szClassName,
                                     "PsychoSnake",
                                     WS_OVERLAPPEDWINDOW,
-                                    x, y, 
+                                    0, 0, 
                                     window_width, window_height,
                                     NULL, NULL, instance, NULL);
         if(window)

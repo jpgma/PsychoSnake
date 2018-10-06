@@ -47,7 +47,7 @@ struct RenderBuffer
     u16 width, height;
     u16 debug_lines;
 
-    u32   *glyph_indexes;
+    s32   *glyph_indexes;
     Color *foreground_colors;
     Color *background_colors;
 };
@@ -57,6 +57,7 @@ struct Renderer
     void *api;
 
     BitmapFont font;
+    s32 current_height_index;
 
     RenderBuffer buffer;
     u16 char_size;
@@ -68,7 +69,7 @@ internal void RenderBufferToScreen (Renderer *renderer);
 
 inline void
 SetChar (RenderBuffer *buffer, u16 x, u16 y,
-         u32 glyph_index, Color foreground_color, Color background_color)
+         s32 glyph_index, Color foreground_color, Color background_color)
 {
     if((x < buffer->width) && (y < (buffer->height+buffer->debug_lines)))
     {
@@ -84,13 +85,13 @@ inline void
 SetChar (Renderer *renderer, u16 x, u16 y,
          u32 codepoint, Color foreground_color, Color background_color)
 {
-    u32 glyph_index = GetGlyphIndex (renderer->font, codepoint);
+    s32 glyph_index = GetGlyphIndex (renderer->font, codepoint);
     SetChar (&renderer->buffer, x,y, glyph_index, foreground_color,background_color);
 }
 
 
 internal void 
-ClearRenderBuffer (RenderBuffer *buffer, u32 clear_glyph_index, Color foreground_color, Color background_color)
+ClearRenderBuffer (RenderBuffer *buffer, s32 clear_glyph_index, Color foreground_color, Color background_color)
 {
     for (u16 y = 0; y < buffer->height; ++y)
     {

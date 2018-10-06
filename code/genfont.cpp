@@ -6,6 +6,7 @@
 #include "bitmap_font.cpp"
 
 #define SRC_FONT_PATH "..\\data\\psychosnake.ttf"
+// #define SRC_FONT_PATH "..\\data\\unifont.ttf"
 #define DST_FONT_PATH "..\\data\\psychosnake.bfnt"
 
 internal BitmapFont

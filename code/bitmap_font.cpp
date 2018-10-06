@@ -198,10 +198,10 @@ LoadBitmapFont (const char *filename)
     return res;
 }
 
-internal u32 
+internal s32 
 GetGlyphIndex (BitmapFont font, u32 codepoint)
 {
-    u32 res = 0;
+    s32 res = 0;
 
     for (u32 i = 0; i < font.header->cp_segment_count; ++i)
     {

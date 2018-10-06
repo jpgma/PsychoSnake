@@ -83,10 +83,10 @@ global u32 double_walls[] =
 };
 
 // TODO: fazer essas constantes variaveis
-#define SCREEN_WIDTH 86//120//16
-#define SCREEN_HEIGHT 48//66//16
+#define SCREEN_WIDTH  86 //120// 16
+#define SCREEN_HEIGHT 48// 67// 16
 #define CHAR_SIZE 16
-#define DEBUG_LINE_COUNT 1
+#define DEBUG_LINE_COUNT 0
 
 #define MAX_SNAKE_LENGTH 100
 
@@ -106,7 +106,7 @@ struct GameState
     u32 food_px;
     u32 food_py;
     u32 food_type;
-    r32 food_char_index;
+    r32 food_spawn_time;
 
     u32 space_block_type[SCREEN_WIDTH * SCREEN_HEIGHT];
 };
