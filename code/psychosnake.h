@@ -85,10 +85,11 @@ global u32 double_walls[] =
 // TODO: fazer essas constantes variaveis
 #define SCREEN_WIDTH  86 //120// 16
 #define SCREEN_HEIGHT 48 // 67// 16
-#define CHAR_SIZE 16
+#define CHAR_SIZE 8
 #define DEBUG_LINE_COUNT 0
 
 #define MAX_SNAKE_LENGTH 100
+#define MAX_WALL_COUNT (SCREEN_WIDTH*SCREEN_WIDTH*2)
 
 struct GameState
 {
@@ -112,8 +113,8 @@ struct GameState
 
     // u32 original_map[SCREEN_WIDTH * SCREEN_HEIGHT];
     u32 space_block_type[SCREEN_WIDTH * SCREEN_HEIGHT];
-    r32 wall_x[SCREEN_WIDTH * SCREEN_HEIGHT];
-    r32 wall_y[SCREEN_WIDTH * SCREEN_HEIGHT];
+    r32 wall_x[MAX_WALL_COUNT];
+    r32 wall_y[MAX_WALL_COUNT];
     u32 wall_count;
 };
 

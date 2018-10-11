@@ -5,11 +5,107 @@
 		[
 			[
 				"SCRE",
+				"SCREEN_WIDTH"
+			],
+			[
+				"SCREN",
 				"SCREEN_HEIGHT"
+			],
+			[
+				"MAX",
+				"MAX_WALL_COUNT"
 			],
 			[
 				"SCR",
 				"SCREEN_WIDTH"
+			],
+			[
+				"Rnad",
+				"RandomBilateral"
+			],
+			[
+				"Rand",
+				"RandomBilateral"
+			],
+			[
+				"Random",
+				"RandomUnilateral"
+			],
+			[
+				"rand",
+				"rand_rate"
+			],
+			[
+				"dis",
+				"dist_atten_rate"
+			],
+			[
+				"scr",
+				"screen_y"
+			],
+			[
+				"scre",
+				"screen_x"
+			],
+			[
+				"max",
+				"max_distance_from_center"
+			],
+			[
+				"move",
+				"move_x"
+			],
+			[
+				"pos",
+				"posicao_x"
+			],
+			[
+				"pla",
+				"player_speed"
+			],
+			[
+				"SCREE",
+				"SCREEN_HEIGHT"
+			],
+			[
+				"FOOD",
+				"FOODTYPE0"
+			],
+			[
+				"ro",
+				"rotation_active"
+			],
+			[
+				"RAND",
+				"RandomBilateral"
+			],
+			[
+				"rel",
+				"rel_x"
+			],
+			[
+				"re",
+				"rel_y"
+			],
+			[
+				"gae",
+				"game_state-"
+			],
+			[
+				"ne",
+				"new_x"
+			],
+			[
+				"SPA",
+				"SPACEBLOCKTYPE_FULL_WALL"
+			],
+			[
+				"snake",
+				"snake_collision"
+			],
+			[
+				"spa",
+				"spawn_time"
 			],
 			[
 				"ma",
@@ -248,24 +344,8 @@
 				"UpdateStage01"
 			],
 			[
-				"pos",
-				"posicao_y"
-			],
-			[
 				"CLASSI",
 				"CLASSIC_COLOR_BACKGROUND"
-			],
-			[
-				"SPA",
-				"SPACEBLOCKTYPE_EMPTY"
-			],
-			[
-				"spa",
-				"space_block_type"
-			],
-			[
-				"SCREE",
-				"SCREEN_WIDTH"
 			],
 			[
 				"foo",
@@ -342,10 +422,6 @@
 			[
 				"game",
 				"game_state-"
-			],
-			[
-				"pla",
-				"player_char"
 			],
 			[
 				"wall",
@@ -438,82 +514,6 @@
 			[
 				"samp",
 				"samples_to_write"
-			],
-			[
-				"sa",
-				"samples_to_write"
-			],
-			[
-				"sound",
-				"sound_mixer"
-			],
-			[
-				"cha",
-				"channel_count"
-			],
-			[
-				"buff",
-				"buffer_size_seconds"
-			],
-			[
-				"dsbu",
-				"ds_buffer"
-			],
-			[
-				"pri",
-				"primary_buffer"
-			],
-			[
-				"erro",
-				"error_str"
-			],
-			[
-				"ds",
-				"ds_buffer"
-			],
-			[
-				"red",
-				"renderer"
-			],
-			[
-				"bitmap",
-				"bitmap_memory"
-			],
-			[
-				"window_h",
-				"window_hdc"
-			],
-			[
-				"char",
-				"char_size"
-			],
-			[
-				"gdiren",
-				"gdi_renderer"
-			],
-			[
-				"ren",
-				"renderer"
-			],
-			[
-				"GDI",
-				"GDIRenderer"
-			],
-			[
-				"bitme",
-				"bitmap_height"
-			],
-			[
-				"opera",
-				"operation_logs"
-			],
-			[
-				"daylo",
-				"day_log_size"
-			],
-			[
-				"star",
-				"start_time"
 			]
 		]
 	},
@@ -549,7 +549,7 @@
 			"file": "code/psychosnake.h",
 			"settings":
 			{
-				"buffer_size": 2339,
+				"buffer_size": 2487,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -611,7 +611,7 @@
 			"file": "code/psychosnake.cpp",
 			"settings":
 			{
-				"buffer_size": 17394,
+				"buffer_size": 15405,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -836,6 +836,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"GameState",
 			"setCha",
 			"stbtt_MakeGlyphBitmap",
 			"stbtt_GetGlyphBitmapBox",
@@ -890,10 +891,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2363.0,
+						"translation.y": 2363.2,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
@@ -961,15 +962,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2339,
+						"buffer_size": 2487,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2192,
-								2192
+								1823,
+								1823
 							]
 						],
 						"settings":
@@ -979,10 +980,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 936.0,
+						"translation.y": 871.2,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -1076,7 +1077,7 @@
 						"translation.y": 1937.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 6,
 					"type": "text"
 				},
 				{
@@ -1104,7 +1105,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 7,
 					"type": "text"
 				},
 				{
@@ -1131,10 +1132,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 195.0,
+						"translation.y": 273.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
@@ -1165,7 +1166,7 @@
 						"translation.y": 306.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
@@ -1174,15 +1175,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 17394,
+						"buffer_size": 15405,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4849,
-								4849
+								4786,
+								3918
 							]
 						],
 						"settings":
@@ -1192,7 +1193,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1884.8,
+						"translation.y": 2120.8,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -1225,7 +1226,7 @@
 						"translation.y": 156.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
@@ -1255,7 +1256,7 @@
 						"translation.y": 247.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
@@ -1282,10 +1283,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2018.4,
+						"translation.y": 2018.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
