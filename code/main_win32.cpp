@@ -249,12 +249,14 @@ WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
             ms_since_last_s += ms_for_frame;
             if(ms_since_last_s >= 1000.0)
             {
+                u16 char_size = renderer->font.height_group_headers[renderer->current_height_index].height;
                 // escrevendo fps na linha de debug
-                char str[SCREEN_WIDTH];
+                char str[128];
                 // escrever frame_count em str
-                sprintf(str, "[%d FPS][%dx%d]", frame_count, 
-                         renderer->char_size*SCREEN_WIDTH,
-                         renderer->char_size*SCREEN_HEIGHT);
+                sprintf(str, "[%d FPS] bs:[%dx%d] cs:%d", frame_count, 
+                         char_size*renderer->buffer.width,
+                         char_size*renderer->buffer.height,
+                         char_size);
                 // copiar str p/ linha de debug no buffer
                 WriteDebugText(renderer, (const char *)str, DBG_TEXT_COLOR,COLOR_BLACK);
                 SetWindowText(window, str);

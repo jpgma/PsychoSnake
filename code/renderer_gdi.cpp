@@ -58,17 +58,19 @@ UpdateGDIRendererBitmap (Renderer *renderer)
 {
     GDIRenderer *gdi_renderer = (GDIRenderer*)renderer->api;
 
-    if(gdi_renderer->char_size != renderer->char_size)
-    {
+    s32 height_index = GetClosestHeightIndex(renderer->font, renderer->char_size);
+    u16 new_char_size = renderer->font.height_group_headers[height_index].height;
 
-        s32 height_index = GetClosestHeightIndex(renderer->font, renderer->char_size);
-        gdi_renderer->char_size = renderer->font.height_group_headers[height_index].height;
+    if(gdi_renderer->char_size != new_char_size)
+    {
+        gdi_renderer->char_size = new_char_size;   
+        renderer->char_size = new_char_size;
         r32 scale = renderer->font.height_group_headers[height_index].scale;
         renderer->current_height_index = height_index;
 
         gdi_renderer->font_width = renderer->font.header->raw_max_advance * scale;
-        gdi_renderer->font_height = abs((s32)(renderer->font.header->raw_ascent * scale)) + 
-                                    abs((s32)floorf(renderer->font.header->raw_descent * scale));
+        gdi_renderer->font_height = (s32)(fabs(renderer->font.header->raw_ascent * scale) + 
+                                          fabs(renderer->font.header->raw_descent * scale));
         
         u32 bytes_per_pixel = 4;
         u32 last_bitmap_memory_size = gdi_renderer->bitmap_width*gdi_renderer->bitmap_height*bytes_per_pixel;
@@ -268,8 +270,8 @@ RenderBufferToScreen (Renderer *renderer)
         
     s32 window_width = rect.right - rect.left;
     s32 window_height = rect.bottom - rect.top;
-    s32 window_left = (window_width - gdi_renderer->bitmap_width)/2;
-    s32 window_top = (window_height - gdi_renderer->bitmap_height)/2;
+    s32 window_left = (window_width - (s32)gdi_renderer->bitmap_width)/2;
+    s32 window_top = (window_height - (s32)gdi_renderer->bitmap_height)/2;
 
     // StretchDIBits(gdi_renderer->window_hdc,
     //                 0,0,gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
@@ -294,14 +296,14 @@ RenderBufferToScreen (Renderer *renderer)
     //               &gdi_renderer->bitmap_info,
     //               DIB_RGB_COLORS, SRCCOPY);
 
-  //   SetDIBitsToDevice(gdi_renderer->window_hdc,
-  // window_left,window_top,
-  // gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
-  // 0,0,0,gdi_renderer->bitmap_height,
-  // (void*)gdi_renderer->bitmap_memory,
-  // &gdi_renderer->bitmap_info,
-  // DIB_RGB_COLORS);
+    // SetDIBitsToDevice(gdi_renderer->window_hdc,
+    //                   window_left,window_top,
+    //                   gdi_renderer->bitmap_width,gdi_renderer->bitmap_height,
+    //                   0,0,0,gdi_renderer->bitmap_height,
+    //                   (void*)gdi_renderer->bitmap_memory,
+    //                   &gdi_renderer->bitmap_info,
+    //                   DIB_RGB_COLORS);
 
     // SwapBuffers(GLOBAL_WINDOW_HDC);
-    UpdateWindow(gdi_renderer->window_handle);
+    // UpdateWindow(gdi_renderer->window_handle);
 }

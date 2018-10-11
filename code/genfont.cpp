@@ -40,7 +40,8 @@ void main()
     };
     const u32 block_count = sizeof(unicode_blocks)/sizeof(UnicodeBlock*);
 
-    u16 glyph_heights[] = { 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48 };
+    u16 glyph_heights[] = { 8, /*12,*/ 16, /*20, 24, 28,*/ 32, /*36, 40, 44, 48, 
+                            52, 56, 60,*/ 64, /*68, 72, 76, 80, 84, 88, 92, 96*/ 120, };
     const u32 glyph_height_count = sizeof(glyph_heights)/sizeof(u16);
 
     BitmapFont font = GenerateBitmapFont(SRC_FONT_PATH, 

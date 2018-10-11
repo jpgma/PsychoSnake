@@ -6,6 +6,11 @@
 
 #define DBG_TEXT_COLOR   COLOR(59,120,255,255)
 
+#define PI (3.1415927)
+#define RAD_45  (PI*0.25f)
+#define RAD_90  (PI*0.5f)
+#define RAD_180 PI
+#define RAD_360 (2.0f*PI)
 
 enum FoodType 
 { 
@@ -14,7 +19,8 @@ enum FoodType
     FOODTYPE2, 
     FOODTYPE3, 
     FOODTYPE4, 
-    FOODTYPE5
+    FOODTYPE5,
+    FOODTYPE_COUNT
 };
 
 enum SpaceBlockType
@@ -128,6 +134,22 @@ ResetSnake (GameState *game_state)
 #define WALL_COLOR       COLOR(242,242,242,255)
 #define BACKGROUND_COLOR COLOR( 12, 12, 12,255)
 
+internal r32
+RandomBilateral()
+{
+    r32 res = (((r32)rand())/RAND_MAX) - 1.0f;
+    return res;
+}
+
+internal r32
+RandomUnilateral()
+{
+    r32 res = (((r32)rand())/RAND_MAX);
+    return res;
+}
+
+global r32 ANGLE = 0.0f;
+
 internal void 
 GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 {
@@ -142,23 +164,241 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         u32 right = left + 16;
         u32 top = (SCREEN_HEIGHT - 16)/2;
         u32 bottom = top + 16;
-        for (s32 i = 0; i < SCREEN_WIDTH*SCREEN_HEIGHT; ++i)
+        
+        //x,y
+        // for (s32 i = 1; i < 16; ++i)
+        // {
+        //     //top wall
+        //     game_state->wall_x[game_state->wall_count] = (r32) left + i;
+        //     game_state->wall_y[game_state->wall_count] = (r32) top;
+        //     ++game_state->wall_count;
+
+        //     //bottom wall
+        //     game_state->wall_x[game_state->wall_count] = (r32) left + i;
+        //     game_state->wall_y[game_state->wall_count] = (r32) bottom;
+        //     ++game_state->wall_count;
+
+        //     //left wall
+        //     game_state->wall_x[game_state->wall_count] = (r32) left;
+        //     game_state->wall_y[game_state->wall_count] = (r32) top + i;
+        //     ++game_state->wall_count;
+
+        //     //right wall
+        //     game_state->wall_x[game_state->wall_count] = (r32) right;
+        //     game_state->wall_y[game_state->wall_count] = (r32) top + i;
+        //     ++game_state->wall_count;
+        // }
+        for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
         {
-            if(rand()%3 == 0)
-                game_state->space_block_type[i] = SPACEBLOCKTYPE_FULL_WALL;
-        }
-        for (u32 y = top; y < bottom; ++y)
-        {
-            for (u32 x = left; x < right; ++x)
+            for (u32 x = ((SCREEN_WIDTH - SCREEN_HEIGHT)/2); x < ((SCREEN_WIDTH - SCREEN_HEIGHT)/2) + SCREEN_HEIGHT; ++x)
             {
-                game_state->space_block_type[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_EMPTY;
+                if((x < left) || (x >= right) ||
+                   (y < top)  || (y >= bottom))
+                {
+                    game_state->wall_x[game_state->wall_count] = (r32) x;
+                    game_state->wall_y[game_state->wall_count] = (r32) y;
+                    ++game_state->wall_count;
+                }
             }
         }
+
+        // in place
+        // for (s32 y = top-2; y < bottom+2; ++y)
+        // {
+        //     for (s32 x = left-2; x < right+2; ++x)
+        //     {
+        //     // if(rand()%10 == 0)
+        //         game_state->space_block_type[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_FULL_WALL;
+        //     }
+        // }
+        // for (u32 y = top; y < bottom; ++y)
+        // {
+        //     for (u32 x = left; x < right; ++x)
+        //     {
+        //         game_state->space_block_type[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_EMPTY;
+        //     }
+        // }
+
+        // copy
+        // for (s32 y = top-2; y < bottom+2; ++y)
+        // {
+        //     for (s32 x = left-2; x < right+2; ++x)
+        //     {
+        //     // if(rand()%10 == 0)
+        //         game_state->original_map[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_FULL_WALL;
+        //     }
+        // }
+        // for (u32 y = top; y < bottom; ++y)
+        // {
+        //     for (u32 x = left; x < right; ++x)
+        //     {
+        //         game_state->original_map[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_EMPTY;
+        //     }
+        // }
+
+        u32 x = SCREEN_WIDTH/2;
+        u32 y = SCREEN_HEIGHT/2 + 2;
+        game_state->space_block_type[x+(y*SCREEN_WIDTH)] = SPACEBLOCKTYPE_FULL_WALL;     
 
         game_state->initialized = true;
     }
 
     ClearRenderBuffer(&renderer->buffer, GetGlyphIndex (renderer->font, ' '), CLASSIC_COLOR_BACKGROUND,CLASSIC_COLOR_BACKGROUND);
+
+    { // movimentando mapa
+
+        r32 dr = RAD_45 * 0.05f;
+
+        // in place
+        if(game_state->rotation_active)
+        {
+            ANGLE = dr;
+        }
+        else ANGLE = 0.0f;
+
+        // copy 
+        // ANGLE += (dr * dt);
+        // if(ANGLE >= RAD_360)
+        //     ANGLE = 0.0f;
+
+        r32 c = cosf(ANGLE);
+        r32 s = sinf(ANGLE);
+    
+        r32 cx = ((r32)SCREEN_WIDTH)/2.0f;
+        r32 cy = ((r32)SCREEN_HEIGHT)/2.0f;
+
+        // x,y
+        for (s32 i = 0; i < (SCREEN_WIDTH*SCREEN_HEIGHT); ++i)
+        {
+            game_state->space_block_type[i] = 0;
+        }
+        for (s32 i = 0; i < game_state->wall_count; ++i)
+        {
+            r32 *x = game_state->wall_x + i;
+            r32 *y = game_state->wall_y + i;
+
+            r32 rel_x = *x - cx;
+            r32 rel_y = *y - cy;
+
+            if(game_state->rotation_active)
+            {
+                r32 distance_from_center = sqrtf((rel_x*rel_x) + (rel_y*rel_y));
+                rel_x -=  ((RandomBilateral()*(2.0f + (1.0f*RandomBilateral()))) + (distance_from_center * 2.0f * dt)) * (rel_x > 0.0f ? 1.0f : -1.0f);
+                rel_y -=  ((RandomBilateral()*(2.0f + (1.0f*RandomBilateral()))) + (distance_from_center * 2.0f * dt)) * (rel_y > 0.0f ? 1.0f : -1.0f);
+            }
+
+            r32 new_x = (((rel_x*c) - (rel_y*s)) + cx);
+            r32 new_y = (((rel_x*s) + (rel_y*c)) + cy);
+
+            *x = new_x;
+            *y = new_y;
+
+            s32 rot_x = (s32)new_x;
+            s32 rot_y = (s32)new_y;
+
+            u32 index = (rot_x + (rot_y*SCREEN_WIDTH));
+            if(index < (SCREEN_WIDTH*SCREEN_HEIGHT))
+            {
+                game_state->space_block_type[index] = SPACEBLOCKTYPE_FULL_WALL;
+            }
+        }
+
+        // in place
+        // for (s32 i = 0; i < (SCREEN_WIDTH*SCREEN_HEIGHT); ++i)
+        // {
+        //     game_state->original_map[i] = 0;
+        // }
+        // for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
+        // {
+        //     for (u32 x = 0; x < SCREEN_WIDTH; ++x)
+        //     {
+        //         u32 type = game_state->space_block_type[x+(y*SCREEN_WIDTH)];
+                
+        //         if(type > SPACEBLOCKTYPE_EMPTY)
+        //         {
+        //             r32 rel_x = ((r32)x) - cx;
+        //             r32 rel_y = ((r32)y) - cy;
+
+        //             r32 new_x = ((rel_x*c) - (rel_y*s)) + cx;
+        //             r32 new_y = ((rel_x*s) + (rel_y*c)) + cy;
+
+        //             s32 rot_x = (s32)new_x;
+        //             s32 rot_y = (s32)new_y;
+
+        //             u32 index = (rot_x + (rot_y*SCREEN_WIDTH));
+        //             if(index < (SCREEN_WIDTH*SCREEN_HEIGHT))
+        //             {
+        //                 game_state->original_map[index] = type;
+        //             }
+        //         }
+
+        //     }
+        // }
+        // for (s32 i = 0; i < (SCREEN_WIDTH*SCREEN_HEIGHT); ++i)
+        // {
+        //     game_state->space_block_type[i] = game_state->original_map[i];
+        // }
+
+        // copy
+        // for (s32 i = 0; i < (SCREEN_WIDTH*SCREEN_HEIGHT); ++i)
+        // {
+        //     game_state->space_block_type[i] = 0;
+        // }
+        // for (u32 y = 0; y < SCREEN_HEIGHT; ++y)
+        // {
+        //     for (u32 x = 0; x < SCREEN_WIDTH; ++x)
+        //     {
+        //         u32 type = game_state->original_map[x+(y*SCREEN_WIDTH)];
+                
+        //         r32 rel_x = ((r32)x) - cx;
+        //         r32 rel_y = ((r32)y) - cy;
+
+        //         r32 new_x = ((rel_x*c) - (rel_y*s)) + cx;
+        //         r32 new_y = ((rel_x*s) + (rel_y*c)) + cy;
+
+        //         s32 rot_x = (s32)new_x;
+        //         s32 rot_y = (s32)new_y;
+
+        //         u32 index = (rot_x + (rot_y*SCREEN_WIDTH));
+        //         if(index < (SCREEN_WIDTH*SCREEN_HEIGHT))
+        //         {
+        //             game_state->space_block_type[index] = type;
+        //         }
+        //         index = ((rot_x+1) + (rot_y*SCREEN_WIDTH));
+        //         if(index < (SCREEN_WIDTH*SCREEN_HEIGHT))
+        //         {
+        //             game_state->space_block_type[index] = type;
+        //         }
+        //         index = ((rot_x+1) + ((rot_y+1)*SCREEN_WIDTH));
+        //         if(index < (SCREEN_WIDTH*SCREEN_HEIGHT))
+        //         {
+        //             game_state->space_block_type[index] = type;
+        //         }
+        //         index = ((rot_x) + ((rot_y+1)*SCREEN_WIDTH));
+        //         if(index < (SCREEN_WIDTH*SCREEN_HEIGHT))
+        //         {
+        //             game_state->space_block_type[index] = type;
+        //         }
+        //         index = ((rot_x-1) + ((rot_y)*SCREEN_WIDTH));
+        //         if(index < (SCREEN_WIDTH*SCREEN_HEIGHT))
+        //         {
+        //             game_state->space_block_type[index] = type;
+        //         }
+        //         index = ((rot_x-1) + ((rot_y-1)*SCREEN_WIDTH));
+        //         if(index < (SCREEN_WIDTH*SCREEN_HEIGHT))
+        //         {
+        //             game_state->space_block_type[index] = type;
+        //         }
+        //         index = ((rot_x) + ((rot_y-1)*SCREEN_WIDTH));
+        //         if(index < (SCREEN_WIDTH*SCREEN_HEIGHT))
+        //         {
+        //             game_state->space_block_type[index] = type;
+        //         }
+
+        //     }
+        // }
+
+    }
 
     { // movimentando player
         bool up = IS_KEY_DOWN(VK_UP);
@@ -238,45 +478,50 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             game_state->posicao_y[0] = npy;
 
         }
-        // else
-        // {
+        else
+        {
 
-        //     FILE *scores;
-        //     scores = fopen("scores.txt", "a");
-        //     fprintf(scores, "Score:%d\n", game_state->gomos);
-        //     fclose(scores);
+            FILE *scores;
+            scores = fopen("scores.txt", "a");
+            fprintf(scores, "Score:%d\n", game_state->gomos);
+            fclose(scores);
 
-        //     ResetSnake(game_state);
+            ResetSnake(game_state);
         
-        //     game_state->dead_count += 1;
-        // }
+            game_state->dead_count += 1;
+        }
 
-        // // COLISÃO ENTRE O CORPO DA SNAKE
-        // for(u32 i =1; i< game_state->gomos; i++)
-        // {
-        //     if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
-        //         (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[i])))
-        //     {
-        //         ResetSnake(game_state);
-        //     }
-        // }
+        // COLISÃO ENTRE O CORPO DA SNAKE
+        for(u32 i =1; i< game_state->gomos; i++)
+        {
+            if((((u32)game_state->posicao_x[0])==((u32)game_state->posicao_x[i]))&&
+                (((u32)game_state->posicao_y[0])==((u32)game_state->posicao_y[i])))
+            {
+                ResetSnake(game_state);
+            }
+        }
     }
 
-    if((((u32)game_state->posicao_x[0]==game_state->food_px)&&((u32)game_state->posicao_y[0])==game_state->food_py))
+    game_state->food_time += dt;
+    bool spawn_time = (game_state->food_time >= 10.0f);
+    bool snake_collision = (((u32)game_state->posicao_x[0]==game_state->food_px)&&((u32)game_state->posicao_y[0])==game_state->food_py);
+    if(spawn_time || snake_collision)
     {
-        game_state->gomos++;
-        game_state->food_type = rand()%5+1;
-        game_state->posicao_x[game_state->gomos] = game_state->posicao_x[game_state->gomos-1];
-        game_state->posicao_y[game_state->gomos] = game_state->posicao_y[game_state->gomos-1];
+        if(snake_collision)
+        {
+            game_state->gomos++;
+            game_state->posicao_x[game_state->gomos] = game_state->posicao_x[game_state->gomos-1];
+            game_state->posicao_y[game_state->gomos] = game_state->posicao_y[game_state->gomos-1];
+        }
 
+        bool food_in_wall, food_in_snake;
+
+        game_state->food_type = (game_state->food_type + 1)%FOODTYPE_COUNT;
         
-
-        b32 food_in_wall, food_in_snake;
-
         do
         {
-            game_state->food_px = rand()%SCREEN_WIDTH;
-            game_state->food_py = rand()%SCREEN_HEIGHT;
+            game_state->food_px = ((u32)(game_state->posicao_x[0] + (RandomBilateral()*3.0f))) % SCREEN_WIDTH;
+            game_state->food_py = ((u32)(game_state->posicao_y[0] + (RandomBilateral()*3.0f))) % SCREEN_HEIGHT;
 
             food_in_wall = ((game_state->space_block_type[((u32)game_state->food_px)+(((u32)game_state->food_py)*SCREEN_WIDTH)] == SPACEBLOCKTYPE_EMPTY) ? false : true);
 
@@ -292,6 +537,8 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             }
 
         } while(food_in_wall || food_in_snake);
+
+        game_state->food_time = 0.0f;
     }
 
 
@@ -341,11 +588,13 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 
             case FOODTYPE1:
             {
+                game_state->rotation_active = true;
                 background_color = COLOR(66, 194, 244, 255);
             } break;
 
             case FOODTYPE2:
             {
+                game_state->rotation_active = false;
                 background_color = COLOR(78,41,173,255);
             } break;
 
