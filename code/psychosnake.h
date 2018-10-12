@@ -89,18 +89,18 @@ global u32 double_walls[] =
 #define DEBUG_LINE_COUNT 0
 
 #define MAX_SNAKE_LENGTH 100
-#define MAX_WALL_COUNT (SCREEN_WIDTH*SCREEN_WIDTH*2)
+#define MAX_WALL_COUNT (SCREEN_WIDTH*SCREEN_WIDTH  *2)
 
 struct GameState
 {
     b32 initialized;
 
+
     r32 posicao_x[MAX_SNAKE_LENGTH];
     r32 posicao_y[MAX_SNAKE_LENGTH];
-    r32 snake_size_x[MAX_SNAKE_LENGTH];
-    r32 snake_size_y[MAX_SNAKE_LENGTH];
+    r32 gomo_size[MAX_SNAKE_LENGTH];
     r32 velocidade_x;
-    r32 velocidade_y;
+    r32 velocidade_y;  
     s32 dead_count;
     s32 gomos;
 

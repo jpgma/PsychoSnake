@@ -4,14 +4,6 @@
 #define TARGET_FPS 60
 #define TARGET_MS_PER_FRAME (1000.0/(r64)TARGET_FPS)
 
-#define DBG_TEXT_COLOR   COLOR(59,120,255,255)
-
-#define PI (3.1415927)
-#define RAD_45  (PI*0.25f)
-#define RAD_90  (PI*0.5f)
-#define RAD_180 PI
-#define RAD_360 (2.0f*PI)
-
 enum FoodType 
 { 
     FOODTYPE0, 
@@ -148,6 +140,19 @@ RandomUnilateral()
     return res;
 }
 
+internal void
+AddGomo (GameState *game_state, r32 size)
+{
+    game_state->gomos++;
+
+    r32 dir_x = game_state->posicao_x[game_state->gomos-1] - game_state->posicao_x[game_state->gomos-2];
+    r32 dir_y = game_state->posicao_y[game_state->gomos-1] - game_state->posicao_y[game_state->gomos-2];
+
+    game_state->posicao_x[game_state->gomos] = game_state->posicao_x[game_state->gomos-1] + dir_x;
+    game_state->posicao_y[game_state->gomos] = game_state->posicao_y[game_state->gomos-1] + dir_y;
+
+}
+
 internal void 
 GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 {
@@ -164,42 +169,42 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         u32 bottom = top + 16;
         
         //x,y
-        for (s32 i = 1; i < 16; ++i)
-        {
-            //top wall
-            game_state->wall_x[game_state->wall_count] = (r32) left + i;
-            game_state->wall_y[game_state->wall_count] = (r32) top;
-            ++game_state->wall_count;
-
-            //bottom wall
-            game_state->wall_x[game_state->wall_count] = (r32) left + i;
-            game_state->wall_y[game_state->wall_count] = (r32) bottom;
-            ++game_state->wall_count;
-
-            //left wall
-            game_state->wall_x[game_state->wall_count] = (r32) left;
-            game_state->wall_y[game_state->wall_count] = (r32) top + i;
-            ++game_state->wall_count;
-
-            //right wall
-            game_state->wall_x[game_state->wall_count] = (r32) right;
-            game_state->wall_y[game_state->wall_count] = (r32) top + i;
-            ++game_state->wall_count;
-        }
-        // for (s32 y = -((SCREEN_WIDTH-SCREEN_HEIGHT)/2); y < SCREEN_WIDTH; ++y)
+        // for (s32 i = 1; i < 17; ++i)
         // {
-        //     for (s32 x = 0; x < SCREEN_WIDTH; ++x)
-        //     // for (u32 x = ((SCREEN_WIDTH - SCREEN_HEIGHT)/2); x < ((SCREEN_WIDTH - SCREEN_HEIGHT)/2) + SCREEN_HEIGHT; ++x)
-        //     {
-        //         if((x < left) || (x >= right) ||
-        //            (y < top)  || (y >= bottom))
-        //         {
-        //             game_state->wall_x[game_state->wall_count] = (r32) x;
-        //             game_state->wall_y[game_state->wall_count] = (r32) y;
-        //             ++game_state->wall_count;
-        //         }
-        //     }
+        //     //top wall
+        //     game_state->wall_x[game_state->wall_count] = (r32) left + i;
+        //     game_state->wall_y[game_state->wall_count] = (r32) top;
+        //     ++game_state->wall_count;
+
+        //     //bottom wall
+        //     game_state->wall_x[game_state->wall_count] = (r32) left + i;
+        //     game_state->wall_y[game_state->wall_count] = (r32) bottom;
+        //     ++game_state->wall_count;
+
+        //     //left wall
+        //     game_state->wall_x[game_state->wall_count] = (r32) left;
+        //     game_state->wall_y[game_state->wall_count] = (r32) top + i;
+        //     ++game_state->wall_count;
+
+        //     //right wall
+        //     game_state->wall_x[game_state->wall_count] = (r32) right;
+        //     game_state->wall_y[game_state->wall_count] = (r32) top + i;
+        //     ++game_state->wall_count;
         // }
+        for (s32 y = -((SCREEN_WIDTH-SCREEN_HEIGHT)/2); y < SCREEN_WIDTH; ++y)
+        {
+            for (s32 x = 0; x < SCREEN_WIDTH; ++x)
+            // for (u32 x = ((SCREEN_WIDTH - SCREEN_HEIGHT)/2); x < ((SCREEN_WIDTH - SCREEN_HEIGHT)/2) + SCREEN_HEIGHT; ++x)
+            {
+                if((x < left) || (x >= right) ||
+                   (y < top)  || (y >= bottom))
+                {
+                    game_state->wall_x[game_state->wall_count] = (r32) x;
+                    game_state->wall_y[game_state->wall_count] = (r32) y;
+                    ++game_state->wall_count;
+                }
+            }
+        }
 
         game_state->initialized = true;
     }
@@ -211,14 +216,11 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         r32 angle = 0.0f;
         if(game_state->rotation_active)
         {
-            angle = RAD_180 * dt;
+            angle = RAD_360 * dt;
         }
-
-        r32 c = cosf(angle);
-        r32 s = sinf(angle);
     
-        r32 cx = ((r32)SCREEN_WIDTH)/2.0f;
-        r32 cy = ((r32)SCREEN_HEIGHT)/2.0f;
+        r32 cx = game_state->posicao_x[0];//((r32)SCREEN_WIDTH)/2.0f;
+        r32 cy = game_state->posicao_y[0];//((r32)SCREEN_HEIGHT)/2.0f;
 
         // x,y
         for (s32 i = 0; i < (SCREEN_WIDTH*SCREEN_HEIGHT); ++i)
@@ -236,29 +238,43 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             r32 move_x = 0.0f;
             r32 move_y = 0.0f;
 
+            r32 distance_from_center = sqrtf((rel_x*rel_x) + (rel_y*rel_y));
+            r32 max_distance_from_center = SCREEN_HEIGHT/2;
+
+            r32 norm_dist = distance_from_center/max_distance_from_center;
+            if(norm_dist > 1.0f) norm_dist = 1.0f;
+            
             if(game_state->rotation_active)
             {
-                r32 distance_from_center = sqrtf((rel_x*rel_x) + (rel_y*rel_y));
-                r32 max_distance_from_center = SCREEN_HEIGHT/2;
-
+                
                 // if(distance_from_center < max_distance_from_center)
-                {
-                    r32 norm_dist = distance_from_center/max_distance_from_center;
-
-                    r32 drift_rate = 8.0f;
+                // {
+                    r32 drift_rate = 5.0f;
                     r32 dist_atten_rate = drift_rate * 0.9f;
-                    r32 rand_rate = drift_rate * 0.1f;
+                    r32 rand_rate = drift_rate * 4.0f;
 
                     move_x = drift_rate - (norm_dist * dist_atten_rate) + (RandomBilateral() * rand_rate);
                     move_y = drift_rate - (norm_dist * dist_atten_rate) + (RandomBilateral() * rand_rate);
 
                     move_x *= (rel_x > 0.0f ? 1.0f : -1.0f) * dt;
                     move_y *= (rel_y > 0.0f ? 1.0f : -1.0f) * dt;
-                }
+                // }
             }
 
-            r32 new_x = (((rel_x*c) - (rel_y*s)) + cx) + move_x;
-            r32 new_y = (((rel_x*s) + (rel_y*c)) + cy) + move_y;
+            r32 c = cosf(angle - (angle*norm_dist));
+            r32 s = sinf(angle - (angle*norm_dist));
+            
+            r32 new_x = (((rel_x*(c)) - (rel_y*(s))) + cx) + move_x;
+            r32 new_y = (((rel_x*(s)) + (rel_y*(c))) + cy) + move_y;
+
+            if(new_x < 0.0f)
+                new_x = 0.0f;
+            else if(new_x > SCREEN_WIDTH)
+                new_x = SCREEN_WIDTH;
+            if(new_y < 0.0f)
+                new_y = 0.0f;
+            else if(new_y > SCREEN_HEIGHT)
+                new_y = SCREEN_HEIGHT;
 
             *x = new_x;
             *y = new_y;
@@ -320,7 +336,6 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
             game_state->velocidade_y = nvy;
 
         }
-
 
         npx += dt*game_state->velocidade_x*player_speed;
         npy += dt*game_state->velocidade_y*player_speed; 
@@ -384,9 +399,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
     {
         if(snake_collision)
         {
-            game_state->gomos++;
-            game_state->posicao_x[game_state->gomos] = game_state->posicao_x[game_state->gomos-1];
-            game_state->posicao_y[game_state->gomos] = game_state->posicao_y[game_state->gomos-1];
+            r32 size = 1.0f;
 
             switch(game_state->food_type)
             {
@@ -399,6 +412,8 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
                     game_state->rotation_active = false;
                 } break;
             }
+
+            AddGomo(game_state, size);
         }
 
         bool food_in_wall, food_in_snake;

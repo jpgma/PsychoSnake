@@ -19,7 +19,12 @@ typedef u32 b32;
 #define global static;
 #define assert(x) {if(!(x)) *((int*)0) = 0;}
 
-#define PI (3.1415927)
+#define PI (3.1415927f)
+#define RAD_45  (PI*0.25f)
+#define RAD_90  (PI*0.5f)
+#define RAD_180 PI
+#define RAD_360 (2.0f*PI)
+
 
 inline u32 
 U32Swap(u32 n)

@@ -60,12 +60,12 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         V2 a = {0.0f,0.0f};
         ptx = ((u16)a.x) + (SCREEN_WIDTH/2);
         pty = ((u16)a.y) + (SCREEN_HEIGHT/2);
-        SetChar(&renderer->buffer, ptx,pty, 0x2588, COLOR(255,0,0,50),COLOR(165,165,249,255));
+        SetChar(renderer, ptx,pty, 0x2588, COLOR(255,0,0,50),COLOR(165,165,249,255));
 
         V2 b = {5.0f,2.0f};
         ptx = ((u16)b.x) + (SCREEN_WIDTH/2);
         pty = ((u16)b.y) + (SCREEN_HEIGHT/2);
-        SetChar(&renderer->buffer, ptx,pty, 0x2588, COLOR(255,0,0,50),COLOR(165,165,249,255));
+        SetChar(renderer, ptx,pty, 0x2588, COLOR(255,0,0,50),COLOR(165,165,249,255));
 
         static r32 t = 0.0f;
         t += 2.0f*dt;
@@ -74,7 +74,7 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
         V2 p = a + (b * t);
         ptx = ((u16)p.x) + (SCREEN_WIDTH/2);
         pty = ((u16)p.y) + (SCREEN_HEIGHT/2);
-        SetChar(&renderer->buffer, ptx,pty, 0x2588, COLOR(0,0,0,50),COLOR(165,165,249,255));
+        SetChar(renderer, ptx,pty, 0x2588, COLOR(0,0,0,50),COLOR(165,165,249,255));
     }
 
 	bool up = IS_KEY_DOWN(VK_UP);
@@ -111,6 +111,6 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 	ptx = (u16)game_state->p.x;
 	pty = (u16)game_state->p.y;
 
-	SetChar(&renderer->buffer,ptx,pty,0xE000, COLOR(255,0,0,0), COLOR(0,0,0,0));
+	SetChar(renderer,ptx,pty,0xE000, COLOR(255,0,0,0), COLOR(0,0,0,0));
 }
 

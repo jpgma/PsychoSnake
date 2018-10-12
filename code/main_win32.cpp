@@ -125,8 +125,11 @@ WindowProcedure(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
     return 0;
 }
 
+
 #include "psychosnake.cpp"
 // #include "shooterchar.cpp"
+
+#define DBG_TEXT_COLOR   COLOR(59,120,255,255)
 
 s32 WINAPI
 WinMain (HINSTANCE instance, HINSTANCE prev_instance, LPSTR cmd, s32 cmd_show)
