@@ -126,8 +126,9 @@ WindowProcedure(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 }
 
 
-#include "psychosnake.cpp"
+//#include "psychosnake.cpp"
 // #include "shooterchar.cpp"
+#include "spaceshooter.cpp"
 
 #define DBG_TEXT_COLOR   COLOR(59,120,255,255)
 
