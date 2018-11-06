@@ -28,11 +28,16 @@ DrawShip (Renderer *renderer, s32 screen_x, s32 screen_y, u32 width, u32 height,
     s32 miny = screen_y - half_height;
     s32 maxy = screen_y + half_height;
 
-    for (s32 y = miny; y < maxy; ++y)
+    for (s32 y = miny; y <= maxy; ++y)
     {
-        for (s32 x = minx; x < maxx; ++x)
+        for (s32 x = minx; x <= maxx; ++x)
         {
-            SetChar(renderer, (u16)x, (u16)y, GetGlyphIndex(renderer->font,' '), color,color);
+            if(x == screen_x && y == screen_y)
+            {
+                SetChar(renderer, (u16)x, (u16)y, GetGlyphIndex(renderer->font,' '), COLOR_WHITE,COLOR_WHITE);
+            }
+            else
+                SetChar(renderer, (u16)x, (u16)y, GetGlyphIndex(renderer->font,' '), color,color);
         }
     }
 
@@ -52,5 +57,8 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 
     Color red = COLOR(255,0,0,255);
     DrawShip(renderer, (s32)game_state->player_px, (s32)game_state->player_py, PLAYER_WIDTH, PLAYER_HEIGHT, red);
+
+    SetChar(renderer, (u16)0, (u16)0, GetGlyphIndex(renderer->font,' '), red,red);
+
 }
 
