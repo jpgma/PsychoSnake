@@ -49,12 +49,17 @@ Normalized (V2 v)
 
 #define PLAYER_WIDTH 3
 #define PLAYER_HEIGHT 3
-#define PLAYER_MAX_SHOTS 10
-#define PLAYER_SHOT_COOL_SECONDS 0.1f
+#define PLAYER_MAX_SHOTS 100
+#define PLAYER_SHOT_COOL_SECONDS 0.01f
 
 #define MAX_ENEMIES 10
 #define ENEMY_WIDTH 3
 #define ENEMY_HEIGHT 3
+
+struct Shot
+{
+    V2 p,d;
+};
 
 struct GameState
 {
@@ -64,12 +69,12 @@ struct GameState
     V2 player_d;
 
     u32 player_shot_index;
-    V2 player_shot_p[PLAYER_MAX_SHOTS];
-    V2 player_shot_d[PLAYER_MAX_SHOTS];
     r32 player_shot_cooldown;
+    Shot player_shots[PLAYER_MAX_SHOTS];
 
     V2 enemy_p[MAX_ENEMIES];
     V2 enemy_d[MAX_ENEMIES];
+    r32 enemy_health[MAX_ENEMIES];
 };
 
 #define MIN_SPAWN_DISTANCE 10.0f//((SCREEN_HEIGHT+10.0f)/2.0f)
@@ -95,41 +100,37 @@ SpawnEnemy(GameState *game_state, u32 index)
                             MIN_SPAWN_DISTANCE * (RandomBilateral() > 0.0f ? 1.0f : -1.0f));
 
     game_state->enemy_p[index] = spawn_center + spawn_min + (V2(RandomBilateral(),RandomBilateral()) * SPAWN_SPAN);
-    game_state->enemy_d[index] = Normalized(game_state->player_p - game_state->enemy_p[index]); 
+    game_state->enemy_d[index] = Normalized(game_state->player_p - game_state->enemy_p[index]);
+    game_state->enemy_health[index] = 1.0f;
 }
 
 internal void
-PlayerShoot (GameState *game_state, V2 p, V2 d)
+Shoot (GameState *game_state, Shot *shots, u32 *shot_index, u32 max_shots, V2 p, V2 d)
 {
-    if(game_state->player_shot_cooldown >= PLAYER_SHOT_COOL_SECONDS)
+    if(*shot_index < max_shots-1)
     {
-        if(game_state->player_shot_index < PLAYER_MAX_SHOTS-1)
-        {
-            ++game_state->player_shot_index;
-        }
-        else
-        {
-            game_state->player_shot_index = 0;
-        }
-        u32 index = game_state->player_shot_index;
-
-        if(d.x==0.0f && d.y==0.0f)
-        {
-            d.y = -1.0f;
-        }
-
-        game_state->player_shot_p[index] = p + V2(((PLAYER_WIDTH+1)*d.x/2.0f),((PLAYER_HEIGHT+1)*d.y/2.0f));
-        game_state->player_shot_d[index] = d;
-        
-        game_state->player_shot_cooldown = 0.0f;
+        *shot_index = *shot_index+1;
     }
+    else
+    {
+        *shot_index = 0;
+    }
+    u32 index = *shot_index;
+
+    if(d.x==0.0f && d.y==0.0f)
+    {
+        d.y = -1.0f;
+    }
+
+    game_state->player_shots[index].p = p + V2(((PLAYER_WIDTH+1)*d.x/2.0f),((PLAYER_HEIGHT+1)*d.y/2.0f));
+    game_state->player_shots[index].d = d;    
 }
 
 internal void
 PlayerRemoveShot (GameState *game_state, u32 index)
 {
-    game_state->player_shot_p[index] = {INFINITY,INFINITY};
-    game_state->player_shot_d[index] = {0.0f,0.0f};
+    game_state->player_shots[index].p = V2(INFINITY,INFINITY);
+    game_state->player_shots[index].d = V2(0.0f,0.0f);
 }
 
 internal void
@@ -142,9 +143,9 @@ UpdateAndRenderShots (GameState *game_state, Renderer *renderer, r32 dt)
     for (s32 i = 0; i < PLAYER_MAX_SHOTS; ++i)
     {
 
-        game_state->player_shot_p[i] = game_state->player_shot_p[i] + (game_state->player_shot_d[i] * (player_shot_speed*dt));
+        game_state->player_shots[i].p = game_state->player_shots[i].p + (game_state->player_shots[i].d * (player_shot_speed*dt));
 
-        SetChar(renderer, (u16)game_state->player_shot_p[i].x, (u16)game_state->player_shot_p[i].y, 
+        SetChar(renderer, (u16)game_state->player_shots[i].p.x, (u16)game_state->player_shots[i].p.y, 
                 GetGlyphIndex(renderer->font,' '), player_shot_color,player_shot_color);
     }
 }
@@ -189,39 +190,47 @@ DrawShip (Renderer *renderer, s32 screen_x, s32 screen_y, V2 d, u32 width, u32 h
 internal void
 UpdateAndRenderEnemies (GameState *game_state, Renderer *renderer, r32 dt)
 {
-
-    for (s32 i = 0; i < MAX_ENEMIES; ++i)
-    {
-        
-        game_state->enemy_p[i] = game_state->enemy_p[i] + (game_state->enemy_d[i]*1.0f*dt);
-
-        game_state->enemy_d[i] = Normalized(game_state->player_p - game_state->enemy_p[i]);
-
-        s32 half_width = ENEMY_WIDTH/2;
-        s32 half_height = ENEMY_HEIGHT/2;
-
-        s32 screen_x = (s32)game_state->enemy_p[i].x;
-        s32 screen_y = (s32)game_state->enemy_p[i].y;
-
-        Color color = COLOR(100,100,255,255);
-
-        for (s32 j = 0; j < PLAYER_MAX_SHOTS; ++j)
+        for (s32 i = 0; i < MAX_ENEMIES; ++i)
         {
-            s32 x = (s32)game_state->player_shot_p[j].x;
-            s32 y = (s32)game_state->player_shot_p[j].y;
-
-            if((fabs(screen_x - x) <= half_width) && 
-               (fabs(screen_y - y) <= half_height))
+            if(game_state->enemy_health[i] > 0.0f)
             {
-                color = COLOR(50,50,100,255);
-                break;
+                game_state->enemy_p[i] = game_state->enemy_p[i] + (game_state->enemy_d[i]*1.0f*dt);
+
+                game_state->enemy_d[i] = Normalized(game_state->player_p - game_state->enemy_p[i]);
+
+                s32 half_width = ENEMY_WIDTH/2;
+                s32 half_height = ENEMY_HEIGHT/2;
+
+                s32 screen_x = (s32)game_state->enemy_p[i].x;
+                s32 screen_y = (s32)game_state->enemy_p[i].y;
+
+                for (s32 j = 0; j < PLAYER_MAX_SHOTS; ++j)
+                {
+                    s32 x = (s32)game_state->player_shots[j].p.x;
+                    s32 y = (s32)game_state->player_shots[j].p.y;
+
+                    if((fabs(screen_x - x) <= half_width) && 
+                       (fabs(screen_y - y) <= half_height))
+                    {
+                        game_state->enemy_health[i] -= (1.0f/5.0f);
+                        PlayerRemoveShot(game_state, j);
+                    }
+                }
+
+                Color dead_color = COLOR(10,10,25,255);
+                Color live_color = COLOR(100,100,255,255);
+                Color color = LerpColor(dead_color, live_color, game_state->enemy_health[i]);
+             
+                DrawShip(renderer, 
+                         screen_x, screen_y, game_state->enemy_d[i], 
+                         ENEMY_WIDTH, ENEMY_HEIGHT, color);
+            }
+            else
+            {
+                SpawnEnemy(game_state, i);
             }
         }
 
-        DrawShip(renderer, 
-                 (s32)game_state->enemy_p[i].x, (s32)game_state->enemy_p[i].y,
-                 game_state->enemy_d[i], ENEMY_WIDTH, ENEMY_HEIGHT, color);
-    }
 }
 
 internal void 
@@ -258,13 +267,20 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
 
     game_state->player_d = V2(((right ? 1.0f : 0.0f) - (left ? 1.0f : 0.0f)),
                               ((down  ? 1.0f : 0.0f) - (up   ? 1.0f : 0.0f)));
-    game_state->player_p = game_state->player_p + (Normalized(game_state->player_d) * (player_speed * dt));
+    Normalize(&game_state->player_d);
+    game_state->player_p = game_state->player_p + (game_state->player_d * (player_speed * dt));
 
-    if(space)
+    if(space && 
+       (game_state->player_shot_cooldown >= PLAYER_SHOT_COOL_SECONDS))
     {
-        PlayerShoot(game_state, 
-                    game_state->player_p,
-                    game_state->player_d);
+        Shoot(game_state, 
+              game_state->player_shots,
+              &game_state->player_shot_index,
+              PLAYER_MAX_SHOTS,
+              game_state->player_p,
+              game_state->player_d);
+
+        game_state->player_shot_cooldown = 0.0f;
     }
 
     Color red  = COLOR(255,0,0,255);

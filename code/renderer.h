@@ -39,6 +39,26 @@ COLOR(u8 r, u8 g, u8 b, u8 a)
     return res;
 }
 
+internal Color
+LerpColor (Color a, Color b, r32 t)
+{
+    Color res = a;
+
+    if(t >= 1.0f)
+    {
+        res = b;
+    }
+    else if(t > 0.0f)
+    {
+        res = COLOR((a.r + ((b.r-a.r)*t)),
+                    (a.g + ((b.g-a.g)*t)),
+                    (a.b + ((b.b-a.b)*t)),
+                    (a.a + ((b.a-a.a)*t)));
+    }
+
+    return res;
+}
+
 #define COLOR_WHITE COLOR(0xffffffff)
 #define COLOR_BLACK COLOR(0xff000000)
 
