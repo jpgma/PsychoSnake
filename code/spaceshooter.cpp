@@ -137,7 +137,7 @@ UpdateAndRenderShots (GameState *game_state, Renderer *renderer, r32 dt)
 {
     game_state->player_shot_cooldown += dt;
 
-    r32 player_shot_speed = 25.0f;
+    r32 player_shot_speed = 15.0f;
     Color player_shot_color = COLOR(255,100,100,255);
     for (s32 i = 0; i < PLAYER_MAX_SHOTS; ++i)
     {
@@ -189,17 +189,38 @@ DrawShip (Renderer *renderer, s32 screen_x, s32 screen_y, V2 d, u32 width, u32 h
 internal void
 UpdateAndRenderEnemies (GameState *game_state, Renderer *renderer, r32 dt)
 {
-    Color blue = COLOR(100,100,255,255);
 
     for (s32 i = 0; i < MAX_ENEMIES; ++i)
     {
-        game_state->enemy_p[i] = game_state->enemy_p[i] + (game_state->enemy_d[i]*5.0f*dt);
+        
+        game_state->enemy_p[i] = game_state->enemy_p[i] + (game_state->enemy_d[i]*1.0f*dt);
 
         game_state->enemy_d[i] = Normalized(game_state->player_p - game_state->enemy_p[i]);
 
+        s32 half_width = ENEMY_WIDTH/2;
+        s32 half_height = ENEMY_HEIGHT/2;
+
+        s32 screen_x = (s32)game_state->enemy_p[i].x;
+        s32 screen_y = (s32)game_state->enemy_p[i].y;
+
+        Color color = COLOR(100,100,255,255);
+
+        for (s32 j = 0; j < PLAYER_MAX_SHOTS; ++j)
+        {
+            s32 x = (s32)game_state->player_shot_p[j].x;
+            s32 y = (s32)game_state->player_shot_p[j].y;
+
+            if((fabs(screen_x - x) <= half_width) && 
+               (fabs(screen_y - y) <= half_height))
+            {
+                color = COLOR(50,50,100,255);
+                break;
+            }
+        }
+
         DrawShip(renderer, 
                  (s32)game_state->enemy_p[i].x, (s32)game_state->enemy_p[i].y,
-                 game_state->enemy_d[i], ENEMY_WIDTH, ENEMY_HEIGHT, blue);
+                 game_state->enemy_d[i], ENEMY_WIDTH, ENEMY_HEIGHT, color);
     }
 }
 
@@ -252,8 +273,9 @@ GameUpdateAndRender (GameState *game_state, Renderer *renderer, r32 dt)
              (s32)game_state->player_p.x, (s32)game_state->player_p.y,
              game_state->player_d, PLAYER_WIDTH, PLAYER_HEIGHT, red);
 
+    UpdateAndRenderShots(game_state, renderer, dt);
+    
     UpdateAndRenderEnemies(game_state, renderer, dt);
 
-    UpdateAndRenderShots(game_state, renderer, dt);
 }
 

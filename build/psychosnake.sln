@@ -6,9 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "psychosnake", "psychosnake.exe", "{0124C4DE-7079-4941-A756-D48CF4662816}"
 	ProjectSection(DebuggerProjectSystem) = preProject
 		PortSupplier = 00000000-0000-0000-0000-000000000000
-		Executable = C:\Users\Joao\code\projects\psychosnake\build\psychosnake.exe
+		Executable = W:\psychosnake\build\psychosnake.exe
 		RemoteMachine = DESKTOP-C41J84O
-		StartingDirectory = C:\Users\Joao\code\projects\psychosnake\
+		StartingDirectory = W:\psychosnake\
 		Environment = Default
 		LaunchingEngine = 00000000-0000-0000-0000-000000000000
 		UseLegacyDebugEngines = No
@@ -21,7 +21,7 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0124C4DE-7079-4941-A756-D48CF4662816}.Release|x64.ActiveCfg = Release|x64
+		{0124C4DE-7079-4941-A756-D48CF4662816}.Release|x64.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
